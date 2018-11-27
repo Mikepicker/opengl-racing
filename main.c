@@ -23,6 +23,12 @@ float lastX;
 float lastY;
 bool firstMouse;
 
+static void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods)
+{
+  if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
+    glfwSetWindowShouldClose(window, GLFW_TRUE);
+}
+
 int main()
 {
   // Init context
@@ -37,6 +43,7 @@ int main()
 
   GLFWwindow* window = glfwCreateWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Minimal", NULL, NULL);
   glfwMakeContextCurrent(window);
+  glfwSetKeyCallback(window, key_callback);
 
   if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
   {
