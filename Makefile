@@ -12,7 +12,7 @@ CC = gcc -g -std=c99 `pkg-config --cflags glfw3`
 
 #OBJ_NAME specifies the name of our exectuable
 OBJ_NAME = microdrag
-LINKER_FLAGS = `pkg-config --libs glfw3`
+LINKER_FLAGS = `pkg-config --static --libs glfw3`
 
 #This is the target that compiles our executable
 
