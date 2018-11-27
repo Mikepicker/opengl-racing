@@ -42,6 +42,12 @@ int main()
   #endif
 
   GLFWwindow* window = glfwCreateWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Minimal", NULL, NULL);
+  if (!window)
+  {
+    printf("Failed to create GLFW window");
+    glfwTerminate();
+    return -1;
+  }
   glfwMakeContextCurrent(window);
   glfwSetKeyCallback(window, key_callback);
 
