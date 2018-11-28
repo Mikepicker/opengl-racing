@@ -72,9 +72,7 @@ int main()
     t2.position[0] = sinf((float)glfwGetTime());
     quat_rotate(t2.rotation, (float)glfwGetTime(), z_axis);
 
-    renderer_render_objects(objects, window, shader_id);
-    
-    glfwPollEvents();
+    renderer_render_objects(objects, 2, window, shader_id);
   }
 
   renderer_cleanup();

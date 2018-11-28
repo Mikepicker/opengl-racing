@@ -57,7 +57,7 @@ void renderer_add_object(object* o) {
   glBindVertexArray(0);
 }
 
-void renderer_render_objects(object* objects[], GLFWwindow* window, GLuint shader_id) {
+void renderer_render_objects(object* objects[], int objects_length, GLFWwindow* window, GLuint shader_id) {
   GLint mvp_location;
   float ratio;
   int width, height;
@@ -73,7 +73,7 @@ void renderer_render_objects(object* objects[], GLFWwindow* window, GLuint shade
   glViewport(0, 0, width, height);
   glClear(GL_COLOR_BUFFER_BIT);
 
-  for (int i = 0; i < 2; i++) {
+  for (int i = 0; i < objects_length; i++) {
     object* o = objects[i];
     mat4x4 m, p, mvp;
 
@@ -101,6 +101,9 @@ void renderer_render_objects(object* objects[], GLFWwindow* window, GLuint shade
 
   // swap buffers and poll events
   glfwSwapBuffers(window);
+
+  // poll events
+  glfwPollEvents();
 
 #ifdef __APPLE__ // TODO: remove this workaround with glfw 3.3
   if (macMoved == 0)

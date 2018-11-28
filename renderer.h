@@ -11,6 +11,6 @@ int renderer_init(char* title, int width, int height, void* key_callback);
 void renderer_cleanup();
 int renderer_should_close();
 void renderer_add_object(object* o);
-void renderer_render_objects(object* objects[], GLFWwindow* window, GLuint shaderID);
+void renderer_render_objects(object* objects[], int objects_length, GLFWwindow* window, GLuint shaderID);
 
 #endif
