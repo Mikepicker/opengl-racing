@@ -3,8 +3,6 @@
 
 #include "engine.h"
 
-void loadShader(const GLchar* filePath, GLchar** shader);
-void compileShaders(const GLchar* vertexPath, const GLchar* fragmentPath, GLuint* shaderID);
-void checkCompileErrors(GLuint object, const char* type);
+void shader_compile(const GLchar* vertex_path, const GLchar* fragment_path, GLuint* shader_id);
 
 #endif

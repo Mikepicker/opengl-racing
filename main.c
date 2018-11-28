@@ -60,7 +60,7 @@ int main()
   renderer_add_object(&triangle);
 
   // Compile shaders
-  compileShaders("triangle.vs", "triangle.fs", &shader_id);
+  shader_compile("triangle.vs", "triangle.fs", &shader_id);
 
   int macMoved = 0;
   while (!glfwWindowShouldClose(window)) {
