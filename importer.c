@@ -1,3 +1,4 @@
+#define TINYOBJ_LOADER_C_IMPLEMENTATION
 #include "importer.h"
 
 static const char* mmap_file(size_t* len, const char* filename) {
