@@ -54,10 +54,27 @@ int main()
     0.0f,  0.6f, 0.0f,  0.0f, 0.0f, 1.0f   // top
   };
 
-  object triangle;
-  triangle.vertices = vertices;
-  triangle.num_vertices = sizeof(vertices) / sizeof(GLfloat);
-  renderer_add_object(&triangle);
+  object* objects[2];
+
+  object t1;
+  object t2;
+
+  t1.position[0] = 0.0f;
+  t1.position[1] = 0.0f;
+  t1.position[2] = 0.0f;
+  t1.vertices = vertices;
+  t1.num_vertices = sizeof(vertices) / sizeof(GLfloat);
+  renderer_add_object(&t1);
+
+  t2.position[0] = 1.0f;
+  t2.position[1] = 0.0f;
+  t2.position[2] = 0.0f;
+  t2.vertices = vertices;
+  t2.num_vertices = sizeof(vertices) / sizeof(GLfloat);
+  renderer_add_object(&t2);
+
+  objects[0] = &t1;
+  objects[1] = &t2;
 
   // Compile shaders
   shader_compile("triangle.vs", "triangle.fs", &shader_id);
@@ -66,7 +83,7 @@ int main()
   while (!glfwWindowShouldClose(window)) {
 
     // render
-    renderer_render_objects(&triangle, window, shader_id);
+    renderer_render_objects(objects, window, shader_id);
     
     glfwPollEvents();
     #ifdef __APPLE__ // TODO: remove this workaround with glfw 3.3
