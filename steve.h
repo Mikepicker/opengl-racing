@@ -6,5 +6,7 @@
 
 /* include modules */
 #include "shader.h"
+#include "object.h"
+#include "renderer.h"
 
 #endif
