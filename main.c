@@ -1,3 +1,5 @@
+#include <math.h>
+
 #include "steve.h"
 
 const GLuint SCREEN_WIDTH = 800;
@@ -21,28 +23,8 @@ static void key_callback(GLFWwindow *window, int key, int scancode, int action, 
 int main()
 {
   // Init context
-  glfwInit();
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-  glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-  glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
-  #ifdef __APPLE__
-    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
-  #endif
-
-  GLFWwindow* window = glfwCreateWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Microdrag", NULL, NULL);
-  if (!window)
-  {
-    printf("Failed to create GLFW window");
-    glfwTerminate();
-    return -1;
-  }
-  glfwMakeContextCurrent(window);
-  glfwSetKeyCallback(window, key_callback);
-
-  if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
-  {
-    printf("Failed to initialize GLAD\n");
+  if (!renderer_init("Microdrag", SCREEN_WIDTH, SCREEN_HEIGHT, key_callback)) {
+    printf("Error initializing renderer!\n");
     return -1;
   }
 
@@ -64,6 +46,7 @@ int main()
   t1.position[2] = 0.0f;
   t1.vertices = vertices;
   t1.num_vertices = sizeof(vertices) / sizeof(GLfloat);
+  quat_identity(t1.rotation);
   renderer_add_object(&t1);
 
   t2.position[0] = 1.0f;
@@ -71,6 +54,7 @@ int main()
   t2.position[2] = 0.0f;
   t2.vertices = vertices;
   t2.num_vertices = sizeof(vertices) / sizeof(GLfloat);
+  quat_identity(t2.rotation);
   renderer_add_object(&t2);
 
   objects[0] = &t1;
@@ -80,24 +64,20 @@ int main()
   shader_compile("triangle.vs", "triangle.fs", &shader_id);
 
   int macMoved = 0;
-  while (!glfwWindowShouldClose(window)) {
+  while (!renderer_should_close()) {
 
     // render
+    vec3 z_axis = {0.0f, 0.0f, 1.0f};
+    quat_rotate(t1.rotation, (float)glfwGetTime(), z_axis);
+    t2.position[0] = sinf((float)glfwGetTime());
+    quat_rotate(t2.rotation, (float)glfwGetTime(), z_axis);
+
     renderer_render_objects(objects, window, shader_id);
     
     glfwPollEvents();
-    #ifdef __APPLE__ // TODO: remove this workaround with glfw 3.3
-      if (macMoved == 0)
-      {
-        int x, y;
-        glfwGetWindowPos(window, &x, &y);
-        glfwSetWindowPos(window, ++x, y);
-        macMoved = 1;
-      }
-    #endif
   }
 
-  glfwTerminate();
+  renderer_cleanup();
 
   return 0;
 }

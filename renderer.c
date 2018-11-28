@@ -1,6 +1,41 @@
 #include "renderer.h"
 #include "debug.h"
 
+int renderer_init(char* title, int width, int height, void* key_callback) {
+  glfwInit();
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+  glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+  glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
+  #ifdef __APPLE__
+    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+  #endif
+
+  window = glfwCreateWindow(width, height, title, NULL, NULL);
+  if (!window)
+  {
+    printf("Failed to create GLFW window");
+    glfwTerminate();
+    return -1;
+  }
+  glfwMakeContextCurrent(window);
+  glfwSetKeyCallback(window, key_callback);
+
+  if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
+  {
+    printf("Failed to initialize GLAD\n");
+    return -1;
+  }
+}
+
+void renderer_cleanup() {
+  glfwTerminate();
+}
+
+int renderer_should_close() {
+  return glfwWindowShouldClose(window);
+}
+
 void renderer_add_object(object* o) {
   glGenVertexArrays(1, &(o->vao)); // Vertex Array Object
   glGenBuffers(1, &(o->vbo)); // Vertex Buffer Object
@@ -46,8 +81,6 @@ void renderer_render_objects(object* objects[], GLFWwindow* window, GLuint shade
     mat4x4_translate(m, o->position[0], o->position[1], o->position[2]);
 
     // compute rotation matrix from quaternion
-    vec3 z_axis = {0.0f, 0.0f, 1.0f};
-    quat_rotate(o->rotation, (float)glfwGetTime(), z_axis);
     mat4x4 mat_rot;
     mat4x4_from_quat(mat_rot, o->rotation);
 
@@ -68,4 +101,14 @@ void renderer_render_objects(object* objects[], GLFWwindow* window, GLuint shade
 
   // swap buffers and poll events
   glfwSwapBuffers(window);
+
+#ifdef __APPLE__ // TODO: remove this workaround with glfw 3.3
+  if (macMoved == 0)
+  {
+    int x, y;
+    glfwGetWindowPos(window, &x, &y);
+    glfwSetWindowPos(window, ++x, y);
+    macMoved = 1;
+  }
+#endif
 }
