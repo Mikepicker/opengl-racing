@@ -37,8 +37,15 @@ void renderer_render_objects(object* objects, GLFWwindow* window, GLuint shaderI
   ratio = width / (float)height;
   glViewport(0, 0, width, height);
   glClear(GL_COLOR_BUFFER_BIT);
+
+  // transform object
   mat4x4_identity(m);
-  mat4x4_rotate_Z(m, m, (float)glfwGetTime());
+  vec3 z_axis = {0.0f, 0.0f, 1.0f};
+  quat_rotate(objects->rotation, (float)glfwGetTime(), z_axis);
+  mat4x4 mat_rot;
+  mat4x4_from_quat(mat_rot, objects->rotation);
+  mat4x4_mul(m, mat_rot, m);
+
   mat4x4_ortho(p, -ratio, ratio, -1.f, 1.f, 1.f, -1.f);
   mat4x4_mul(mvp, p, m);
   glUniformMatrix4fv(mvp_location, 1, GL_FALSE, (const GLfloat*) mvp);
