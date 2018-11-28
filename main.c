@@ -1,5 +1,3 @@
-#include <math.h>
-
 #include "steve.h"
 
 const GLuint SCREEN_WIDTH = 800;
@@ -28,13 +26,17 @@ int main()
     return -1;
   }
 
+  // import obj
+  GLfloat* vertices;
+  importer_load_obj("./assets/cornell_box.obj", &vertices);
+
   // Init quad
-  GLfloat vertices[] = {
+  /*GLfloat vertices[] = {
     // positions         // colors
     0.6f, -0.4f, 0.0f,  1.0f, 0.0f, 0.0f,  // bottom right
     -0.6f, -0.4f, 0.0f,  0.0f, 1.0f, 0.0f,  // bottom left
     0.0f,  0.6f, 0.0f,  0.0f, 0.0f, 1.0f   // top
-  };
+  };*/
 
   object* objects[2];
 
@@ -72,7 +74,7 @@ int main()
     t2.position[0] = sinf((float)glfwGetTime());
     quat_rotate(t2.rotation, (float)glfwGetTime(), z_axis);
 
-    renderer_render_objects(objects, 2, window, shader_id);
+    renderer_render_objects(objects, 1, window, shader_id);
   }
 
   renderer_cleanup();
