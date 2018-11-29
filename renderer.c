@@ -14,7 +14,7 @@ int renderer_init(char* title, int width, int height, void* key_callback) {
   window = glfwCreateWindow(width, height, title, NULL, NULL);
   if (!window)
   {
-    printf("Failed to create GLFW window");
+    printf("Failed to create GLFW window\n");
     glfwTerminate();
     return -1;
   }
@@ -26,6 +26,7 @@ int renderer_init(char* title, int width, int height, void* key_callback) {
     printf("Failed to initialize GLAD\n");
     return -1;
   }
+  return 0;
 }
 
 void renderer_cleanup() {
@@ -104,14 +105,4 @@ void renderer_render_objects(object* objects[], int objects_length, GLFWwindow* 
 
   // poll events
   glfwPollEvents();
-
-#ifdef __APPLE__ // TODO: remove this workaround with glfw 3.3
-  if (macMoved == 0)
-  {
-    int x, y;
-    glfwGetWindowPos(window, &x, &y);
-    glfwSetWindowPos(window, ++x, y);
-    macMoved = 1;
-  }
-#endif
 }

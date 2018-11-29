@@ -21,7 +21,7 @@ static void key_callback(GLFWwindow *window, int key, int scancode, int action, 
 int main()
 {
   // Init context
-  if (!renderer_init("Microdrag", SCREEN_WIDTH, SCREEN_HEIGHT, key_callback)) {
+  if (renderer_init("Microdrag", SCREEN_WIDTH, SCREEN_HEIGHT, key_callback) < 0) {
     printf("Error initializing renderer!\n");
     return -1;
   }
@@ -74,7 +74,16 @@ int main()
     t2.position[0] = sinf((float)glfwGetTime());
     quat_rotate(t2.rotation, (float)glfwGetTime(), z_axis);
 
-    renderer_render_objects(objects, 1, window, shader_id);
+    renderer_render_objects(objects, 2, window, shader_id);
+    #ifdef __APPLE__ // TODO: remove this workaround with glfw 3.3
+      if (macMoved == 0)
+      {
+        int x, y;
+        glfwGetWindowPos(window, &x, &y);
+        glfwSetWindowPos(window, ++x, y);
+        macMoved = 1;
+      }
+    #endif
   }
 
   renderer_cleanup();
