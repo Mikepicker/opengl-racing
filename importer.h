@@ -5,6 +5,6 @@
 
 #include "tinyobj_loader_c.h"
 
-void importer_load_obj(const char* filename, GLfloat* vertices[]);
+void importer_load_obj(const char *filename, tinyobj_attrib_t *model_data);
 
 #endif

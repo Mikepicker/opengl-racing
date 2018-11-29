@@ -60,8 +60,8 @@ static const char* get_file_data(size_t* len, const char* filename) {
   return data;
 }
 
-void importer_load_obj(const char* filename, GLfloat* vertices[]) {
-  tinyobj_attrib_t attrib;
+void importer_load_obj(const char *filename, tinyobj_attrib_t *model_data)
+{
   tinyobj_shape_t* shapes = NULL;
   size_t num_shapes;
   tinyobj_material_t* materials = NULL;
@@ -71,7 +71,5 @@ void importer_load_obj(const char* filename, GLfloat* vertices[]) {
   const char* data = get_file_data(&data_len, filename);
 
   unsigned int flags = TINYOBJ_FLAG_TRIANGULATE;
-  tinyobj_parse_obj(&attrib, &shapes, &num_shapes, &materials, &num_materials, data, data_len, flags);
-  vertices = &attrib.vertices;
-  printf("NUM VERTICES: %u\n", attrib.num_vertices);
+  tinyobj_parse_obj(model_data, &shapes, &num_shapes, &materials, &num_materials, data, data_len, flags);
 }

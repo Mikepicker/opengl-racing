@@ -10,7 +10,9 @@ typedef struct {
 
  GLfloat* vertices;
  GLuint num_vertices;
- GLuint vao, vbo;
+ GLuint* faces;
+ GLuint num_faces;
+ GLuint vao, vbo, ebo;
 } object;
 
 #endif

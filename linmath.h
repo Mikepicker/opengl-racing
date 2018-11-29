@@ -7,6 +7,16 @@
 #define inline __inline
 #endif
 
+static inline float to_degrees(float radians)
+{
+  return radians * (180.0 / M_PI);
+}
+
+static inline float to_radians(float degrees)
+{
+  return degrees * (M_PI / 180.0);
+}
+
 #define LINMATH_H_DEFINE_VEC(n) \
 typedef float vec##n[n]; \
 static inline void vec##n##_add(vec##n r, vec##n const a, vec##n const b) \
@@ -45,11 +55,11 @@ static inline void vec##n##_norm(vec##n r, vec##n const v) \
 	vec##n##_scale(r, v, k); \
 }
 
-LINMATH_H_DEFINE_VEC(2)
-LINMATH_H_DEFINE_VEC(3)
-LINMATH_H_DEFINE_VEC(4)
+    LINMATH_H_DEFINE_VEC(2)
+        LINMATH_H_DEFINE_VEC(3)
+            LINMATH_H_DEFINE_VEC(4)
 
-static inline void vec3_mul_cross(vec3 r, vec3 const a, vec3 const b)
+                static inline void vec3_mul_cross(vec3 r, vec3 const a, vec3 const b)
 {
 	r[0] = a[1]*b[2] - a[2]*b[1];
 	r[1] = a[2]*b[0] - a[0]*b[2];
