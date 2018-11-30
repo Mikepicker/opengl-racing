@@ -2,8 +2,9 @@
 #define renderer_h
 
 #include "engine.h"
-
 #include "object.h"
+#include "stb_image.h"
+#include "debug.h"
 
 GLFWwindow* window;
 
