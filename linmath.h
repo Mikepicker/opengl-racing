@@ -7,6 +7,10 @@
 #define inline __inline
 #endif
 
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
+#endif
+
 static inline float to_degrees(float radians)
 {
   return radians * (180.0 / M_PI);
