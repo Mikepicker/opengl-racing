@@ -4,7 +4,7 @@ void load_image(char* filename) {
   unsigned int texture;
 
   glGenTextures(1, &texture);
-  glBindTexture(GL_TEXTURE_2D, texture); 
+  glBindTexture(GL_TEXTURE_2D, texture);
   // set the texture wrapping parameters
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	// set texture wrapping to GL_REPEAT (default wrapping method)
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
@@ -64,20 +64,31 @@ int renderer_should_close() {
 }
 
 void renderer_add_object(object* o) {
+
   glGenVertexArrays(1, &(o->vao)); // Vertex Array Object
   glGenBuffers(1, &(o->vbo));      // Vertex Buffer Object
-  glGenBuffers(1, &(o->ebo));           // Element Buffer Object
+  glGenBuffers(1, &(o->ebo));      // Element Buffer Object
 
   glBindVertexArray(o->vao);
 
+  for (int i = 0; i < o->num_vertices; i++)
+  {
+    printf("VERTEX %f %f %f\n", o->vertices[i].x, o->vertices[i].y, o->vertices[i].z);
+  }
+
+  for (int i = 0; i < o->num_faces; i = i + 3)
+  {
+    printf("INDEX %u %u %u\n", o->indices[i], o->indices[i+1], o->indices[i+2]);
+  }
+
   glBindBuffer(GL_ARRAY_BUFFER, o->vbo);
-  glBufferData(GL_ARRAY_BUFFER, o->num_vertices * 3 * sizeof(GLfloat), o->vertices, GL_STATIC_DRAW);
+  glBufferData(GL_ARRAY_BUFFER, o->num_vertices * sizeof(vertex), o->vertices, GL_STATIC_DRAW);
 
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, o->ebo);
-  glBufferData(GL_ELEMENT_ARRAY_BUFFER, o->num_faces * sizeof(GLuint), o->faces, GL_STATIC_DRAW);
+  glBufferData(GL_ELEMENT_ARRAY_BUFFER, o->num_faces * sizeof(GLuint), o->indices, GL_STATIC_DRAW);
 
   // position attribute
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid *)0);
   glEnableVertexAttribArray(0);
 
   // color attribute
@@ -85,8 +96,12 @@ void renderer_add_object(object* o) {
     glEnableVertexAttribArray(1);*/
 
   // texture coord attribute
-  // glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid *)(3 * sizeof(GLfloat)));
-  // glEnableVertexAttribArray(1);
+  /* glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid *)(3 * sizeof(GLfloat)));
+  glEnableVertexAttribArray(1);
+
+  // normals attribute
+  glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid *)(5 * sizeof(GLfloat)));
+  glEnableVertexAttribArray(2); */
 
   glBindBuffer(GL_ARRAY_BUFFER, 0);
   glBindVertexArray(0);

@@ -10,4 +10,7 @@
 #include "renderer.h"
 #include "importer.h"
 
+/* include data */
+#include "vertex_hashtable.h"
+
 #endif
