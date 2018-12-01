@@ -1,6 +1,37 @@
 #define TINYOBJ_LOADER_C_IMPLEMENTATION
 #include "importer.h"
 
+static material** parse_mtl(const char* filename) {
+  FILE* file = fopen(filename, "r");
+  char line[256];
+  material** materials = (material**)malloc(256 * sizeof(material*));
+
+  material* current_mat;
+  int index = 0;
+  int first = 1;
+  while (fgets(line, sizeof(line), file)) {
+
+    // new material
+    if (strstr(line, "newmtl") != NULL) {
+      if (!first) {
+        materials[index++] = current_mat;
+      }
+      current_mat = (material*)malloc(sizeof(material));
+      sscanf(line, "newmtl %s", current_mat->name);
+    }
+    // texture path
+    else if (strstr(line, "map_Kd") != NULL) {
+      sscanf(line, "map_Kd %s", current_mat->texture_path);
+    }
+  }
+
+  materials[index] = current_mat;
+  printf("Mat %s %s\n", materials[0]->name, materials[0]->texture_path);
+  fclose(file);
+
+  return materials;
+}
+
 static const char* mmap_file(size_t* len, const char* filename) {
   FILE* f;
   long file_size;
