@@ -1,3 +1,4 @@
+#define STB_IMAGE_IMPLEMENTATION
 #include "renderer.h"
 
 void load_image(char* filename) {
