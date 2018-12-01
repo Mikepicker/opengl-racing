@@ -20,9 +20,13 @@ int hash_code(char* key)
   return hash(key) % hash_size;
 }
 
-void vertex_hashtable_init(uint size) {
+int vertex_hashtable_init(int size) {
+  if (size < 0) {
+    return -1;
+  }
   hash_array = malloc(size * sizeof(vertex_item));
   hash_size = size;
+  return 0;
 }
 
 vertex_item* vertex_hashtable_search(char* key)

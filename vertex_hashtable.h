@@ -9,7 +9,7 @@ typedef struct {
   char* key;
 } vertex_item;
 
-void vertex_hashtable_init(uint size);
+int vertex_hashtable_init(int size);
 void vertex_hashtable_insert(char* key, vertex_indexed data);
 vertex_item* vertex_hashtable_search(char* key);
 vertex_item* vertex_hashtable_delete(char* key);
