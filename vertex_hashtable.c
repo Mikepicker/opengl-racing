@@ -15,8 +15,7 @@ unsigned long hash(char *str)
   return hash;
 }
 
-int hash_code(char* key)
-{
+int hash_code(char* key) {
   return hash(key) % hash_size;
 }
 
@@ -24,13 +23,19 @@ int vertex_hashtable_init(int size) {
   if (size < 0) {
     return -1;
   }
-  hash_array = malloc(size * sizeof(vertex_item));
+  hash_array = malloc(size * sizeof(vertex_item*));
+  memset(hash_array, 0, size * sizeof(vertex_item*));
   hash_size = size;
   return 0;
 }
 
-vertex_item* vertex_hashtable_search(char* key)
-{
+void vertex_hashtable_resize(int new_size) {
+  hash_array = realloc(hash_array, new_size * sizeof(vertex_item*));
+  memset(hash_array, 0, new_size * sizeof(vertex_item*));
+  hash_size = new_size;
+}
+
+vertex_item* vertex_hashtable_search(char* key) {
   //get the hash
   int hash_index = hash_code(key);
 
