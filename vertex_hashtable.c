@@ -4,7 +4,7 @@ vertex_item** hash_array;
 int hash_size;
 // vertex_item *dummy_item;
 
-unsigned long hash(char *str)
+static unsigned long hash(const char *str)
 {
   unsigned long hash = 5381;
   int c;
@@ -15,7 +15,7 @@ unsigned long hash(char *str)
   return hash;
 }
 
-int hash_code(char* key) {
+static int hash_code(const char* key) {
   return hash(key) % hash_size;
 }
 
@@ -24,26 +24,28 @@ int vertex_hashtable_init(int size) {
     return -1;
   }
   hash_array = malloc(size * sizeof(vertex_item*));
-  memset(hash_array, 0, size * sizeof(vertex_item*));
+  for (int i = 0; i < size; i++) {
+    hash_array[i] = NULL;
+  }
   hash_size = size;
   return 0;
 }
 
 void vertex_hashtable_resize(int new_size) {
   hash_array = realloc(hash_array, new_size * sizeof(vertex_item*));
-  memset(hash_array, 0, new_size * sizeof(vertex_item*));
+  for (int i = hash_size; i < new_size; i++) {
+    hash_array[i] = NULL;
+  }
   hash_size = new_size;
 }
 
-vertex_item* vertex_hashtable_search(char* key) {
+vertex_item* vertex_hashtable_search(const char* key) {
   //get the hash
   int hash_index = hash_code(key);
 
   //move in array until an empty
-  while (hash_array[hash_index] != NULL)
-  {
-    if (hash_array[hash_index]->key == key)
-    {
+  while (hash_array[hash_index] != NULL) {
+    if (strcmp(hash_array[hash_index]->key, key) == 0) {
       return hash_array[hash_index];
     }
 
@@ -57,11 +59,11 @@ vertex_item* vertex_hashtable_search(char* key) {
   return NULL;
 }
 
-void vertex_hashtable_insert(char* key, vertex_indexed data)
+void vertex_hashtable_insert(const char* key, vertex_indexed data)
 {
   vertex_item *item = (vertex_item *)malloc(sizeof(vertex_item));
   item->data = data;
-  item->key = key;
+  strncpy(item->key, key, sizeof(item->key));
 
   //get the hash
   int hash_index = hash_code(key);
@@ -80,7 +82,7 @@ void vertex_hashtable_insert(char* key, vertex_indexed data)
   hash_array[hash_index] = item;
 }
 
-vertex_item* vertex_hashtable_delete(char* key)
+vertex_item* vertex_hashtable_delete(const char* key)
 {
   //get the hash
   int hash_index = hash_code(key);

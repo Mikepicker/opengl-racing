@@ -72,21 +72,11 @@ void renderer_add_object(object* o) {
 
   glBindVertexArray(o->vao);
 
-  for (int i = 0; i < o->num_vertices; i++)
-  {
-    printf("VERTEX %f %f %f\n", o->vertices[i].x, o->vertices[i].y, o->vertices[i].z);
-  }
-
-  for (int i = 0; i < o->num_faces; i = i + 3)
-  {
-    printf("INDEX %u %u %u\n", o->indices[i], o->indices[i+1], o->indices[i+2]);
-  }
-
   glBindBuffer(GL_ARRAY_BUFFER, o->vbo);
   glBufferData(GL_ARRAY_BUFFER, o->num_vertices * sizeof(vertex), o->vertices, GL_STATIC_DRAW);
 
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, o->ebo);
-  glBufferData(GL_ELEMENT_ARRAY_BUFFER, o->num_faces * sizeof(GLuint), o->indices, GL_STATIC_DRAW);
+  glBufferData(GL_ELEMENT_ARRAY_BUFFER, o->num_indices * sizeof(GLuint), o->indices, GL_STATIC_DRAW);
 
   // position attribute
   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid *)0);
@@ -156,7 +146,7 @@ void renderer_render_objects(object* objects[], int objects_length, GLFWwindow* 
 
     // render the triangle
     glBindVertexArray(o->vao);
-    glDrawElements(GL_TRIANGLES, o->num_faces, GL_UNSIGNED_INT , 0);
+    glDrawElements(GL_TRIANGLES, o->num_indices, GL_UNSIGNED_INT , 0);
   }
 
   // swap buffers and poll events

@@ -15,17 +15,6 @@ typedef struct {
 } vertex;
 
 typedef struct {
-  int index;
-  vertex v;
-} vertex_indexed;
-
-typedef struct {
-  GLuint v_idx;
-  GLuint vt_idx;
-  GLuint vn_idx;
-} face;
-
-typedef struct {
  vec3 position;
  vec3 scale;
  quat rotation;
@@ -35,7 +24,7 @@ typedef struct {
  GLfloat* normals;
  GLfloat* texcoords;
 
- GLuint num_faces;
+ GLuint num_indices;
  GLuint num_vertices;
  GLuint num_normals;
  GLuint num_texcoords;

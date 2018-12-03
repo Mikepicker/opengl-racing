@@ -1,4 +1,3 @@
-#define TINYOBJ_LOADER_C_IMPLEMENTATION
 #include "importer.h"
 
 static material** parse_mtl(const char* filename) {
@@ -32,75 +31,89 @@ static material** parse_mtl(const char* filename) {
   return materials;
 }
 
-static const char* mmap_file(size_t* len, const char* filename) {
-  FILE* f;
-  long file_size;
-  struct stat sb;
-  char* p;
-  int fd;
+static void push_index(int* indices, int icount, vertex* vertices, const char* vkey) {
+  // search face in the hashmap
+  vertex_item* found = vertex_hashtable_search(vkey);
 
-  (*len) = 0;
+  // get vertex indices (vertex, texcoords, normals)
+  int v_index, vt_index, vn_index;
+  sscanf(vkey, "%d/%d/%d", &v_index, &vt_index, &vn_index);
+  v_index--; vt_index--; vn_index--;
 
-  f = fopen(filename, "r");
-  fseek(f, 0, SEEK_END);
-  file_size = ftell(f);
-  fclose(f);
-
-  fd = open(filename, O_RDONLY);
-  if (fd == -1) {
-    perror("open");
-    return NULL;
+  vertex_indexed vi = { v_index, vertices[v_index] };
+  if (found != NULL) {
+    indices[icount] = found->data.index;
+  } else {
+    vertex_hashtable_insert(vkey, vi);
+    indices[icount] = v_index;
   }
-
-  if (fstat(fd, &sb) == -1) {
-    perror("fstat");
-    return NULL;
-  }
-
-  if (!S_ISREG(sb.st_mode)) {
-    fprintf(stderr, "%s is not a file\n", "lineitem.tbl");
-    return NULL;
-  }
-
-  p = (char*)mmap(0, (size_t)file_size, PROT_READ, MAP_SHARED, fd, 0);
-
-  if (p == MAP_FAILED) {
-    perror("mmap");
-    return NULL;
-  }
-
-  if (close(fd) == -1) {
-    perror("close");
-    return NULL;
-  }
-
-  (*len) = (size_t)file_size;
-
-  return p;
 }
 
-static const char* get_file_data(size_t* len, const char* filename) {
-  const char* ext = strrchr(filename, '.');
-
-  size_t data_len = 0;
-  const char* data = NULL;
-
-  data = mmap_file(&data_len, filename);
-
-  (*len) = data_len;
-  return data;
-}
-
-void importer_load_obj(const char *filename, tinyobj_attrib_t *model_data)
+int importer_load_obj(const char *filename, vertex* out_vertices[], GLuint* out_indices[], GLuint* vertices_size, GLuint* indices_size)
 {
-  tinyobj_shape_t* shapes = NULL;
-  size_t num_shapes;
-  tinyobj_material_t* materials = NULL;
-  size_t num_materials;
+  /* parse vertices */
+  FILE* file = fopen(filename, "r");
+  char line[256];
 
-  size_t data_len= 0;
-  const char* data = get_file_data(&data_len, filename);
+  int vsize = 256;
+  vertex* vertices = malloc(vsize * sizeof(vertex));
+  int isize = 256;
+  int* indices = malloc(isize * sizeof(int));
+  int vcount = 0;
+  int icount = 0;
+  int fcount = 0;
 
-  unsigned int flags = TINYOBJ_FLAG_TRIANGULATE;
-  tinyobj_parse_obj(model_data, &shapes, &num_shapes, &materials, &num_materials, data, data_len, flags);
+  // init hastable (it will be resized if needed)
+  vertex_hashtable_init(isize);
+
+  while (fgets(line, sizeof(line), file)) {
+
+    // realloc vertices list
+    if (vcount >= vsize) {
+      vsize = vsize * 2;
+      vertices = realloc(vertices, vsize * sizeof(vertex));
+    }
+
+    // realloc indices list & vertex hashmap
+    if (icount + 3 >= isize) {
+      isize = isize * 2;
+      indices = realloc(indices, isize * sizeof(int));
+      vertex_hashtable_resize(isize);
+    }
+
+    // new vertex
+    if (strstr(line, "v ") != NULL) {
+      vertex* v = &vertices[vcount]; 
+      sscanf(line, "v %f %f %f", &v->x, &v->y, &v->z);
+      vcount++;
+    }
+
+    // new face
+    if (strstr(line, "f ") != NULL) {
+
+      // parse vertices of current face
+      char v1[128];
+      char v2[128];
+      char v3[128];
+      sscanf(line, "f %s %s %s", v1, v2, v3);
+
+      // update indices
+      push_index(indices, icount++, vertices, v1);
+      push_index(indices, icount++, vertices, v2);
+      push_index(indices, icount++, vertices, v3);
+
+      // just parsed 1 face
+      fcount++;
+    }
+  }
+
+  // return values
+  *out_vertices = vertices;
+  *out_indices = indices;
+  *indices_size = icount;
+  *vertices_size = vcount;
+
+  fclose(file);
+
+  return 1;
 }

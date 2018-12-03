@@ -3,9 +3,9 @@
 
 #include "engine.h"
 
-#include "tinyobj_loader_c.h"
 #include "material.h"
+#include "vertex_hashtable.h"
 
-void importer_load_obj(const char *filename, tinyobj_attrib_t *model_data);
+int importer_load_obj(const char *filename, vertex* out_vertices[], GLuint* out_indices[], GLuint* vertices_size, GLuint* indices_size);
 
 #endif

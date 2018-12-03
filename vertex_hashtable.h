@@ -11,13 +11,13 @@ typedef struct {
 
 typedef struct {
   vertex_indexed data;
-  char* key;
+  char key[256];
 } vertex_item;
 
 int vertex_hashtable_init(int size);
 void vertex_hashtable_resize(int new_size);
-void vertex_hashtable_insert(char* key, vertex_indexed data);
-vertex_item* vertex_hashtable_search(char* key);
-vertex_item* vertex_hashtable_delete(char* key);
+void vertex_hashtable_insert(const char* key, vertex_indexed data);
+vertex_item* vertex_hashtable_search(const char* key);
+vertex_item* vertex_hashtable_delete(const char* key);
 
 #endif
