@@ -31,9 +31,9 @@ static material** parse_mtl(const char* filename) {
   return materials;
 }
 
-static void push_index(int* indices, int icount, vertex* vertices, const char* vkey) {
+static void push_index(vertex_hashtable* vh, int* indices, int icount, vertex* vertices, const char* vkey) {
   // search face in the hashmap
-  vertex_item* found = vertex_hashtable_search(vkey);
+  vertex_item* found = vertex_hashtable_search(vh, vkey);
 
   // get vertex indices (vertex, texcoords, normals)
   int v_index, vt_index, vn_index;
@@ -44,7 +44,7 @@ static void push_index(int* indices, int icount, vertex* vertices, const char* v
   if (found != NULL) {
     indices[icount] = found->data.index;
   } else {
-    vertex_hashtable_insert(vkey, vi);
+    vertex_hashtable_insert(vh, vkey, vi);
     indices[icount] = v_index;
   }
 }
@@ -64,7 +64,7 @@ int importer_load_obj(const char *filename, vertex* out_vertices[], GLuint* out_
   int fcount = 0;
 
   // init hastable (it will be resized if needed)
-  vertex_hashtable_init(isize);
+  vertex_hashtable* vh = vertex_hashtable_new(isize);
 
   while (fgets(line, sizeof(line), file)) {
 
@@ -78,7 +78,7 @@ int importer_load_obj(const char *filename, vertex* out_vertices[], GLuint* out_
     if (icount + 3 >= isize) {
       isize = isize * 2;
       indices = realloc(indices, isize * sizeof(int));
-      vertex_hashtable_resize(isize);
+      vertex_hashtable_resize(vh, isize);
     }
 
     // new vertex
@@ -98,9 +98,9 @@ int importer_load_obj(const char *filename, vertex* out_vertices[], GLuint* out_
       sscanf(line, "f %s %s %s", v1, v2, v3);
 
       // update indices
-      push_index(indices, icount++, vertices, v1);
-      push_index(indices, icount++, vertices, v2);
-      push_index(indices, icount++, vertices, v3);
+      push_index(vh, indices, icount++, vertices, v1);
+      push_index(vh, indices, icount++, vertices, v2);
+      push_index(vh, indices, icount++, vertices, v3);
 
       // just parsed 1 face
       fcount++;
@@ -114,6 +114,8 @@ int importer_load_obj(const char *filename, vertex* out_vertices[], GLuint* out_
   *vertices_size = vcount;
 
   fclose(file);
+  
+  vertex_hashtable_free(vh);
 
   return 1;
 }
