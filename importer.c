@@ -4,12 +4,12 @@ const int INIT_SIZE = 4;
 
 vec3* temp_vertices;
 vec2* temp_uvs;
+vec3* temp_normals;
 GLuint* indices;
 
 int vsize, vcount;
-
 int vtsize, vtcount;
-
+int vnsize, vncount;
 int isize, icount;
 
 int total_vertices_size, total_vertices;
@@ -55,10 +55,6 @@ static void push_index(vertex_hashtable* vh, const char* vkey) {
   sscanf(vkey, "%d/%d/%d", &v_index, &vt_index, &vn_index);
   v_index--; vt_index--; vn_index--;
 
-  // push vertex
-  vec3* temp_v = &temp_vertices[v_index]; 
-  vec2* temp_vt = &temp_uvs[vt_index];
-
   // get index from hashtable (or insert it if not present)
   if (found != NULL) {
     indices[icount] = found->data.index;
@@ -69,9 +65,9 @@ static void push_index(vertex_hashtable* vh, const char* vkey) {
     vertices[total_vertices].z = temp_vertices[v_index][2];
     vertices[total_vertices].u = temp_uvs[vt_index][0];
     vertices[total_vertices].v = temp_uvs[vt_index][1];
-    vertices[total_vertices].nx = 0.0f;
-    vertices[total_vertices].ny = 0.0f;
-    vertices[total_vertices].nz = 0.0f;
+    vertices[total_vertices].nx = temp_normals[vn_index][0];
+    vertices[total_vertices].ny = temp_normals[vn_index][1];
+    vertices[total_vertices].nz = temp_normals[vn_index][2];
     
     // update indices
     vertex_indexed vi = { total_vertices, vertices[total_vertices] };
@@ -103,6 +99,10 @@ int importer_load_obj(const char *filename, vertex* out_vertices[], GLuint* out_
   vtcount = 0;
   temp_uvs = malloc(vtsize * sizeof(vec2));
   
+  vnsize = INIT_SIZE;
+  vncount = 0;
+  temp_normals = malloc(vnsize * sizeof(vec3));
+
   isize = INIT_SIZE;
   icount = 0;
   indices = malloc(isize * sizeof(GLuint));
@@ -145,6 +145,18 @@ int importer_load_obj(const char *filename, vertex* out_vertices[], GLuint* out_
       if (vtcount >= vtsize) {
         vtsize *= 2;
         temp_uvs = realloc(temp_uvs, vtsize * sizeof(vec2));
+      }
+    }
+
+    // new normal
+    if (strstr(line, "vn ") != NULL) {
+      sscanf(line, "vn %f %f %f", &temp_normals[vncount][0], &temp_normals[vncount][1], &temp_normals[vncount][2]);
+      vncount++;
+
+      // realloc vertices list
+      if (vncount >= vnsize) {
+        vnsize *= 2;
+        temp_normals = realloc(temp_normals, vnsize * sizeof(vec3));
       }
     }
 
