@@ -30,6 +30,7 @@ typedef struct {
  GLuint num_texcoords;
 
  GLuint vao, vbo, ebo;
+ GLuint texture_id;
 } object;
 
 #endif

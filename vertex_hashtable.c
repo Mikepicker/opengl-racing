@@ -16,7 +16,7 @@ static unsigned int hash_code(vertex_hashtable* vh, const char* key) {
 }
 
 vertex_hashtable* vertex_hashtable_new(int size) {
-  vertex_hashtable* vh = malloc(sizeof(vertex_hashtable*));
+  vertex_hashtable* vh = malloc(sizeof(vertex_hashtable));
   vh->hash_array = malloc(size * sizeof(vertex_item*));
   for (int i = 0; i < size; i++) {
     vh->hash_array[i] = NULL;

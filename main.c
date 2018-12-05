@@ -33,7 +33,7 @@ int main()
   vertex* vertices;
   GLuint* indices;
   GLuint indices_size, vertices_size;
-  importer_load_obj("./assets/monkey.obj", &vertices, &indices, &vertices_size, &indices_size);
+  importer_load_obj("./assets/crate.obj", &vertices, &indices, &vertices_size, &indices_size);
 
   // init object list
   object* objects[1];

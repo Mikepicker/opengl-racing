@@ -1,5 +1,20 @@
 #include "importer.h"
 
+const int INIT_SIZE = 4;
+
+vec3* temp_vertices;
+vec2* temp_uvs;
+GLuint* indices;
+
+int vsize, vcount;
+
+int vtsize, vtcount;
+
+int isize, icount;
+
+int total_vertices_size, total_vertices;
+vertex* vertices;
+
 static material** parse_mtl(const char* filename) {
   FILE* file = fopen(filename, "r");
   char line[256];
@@ -31,7 +46,7 @@ static material** parse_mtl(const char* filename) {
   return materials;
 }
 
-static void push_index(vertex_hashtable* vh, int* indices, int icount, vertex* vertices, const char* vkey) {
+static void push_index(vertex_hashtable* vh, const char* vkey) {
   // search face in the hashmap
   vertex_item* found = vertex_hashtable_search(vh, vkey);
 
@@ -40,13 +55,38 @@ static void push_index(vertex_hashtable* vh, int* indices, int icount, vertex* v
   sscanf(vkey, "%d/%d/%d", &v_index, &vt_index, &vn_index);
   v_index--; vt_index--; vn_index--;
 
-  vertex_indexed vi = { v_index, vertices[v_index] };
+  // push vertex
+  vec3* temp_v = &temp_vertices[v_index]; 
+  vec2* temp_vt = &temp_uvs[vt_index];
+
+  // get index from hashtable (or insert it if not present)
   if (found != NULL) {
     indices[icount] = found->data.index;
   } else {
+    // push vertex
+    vertices[total_vertices].x = temp_vertices[v_index][0];
+    vertices[total_vertices].y = temp_vertices[v_index][1];
+    vertices[total_vertices].z = temp_vertices[v_index][2];
+    vertices[total_vertices].u = temp_uvs[vt_index][0];
+    vertices[total_vertices].v = temp_uvs[vt_index][1];
+    vertices[total_vertices].nx = 0.0f;
+    vertices[total_vertices].ny = 0.0f;
+    vertices[total_vertices].nz = 0.0f;
+    
+    // update indices
+    vertex_indexed vi = { total_vertices, vertices[total_vertices] };
     vertex_hashtable_insert(vh, vkey, vi);
-    indices[icount] = v_index;
+    indices[icount] = total_vertices;
+
+    total_vertices++;
+
+    // Increase vertices size
+    if (total_vertices >= total_vertices_size) {
+      total_vertices_size *= 2;
+      vertices = realloc(vertices, total_vertices_size * sizeof(vertex));
+    }
   }
+  icount++;
 }
 
 int importer_load_obj(const char *filename, vertex* out_vertices[], GLuint* out_indices[], GLuint* vertices_size, GLuint* indices_size)
@@ -55,37 +95,57 @@ int importer_load_obj(const char *filename, vertex* out_vertices[], GLuint* out_
   FILE* file = fopen(filename, "r");
   char line[256];
 
-  int vsize = 256;
-  vertex* vertices = malloc(vsize * sizeof(vertex));
-  int isize = 256;
-  int* indices = malloc(isize * sizeof(int));
-  int vcount = 0;
-  int icount = 0;
-  int fcount = 0;
+  vsize = INIT_SIZE;
+  vcount = 0;
+  temp_vertices = malloc(vsize * sizeof(vec3));
+
+  vtsize = INIT_SIZE;
+  vtcount = 0;
+  temp_uvs = malloc(vtsize * sizeof(vec2));
+  
+  isize = INIT_SIZE;
+  icount = 0;
+  indices = malloc(isize * sizeof(GLuint));
+
+  // vertices to return
+  total_vertices_size = INIT_SIZE;
+  total_vertices = 0;
+  vertices = malloc(total_vertices_size * sizeof(vertex));
 
   // init hastable (it will be resized if needed)
-  vertex_hashtable* vh = vertex_hashtable_new(isize);
+  vertex_hashtable* vh = vertex_hashtable_new(INIT_SIZE);
 
   while (fgets(line, sizeof(line), file)) {
 
-    // realloc vertices list
-    if (vcount >= vsize) {
-      vsize = vsize * 2;
-      vertices = realloc(vertices, vsize * sizeof(vertex));
-    }
-
-    // realloc indices list & vertex hashmap
+    // realloc indices list, vertex hashmap
     if (icount + 3 >= isize) {
       isize = isize * 2;
-      indices = realloc(indices, isize * sizeof(int));
+      indices = realloc(indices, isize * sizeof(GLuint));
       vertex_hashtable_resize(vh, isize);
     }
 
     // new vertex
     if (strstr(line, "v ") != NULL) {
-      vertex* v = &vertices[vcount]; 
-      sscanf(line, "v %f %f %f", &v->x, &v->y, &v->z);
+      sscanf(line, "v %f %f %f", &temp_vertices[vcount][0], &temp_vertices[vcount][1], &temp_vertices[vcount][2]);
       vcount++;
+
+      // realloc vertices list
+      if (vcount >= vsize) {
+        vsize *= 2;
+        temp_vertices = realloc(temp_vertices, vsize * sizeof(vec3));
+      }
+    }
+
+    // new texcoords
+    if (strstr(line, "vt ") != NULL) {
+      sscanf(line, "vt %f %f", &temp_uvs[vtcount][0], &temp_uvs[vtcount][1]);
+      vtcount++;
+
+      // realloc uvs list
+      if (vtcount >= vtsize) {
+        vtsize *= 2;
+        temp_uvs = realloc(temp_uvs, vtsize * sizeof(vec2));
+      }
     }
 
     // new face
@@ -98,12 +158,9 @@ int importer_load_obj(const char *filename, vertex* out_vertices[], GLuint* out_
       sscanf(line, "f %s %s %s", v1, v2, v3);
 
       // update indices
-      push_index(vh, indices, icount++, vertices, v1);
-      push_index(vh, indices, icount++, vertices, v2);
-      push_index(vh, indices, icount++, vertices, v3);
-
-      // just parsed 1 face
-      fcount++;
+      push_index(vh, v1);
+      push_index(vh, v2);
+      push_index(vh, v3);
     }
   }
 
@@ -111,11 +168,13 @@ int importer_load_obj(const char *filename, vertex* out_vertices[], GLuint* out_
   *out_vertices = vertices;
   *out_indices = indices;
   *indices_size = icount;
-  *vertices_size = vcount;
+  *vertices_size = total_vertices;
 
   fclose(file);
   
   vertex_hashtable_free(vh);
+  free(temp_vertices);
+  free(temp_uvs);
 
   return 1;
 }

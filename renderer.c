@@ -1,8 +1,8 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "renderer.h"
 
-void load_image(char* filename) {
-  unsigned int texture;
+unsigned int load_image(char* filename) {
+  unsigned int texture = -1;
 
   glGenTextures(1, &texture);
   glBindTexture(GL_TEXTURE_2D, texture);
@@ -18,13 +18,30 @@ void load_image(char* filename) {
   // The FileSystem::getPath(...) is part of the GitHub repository so we can find files on any IDE/platform; replace it with your own image path.
   unsigned char *data = stbi_load(filename, &width, &height, &nrChannels, 0);
   if (data) {
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+    GLenum format;
+    if (nrChannels == 1)
+      format = GL_RED;
+    if (nrChannels == 2)
+      format = GL_ALPHA;
+    else if (nrChannels == 3)
+      format = GL_RGB;
+    else if (nrChannels == 4)
+      format = GL_RGBA;
+
+    glBindTexture(GL_TEXTURE_2D, texture);
+    glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
     glGenerateMipmap(GL_TEXTURE_2D);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
   }
   else {
     printf("Error loading texture\n");
   }
   stbi_image_free(data);
+  return texture;
 }
 
 int renderer_init(char* title, int width, int height, void* key_callback) {
@@ -82,20 +99,19 @@ void renderer_add_object(object* o) {
   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid *)0);
   glEnableVertexAttribArray(0);
 
-  // color attribute
-  /*glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
-    glEnableVertexAttribArray(1);*/
-
   // texture coord attribute
-  /* glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid *)(3 * sizeof(GLfloat)));
+  glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid *)(3 * sizeof(GLfloat)));
   glEnableVertexAttribArray(1);
 
   // normals attribute
   glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid *)(5 * sizeof(GLfloat)));
-  glEnableVertexAttribArray(2); */
+  glEnableVertexAttribArray(2);
 
   glBindBuffer(GL_ARRAY_BUFFER, 0);
   glBindVertexArray(0);
+
+  // TODO: properly set texture
+  o->texture_id = load_image("assets/crate.png");
 }
 
 void renderer_render_objects(object* objects[], int objects_length, GLFWwindow* window, GLuint shader_id) {
@@ -143,6 +159,11 @@ void renderer_render_objects(object* objects[], int objects_length, GLFWwindow* 
     glUniformMatrix4fv(m_location, 1, GL_FALSE, (const GLfloat*) m);
     glUniformMatrix4fv(v_location, 1, GL_FALSE, (const GLfloat*) v);
     glUniformMatrix4fv(p_location, 1, GL_FALSE, (const GLfloat*) p);
+
+    // bind texture
+    glUniform1i(glGetUniformLocation(o->texture_id, "texture1"), 0);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, o->texture_id);
 
     // render the triangle
     glBindVertexArray(o->vao);
