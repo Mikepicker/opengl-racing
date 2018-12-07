@@ -78,7 +78,9 @@ int main()
 
   // cleanup
   renderer_cleanup();
-
+  for (int i = 0; i < num_meshes; i++) {
+    mesh_free(&meshes[i]);
+  }
   free(meshes);
 
   return 0;

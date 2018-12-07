@@ -62,5 +62,7 @@ void dict_free(dict* h) {
     free(h->keys[i]);
     free(h->values[i]);
   }
+  free(h->keys);
+  free(h->values);
   free(h);
 }
