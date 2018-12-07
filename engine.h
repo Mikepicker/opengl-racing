@@ -19,7 +19,6 @@
 #include <unistd.h>
 #include <assert.h>
 
-
 /* math */
 #include "linmath.h"
 

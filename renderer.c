@@ -83,35 +83,38 @@ int renderer_should_close() {
 
 void renderer_add_object(object* o) {
 
-  glGenVertexArrays(1, &(o->vao)); // Vertex Array Object
-  glGenBuffers(1, &(o->vbo));      // Vertex Buffer Object
-  glGenBuffers(1, &(o->ebo));      // Element Buffer Object
+  for (int i = 0; i < o->num_meshes; i++) {
+    mesh* mesh = &o->meshes[i];
+    glGenVertexArrays(1, &(mesh->vao)); // Vertex Array Object
+    glGenBuffers(1, &(mesh->vbo));      // Vertex Buffer Object
+    glGenBuffers(1, &(mesh->ebo));      // Element Buffer Object
 
-  glBindVertexArray(o->vao);
+    glBindVertexArray(mesh->vao);
 
-  glBindBuffer(GL_ARRAY_BUFFER, o->vbo);
-  glBufferData(GL_ARRAY_BUFFER, o->num_vertices * sizeof(vertex), o->vertices, GL_STATIC_DRAW);
+    glBindBuffer(GL_ARRAY_BUFFER, mesh->vbo);
+    glBufferData(GL_ARRAY_BUFFER, mesh->num_vertices * sizeof(vertex), mesh->vertices, GL_STATIC_DRAW);
 
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, o->ebo);
-  glBufferData(GL_ELEMENT_ARRAY_BUFFER, o->num_indices * sizeof(GLuint), o->indices, GL_STATIC_DRAW);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->ebo);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, mesh->num_indices * sizeof(GLuint), mesh->indices, GL_STATIC_DRAW);
 
-  // position attribute
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid *)0);
-  glEnableVertexAttribArray(0);
+    // position attribute
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid *)0);
+    glEnableVertexAttribArray(0);
 
-  // texture coord attribute
-  glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid *)(3 * sizeof(GLfloat)));
-  glEnableVertexAttribArray(1);
+    // texture coord attribute
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid *)(3 * sizeof(GLfloat)));
+    glEnableVertexAttribArray(1);
 
-  // normals attribute
-  glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid *)(5 * sizeof(GLfloat)));
-  glEnableVertexAttribArray(2);
+    // normals attribute
+    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid *)(5 * sizeof(GLfloat)));
+    glEnableVertexAttribArray(2);
 
-  glBindBuffer(GL_ARRAY_BUFFER, 0);
-  glBindVertexArray(0);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
 
-  // TODO: properly set texture
-  o->texture_id = load_image("assets/crate.png");
+    // texture
+    mesh->texture_id = load_image(mesh->mat.texture_path);
+  }
 }
 
 void renderer_render_objects(object* objects[], int objects_length, GLFWwindow* window, GLuint shader_id) {
@@ -124,7 +127,7 @@ void renderer_render_objects(object* objects[], int objects_length, GLFWwindow* 
   p_location = glGetUniformLocation(shader_id, "P");
   glUseProgram(shader_id);
 
-  glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+  glClearColor(183.0f / 255.0f, 220.0f / 255.0f, 244.0f / 255.0f, 1.0f);
 
   glfwGetFramebufferSize(window, &width, &height);
   ratio = width / (float)height;
@@ -160,14 +163,17 @@ void renderer_render_objects(object* objects[], int objects_length, GLFWwindow* 
     glUniformMatrix4fv(v_location, 1, GL_FALSE, (const GLfloat*) v);
     glUniformMatrix4fv(p_location, 1, GL_FALSE, (const GLfloat*) p);
 
-    // bind texture
-    glUniform1i(glGetUniformLocation(o->texture_id, "texture1"), 0);
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, o->texture_id);
+    for (int i = 0; i < o->num_meshes; i++) {
+      mesh* mesh = &o->meshes[i];
+      // bind texture
+      glUniform1i(glGetUniformLocation(mesh->texture_id, "texture1"), 0);
+      glActiveTexture(GL_TEXTURE0);
+      glBindTexture(GL_TEXTURE_2D, mesh->texture_id);
 
-    // render the triangle
-    glBindVertexArray(o->vao);
-    glDrawElements(GL_TRIANGLES, o->num_indices, GL_UNSIGNED_INT , 0);
+      // render the triangle
+      glBindVertexArray(mesh->vao);
+      glDrawElements(GL_TRIANGLES, mesh->num_indices, GL_UNSIGNED_INT , 0);
+    }
   }
 
   // swap buffers and poll events

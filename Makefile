@@ -1,5 +1,5 @@
 #OBJS specifies which files to compile as part of the project
-OBJS = main.c glad.c shader.c renderer.c importer.c vertex_hashtable.c debug.c
+OBJS = main.c glad.c shader.c renderer.c importer.c vertex_hashtable.c dict.c debug.c
 
 #CC specifies which compiler we're using
 CC = gcc -g -std=c99 `pkg-config --cflags glfw3`

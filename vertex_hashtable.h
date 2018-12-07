@@ -2,7 +2,7 @@
 #define vertex_hashtable_h
 
 #include "engine.h"
-#include "object.h"
+#include "data/object.h"
 
 typedef struct {
   int index;

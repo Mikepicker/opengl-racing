@@ -1,6 +1,7 @@
 #include "importer.h"
 
-const int INIT_SIZE = 4;
+const int INIT_SIZE = 256;
+const char* ASSETS_PATH = "assets/";
 
 vec3* temp_vertices;
 vec2* temp_uvs;
@@ -15,20 +16,22 @@ int isize, icount;
 int total_vertices_size, total_vertices;
 vertex* vertices;
 
-static material** parse_mtl(const char* filename) {
+int meshes_size, meshes_count;
+mesh* meshes;
+
+static dict* import_mtl(const char* filename) {
   FILE* file = fopen(filename, "r");
   char line[256];
-  material** materials = (material**)malloc(256 * sizeof(material*));
+  dict* materials = dict_new(INIT_SIZE);
 
-  material* current_mat;
-  int index = 0;
+  material* current_mat = NULL;
   int first = 1;
   while (fgets(line, sizeof(line), file)) {
 
     // new material
     if (strstr(line, "newmtl") != NULL) {
       if (!first) {
-        materials[index++] = current_mat;
+        dict_insert(materials, current_mat->name, current_mat);
       }
       current_mat = (material*)malloc(sizeof(material));
       sscanf(line, "newmtl %s", current_mat->name);
@@ -39,8 +42,11 @@ static material** parse_mtl(const char* filename) {
     }
   }
 
-  materials[index] = current_mat;
-  printf("Mat %s %s\n", materials[0]->name, materials[0]->texture_path);
+  if (current_mat != NULL) {
+    dict_insert(materials, current_mat->name, current_mat);
+  }
+  printf("MAT1 %s %s\n", ((material*)dict_search(materials, current_mat->name))->name, ((material*)dict_search(materials, "Material"))->name);
+
   fclose(file);
 
   return materials;
@@ -85,24 +91,23 @@ static void push_index(vertex_hashtable* vh, const char* vkey) {
   icount++;
 }
 
-int importer_load_obj(const char *filename, vertex* out_vertices[], GLuint* out_indices[], GLuint* vertices_size, GLuint* indices_size)
-{
-  /* parse vertices */
-  FILE* file = fopen(filename, "r");
-  char line[256];
-
+static void new_mesh() {
+  // temp vertices
   vsize = INIT_SIZE;
   vcount = 0;
   temp_vertices = malloc(vsize * sizeof(vec3));
 
+  // temp uvs
   vtsize = INIT_SIZE;
   vtcount = 0;
   temp_uvs = malloc(vtsize * sizeof(vec2));
   
+  // temp normals
   vnsize = INIT_SIZE;
   vncount = 0;
   temp_normals = malloc(vnsize * sizeof(vec3));
 
+  // temp indices
   isize = INIT_SIZE;
   icount = 0;
   indices = malloc(isize * sizeof(GLuint));
@@ -111,10 +116,28 @@ int importer_load_obj(const char *filename, vertex* out_vertices[], GLuint* out_
   total_vertices_size = INIT_SIZE;
   total_vertices = 0;
   vertices = malloc(total_vertices_size * sizeof(vertex));
+}
+
+int importer_load_obj(const char* filename, mesh* out_meshes[], int* out_meshes_size)
+{
+  /* parse vertices */
+  FILE* file = fopen(filename, "r");
+  char line[256];
+
+  new_mesh();
+
+  // meshes
+  meshes_count = 0;
+  meshes_size = INIT_SIZE;
+  meshes = malloc(meshes_size * sizeof(mesh));
 
   // init hastable (it will be resized if needed)
   vertex_hashtable* vh = vertex_hashtable_new(INIT_SIZE);
 
+  // materials dictionary
+  dict* materials;
+
+  int first_mesh = 1;
   while (fgets(line, sizeof(line), file)) {
 
     // realloc indices list, vertex hashmap
@@ -122,6 +145,25 @@ int importer_load_obj(const char *filename, vertex* out_vertices[], GLuint* out_
       isize = isize * 2;
       indices = realloc(indices, isize * sizeof(GLuint));
       vertex_hashtable_resize(vh, isize);
+    }
+
+    // new mesh
+    if (strstr(line, "o ") != NULL) {
+      if (first_mesh) {
+        char mesh_name[256];
+        sscanf(line, "o %s", mesh_name);
+        strncpy(meshes[meshes_count].name, mesh_name, sizeof(mesh_name)-1);
+        
+        first_mesh = 0;
+      } else {
+        meshes[meshes_count].vertices = vertices;
+        meshes[meshes_count].indices = indices;
+        meshes[meshes_count].num_vertices = total_vertices;
+        meshes[meshes_count].num_indices = icount;
+        meshes_count++;
+
+        new_mesh();
+      }
     }
 
     // new vertex
@@ -174,19 +216,42 @@ int importer_load_obj(const char *filename, vertex* out_vertices[], GLuint* out_
       push_index(vh, v2);
       push_index(vh, v3);
     }
+
+    // load mtl
+    if (strstr(line, "mtllib ") != NULL) {
+      char mtl_name[128];
+      sscanf(line, "mtllib %s\n", mtl_name);
+      char mtl_path[128] = "assets/";
+      strncat(mtl_path, mtl_name, 128);
+      materials = import_mtl(mtl_path);
+    }
+
+    // use mtl
+    if (strstr(line, "usemtl ") != NULL) {
+      char mtl_name[128];
+      sscanf(line, "usemtl %s\n", mtl_name);
+      printf("MAT %s\n", ((material*)dict_search(materials, mtl_name))->name);
+      meshes[meshes_count].mat = *((material*)dict_search(materials, mtl_name));
+    }
   }
 
+  // push last mesh
+  meshes[meshes_count].vertices = vertices;
+  meshes[meshes_count].indices = indices;
+  meshes[meshes_count].num_vertices = total_vertices;
+  meshes[meshes_count].num_indices = icount;
+  meshes_count++;
+
   // return values
-  *out_vertices = vertices;
-  *out_indices = indices;
-  *indices_size = icount;
-  *vertices_size = total_vertices;
+  *out_meshes = meshes;
+  *out_meshes_size = meshes_count;
 
   fclose(file);
-  
+
   vertex_hashtable_free(vh);
   free(temp_vertices);
   free(temp_uvs);
+  free(temp_normals);
 
   return 1;
 }

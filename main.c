@@ -30,10 +30,9 @@ int main()
   shader_compile("triangle.vs", "triangle.fs", &shader_id);
 
   // import obj
-  vertex* vertices;
-  GLuint* indices;
-  GLuint indices_size, vertices_size;
-  importer_load_obj("./assets/crate.obj", &vertices, &indices, &vertices_size, &indices_size);
+  mesh* meshes;
+  int num_meshes;
+  importer_load_obj("./assets/tower.obj", &meshes, &num_meshes);
 
   // init object list
   object* objects[1];
@@ -41,15 +40,13 @@ int main()
 
   // set position
   t1.position[0] = 0.0f;
-  t1.position[1] = 0.0f;
+  t1.position[1] = -2.0f;
   t1.position[2] = -9.0f;
 
   // set geometry data
-  t1.vertices = vertices;
-  t1.indices = indices;
-  t1.num_vertices = vertices_size;
-  t1.num_indices = indices_size;
-
+  t1.meshes = meshes;
+  t1.num_meshes = num_meshes;
+  
   // init rotation quaternion
   quat_identity(t1.rotation);
 
@@ -82,8 +79,7 @@ int main()
   // cleanup
   renderer_cleanup();
 
-  free(vertices);
-  free(indices);
+  free(meshes);
 
   return 0;
 }
