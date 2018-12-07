@@ -4,6 +4,7 @@
 #include "engine.h"
 
 typedef struct {
+    int capacity;
     int size;
     char** keys;
     void** values;

@@ -12,30 +12,44 @@ static unsigned long hash(const char str[256])
   return hash;
 }
 
-dict* dict_new(int size) {
+dict* dict_new(int capacity) {
   dict *h = calloc(1, sizeof(dict));
-  h->keys = calloc(size, sizeof(char*));
-  for (int i = 0; i < size; i++) {
+  h->keys = calloc(capacity, sizeof(char*));
+  for (int i = 0; i < capacity; i++) {
     h->keys[i] = NULL;
   }
-  h->values = calloc(size, sizeof(void*));
-  h->size = size;
+  h->values = calloc(capacity, sizeof(void*));
+  h->capacity = capacity;
+  h->size = 0;
   return h;
 }
 
 int dict_index(dict* h, const char key[256]) {
-  unsigned int i = hash(key) % h->size;
+  unsigned int i = hash(key) % h->capacity;
   while (h->keys[i] != NULL && strcmp(h->keys[i], key) != 0) {
-    i = (i + 1) % h->size;
+    i = (i + 1) % h->capacity;
   }
   return i;
 }
 
 void dict_insert(dict* h, const char key[256], void* value) {
+  // resize
+  if (h->size >= h->capacity) {
+    int new_capacity = (int)(h->capacity * 1.5f);
+    h->keys = realloc(h->keys, new_capacity * sizeof(char*));
+    for (int i = h->capacity; i < new_capacity; i++) {
+      h->keys[i] = NULL; 
+    }
+    h->values = realloc(h->values, new_capacity * sizeof(void*));
+    h->capacity = new_capacity;
+  }
+
+  // insert element
   int i = dict_index(h, key);
   h->keys[i] = malloc(256 * sizeof(char));
   strncpy(h->keys[i], key, 256 * sizeof(char));
   h->values[i] = value;
+  h->size++;
 }
 
 void* dict_search(dict* h, const char key[256]) {
@@ -44,7 +58,7 @@ void* dict_search(dict* h, const char key[256]) {
 }
 
 void dict_free(dict* h) {
-  for (int i = 0; i < h->size; i++) {
+  for (int i = 0; i < h->capacity; i++) {
     free(h->keys[i]);
     free(h->values[i]);
   }

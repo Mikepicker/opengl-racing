@@ -27,17 +27,18 @@ static dict* import_mtl(const char* filename) {
   material* current_mat = NULL;
   int first = 1;
   while (fgets(line, sizeof(line), file)) {
-
     // new material
-    if (strstr(line, "newmtl") != NULL) {
+    if (strstr(line, "newmtl ") != NULL) {
       if (!first) {
         dict_insert(materials, current_mat->name, current_mat);
+      } else {
+        first = 0;
       }
       current_mat = (material*)malloc(sizeof(material));
       sscanf(line, "newmtl %s", current_mat->name);
     }
     // texture path
-    else if (strstr(line, "map_Kd") != NULL) {
+    else if (strstr(line, "map_Kd ") != NULL) {
       sscanf(line, "map_Kd %s", current_mat->texture_path);
     }
   }
@@ -45,7 +46,6 @@ static dict* import_mtl(const char* filename) {
   if (current_mat != NULL) {
     dict_insert(materials, current_mat->name, current_mat);
   }
-  printf("MAT1 %s %s\n", ((material*)dict_search(materials, current_mat->name))->name, ((material*)dict_search(materials, "Material"))->name);
 
   fclose(file);
 
@@ -230,7 +230,6 @@ int importer_load_obj(const char* filename, mesh* out_meshes[], int* out_meshes_
     if (strstr(line, "usemtl ") != NULL) {
       char mtl_name[128];
       sscanf(line, "usemtl %s\n", mtl_name);
-      printf("MAT %s\n", ((material*)dict_search(materials, mtl_name))->name);
       meshes[meshes_count].mat = *((material*)dict_search(materials, mtl_name));
     }
   }
@@ -252,6 +251,7 @@ int importer_load_obj(const char* filename, mesh* out_meshes[], int* out_meshes_
   free(temp_vertices);
   free(temp_uvs);
   free(temp_normals);
+  dict_free(materials);
 
   return 1;
 }
