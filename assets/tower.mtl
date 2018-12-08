@@ -10,4 +10,4 @@ Ke 1.347200 1.347200 1.347200
 Ni 1.000000
 d 0.000000
 illum 2
-map_Kd /home/mike/gamedev/cg/res/models/tower/tower_diffuse.tga
+map_Kd tower.tga

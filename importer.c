@@ -39,7 +39,12 @@ static dict* import_mtl(const char* filename) {
     }
     // texture path
     else if (strstr(line, "map_Kd ") != NULL) {
-      sscanf(line, "map_Kd %s", current_mat->texture_path);
+      printf("ASDADDASDASD\n");
+      strncpy(current_mat->texture_path, ASSETS_PATH, 256);
+      char tex_path[256];
+      sscanf(line, "map_Kd %s", tex_path);
+      strncat(current_mat->texture_path, tex_path, strlen(tex_path));
+      printf("TEEEX %s\n", current_mat->texture_path);
     }
   }
 
@@ -56,24 +61,24 @@ static void push_index(dict* vh, const char* vkey) {
   // search face in the hashmap
   int* found = dict_search(vh, vkey);
 
-  // get vertex indices (vertex, texcoords, normals)
-  int v_index, vt_index, vn_index;
-  sscanf(vkey, "%d/%d/%d", &v_index, &vt_index, &vn_index);
-  v_index--; vt_index--; vn_index--;
-
   // get index from hashtable (or insert it if not present)
   if (found != NULL) {
     indices[icount] = *found;
   } else {
+    // get vertex indices (vertex, texcoords, normals)
+    int v_index, vt_index, vn_index = -1;
+    sscanf(vkey, "%d/%d/%d", &v_index, &vt_index, &vn_index);
+    v_index--; vt_index--; vn_index--;
+
     // push vertex
     vertices[total_vertices].x = temp_vertices[v_index][0];
     vertices[total_vertices].y = temp_vertices[v_index][1];
     vertices[total_vertices].z = temp_vertices[v_index][2];
-    vertices[total_vertices].u = temp_uvs[vt_index][0];
-    vertices[total_vertices].v = temp_uvs[vt_index][1];
-    vertices[total_vertices].nx = temp_normals[vn_index][0];
-    vertices[total_vertices].ny = temp_normals[vn_index][1];
-    vertices[total_vertices].nz = temp_normals[vn_index][2];
+    vertices[total_vertices].u = vt_index >= 0 ? temp_uvs[vt_index][0] : 0.0f;
+    vertices[total_vertices].v = vt_index >= 0 ? temp_uvs[vt_index][1] : 0.0f;
+    vertices[total_vertices].nx = vn_index >= 0 ? temp_normals[vn_index][0] : 0.0f;
+    vertices[total_vertices].ny = vn_index >= 0 ? temp_normals[vn_index][1] : 0.0f;
+    vertices[total_vertices].nz = vn_index >= 0 ? temp_normals[vn_index][2] : 0.0f;
     
     // update indices
     int* index = malloc(sizeof(int));
