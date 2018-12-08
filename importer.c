@@ -52,9 +52,9 @@ static dict* import_mtl(const char* filename) {
   return materials;
 }
 
-static void push_index(vertex_hashtable* vh, const char* vkey) {
+static void push_index(dict* vh, const char* vkey) {
   // search face in the hashmap
-  vertex_item* found = vertex_hashtable_search(vh, vkey);
+  int* found = dict_search(vh, vkey);
 
   // get vertex indices (vertex, texcoords, normals)
   int v_index, vt_index, vn_index;
@@ -63,7 +63,7 @@ static void push_index(vertex_hashtable* vh, const char* vkey) {
 
   // get index from hashtable (or insert it if not present)
   if (found != NULL) {
-    indices[icount] = found->data.index;
+    indices[icount] = *found;
   } else {
     // push vertex
     vertices[total_vertices].x = temp_vertices[v_index][0];
@@ -76,8 +76,9 @@ static void push_index(vertex_hashtable* vh, const char* vkey) {
     vertices[total_vertices].nz = temp_normals[vn_index][2];
     
     // update indices
-    vertex_indexed vi = { total_vertices, vertices[total_vertices] };
-    vertex_hashtable_insert(vh, vkey, vi);
+    int* index = malloc(sizeof(int));
+    *index = total_vertices;
+    dict_insert(vh, vkey, index);
     indices[icount] = total_vertices;
 
     total_vertices++;
@@ -132,7 +133,7 @@ int importer_load_obj(const char* filename, mesh* out_meshes[], int* out_meshes_
   meshes = malloc(meshes_size * sizeof(mesh));
 
   // init hastable (it will be resized if needed)
-  vertex_hashtable* vh = vertex_hashtable_new(INIT_SIZE);
+  dict* vh = dict_new(INIT_SIZE);
 
   // materials dictionary
   dict* materials;
@@ -140,11 +141,10 @@ int importer_load_obj(const char* filename, mesh* out_meshes[], int* out_meshes_
   int first_mesh = 1;
   while (fgets(line, sizeof(line), file)) {
 
-    // realloc indices list, vertex hashmap
+    // realloc indices list
     if (icount + 3 >= isize) {
       isize = isize * 2;
       indices = realloc(indices, isize * sizeof(GLuint));
-      vertex_hashtable_resize(vh, isize);
     }
 
     // new mesh
@@ -247,7 +247,7 @@ int importer_load_obj(const char* filename, mesh* out_meshes[], int* out_meshes_
 
   fclose(file);
 
-  vertex_hashtable_free(vh);
+  dict_free(vh);
   free(temp_vertices);
   free(temp_uvs);
   free(temp_normals);

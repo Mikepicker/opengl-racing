@@ -33,6 +33,13 @@ int dict_index(dict* h, const char key[256]) {
 }
 
 void dict_insert(dict* h, const char key[256], void* value) {
+  // insert element
+  int i = dict_index(h, key);
+  h->keys[i] = malloc(256 * sizeof(char));
+  strncpy(h->keys[i], key, 256 * sizeof(char));
+  h->values[i] = value;
+  h->size++;
+
   // resize
   if (h->size >= h->capacity) {
     int new_capacity = (int)(h->capacity * 1.5f);
@@ -43,13 +50,6 @@ void dict_insert(dict* h, const char key[256], void* value) {
     h->values = realloc(h->values, new_capacity * sizeof(void*));
     h->capacity = new_capacity;
   }
-
-  // insert element
-  int i = dict_index(h, key);
-  h->keys[i] = malloc(256 * sizeof(char));
-  strncpy(h->keys[i], key, 256 * sizeof(char));
-  h->values[i] = value;
-  h->size++;
 }
 
 void* dict_search(dict* h, const char key[256]) {
