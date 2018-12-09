@@ -118,13 +118,15 @@ void renderer_add_object(object* o) {
 }
 
 void renderer_render_objects(object* objects[], int objects_length, GLFWwindow* window, GLuint shader_id) {
-  GLint m_location, v_location, p_location;
+  GLint m_location, v_location, p_location, time;
   float ratio;
   int width, height;
 
+  // uniforms
   m_location = glGetUniformLocation(shader_id, "M");
   v_location = glGetUniformLocation(shader_id, "V");
   p_location = glGetUniformLocation(shader_id, "P");
+  time = glGetUniformLocation(shader_id, "time");
   glUseProgram(shader_id);
 
   glClearColor(183.0f / 255.0f, 220.0f / 255.0f, 244.0f / 255.0f, 1.0f);
@@ -137,6 +139,10 @@ void renderer_render_objects(object* objects[], int objects_length, GLFWwindow* 
   for (int i = 0; i < objects_length; i++) {
     object* o = objects[i];
     mat4x4 m, p, v;
+
+    // scale
+    mat4x4_identity(m);
+    mat4x4_scale(m, m, o->scale);
 
     // translate
     mat4x4_translate(m, o->position[0], o->position[1], o->position[2]);
@@ -162,6 +168,9 @@ void renderer_render_objects(object* objects[], int objects_length, GLFWwindow* 
     glUniformMatrix4fv(m_location, 1, GL_FALSE, (const GLfloat*) m);
     glUniformMatrix4fv(v_location, 1, GL_FALSE, (const GLfloat*) v);
     glUniformMatrix4fv(p_location, 1, GL_FALSE, (const GLfloat*) p);
+
+    // pass time to shader
+    glUniform1f(time, (float)glfwGetTime());
 
     for (int i = 0; i < o->num_meshes; i++) {
       mesh* mesh = &o->meshes[i];
