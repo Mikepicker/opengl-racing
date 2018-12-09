@@ -117,25 +117,46 @@ void renderer_add_object(object* o) {
   }
 }
 
-void renderer_render_objects(object* objects[], int objects_length, GLFWwindow* window, GLuint shader_id) {
+void renderer_render_objects(object* objects[], int objects_length, light* lights[], int lights_length, GLuint shader_id) {
   GLint m_location, v_location, p_location, time;
+  GLint uniform_light_pos, uniform_camera_pos;
   float ratio;
   int width, height;
+
+  glUseProgram(shader_id);
 
   // uniforms
   m_location = glGetUniformLocation(shader_id, "M");
   v_location = glGetUniformLocation(shader_id, "V");
   p_location = glGetUniformLocation(shader_id, "P");
   time = glGetUniformLocation(shader_id, "time");
-  glUseProgram(shader_id);
 
+  // set bg color
   glClearColor(183.0f / 255.0f, 220.0f / 255.0f, 244.0f / 255.0f, 1.0f);
 
+  // handle window resize
   glfwGetFramebufferSize(window, &width, &height);
   ratio = width / (float)height;
   glViewport(0, 0, width, height);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+  // camera position
+  vec3 camera_pos = {0.0f, 0.0f, 0.0f};
+  uniform_camera_pos = glGetUniformLocation(shader_id, "cameraPos");
+  glUniform3fv(uniform_camera_pos, 1, (const GLfloat*) camera_pos);
+  
+  // process lights
+  glUniform1i(glGetUniformLocation(shader_id, "lightsNr"), lights_length);
+  for (int i = 0; i < lights_length; i++) {
+    char uniform_light_pos[256];
+    sprintf(uniform_light_pos, "lightsPos[%d]", i);
+    char uniform_light_color[256];
+    sprintf(uniform_light_color, "lightsColors[%d]", i);
+    glUniform3fv(glGetUniformLocation(shader_id, uniform_light_pos), 1, (const GLfloat*) lights[i]->position);
+    glUniform3fv(glGetUniformLocation(shader_id, uniform_light_color), 1, (const GLfloat*) lights[i]->color);
+  }
+
+  // process objects
   for (int i = 0; i < objects_length; i++) {
     object* o = objects[i];
     mat4x4 m, p, v;

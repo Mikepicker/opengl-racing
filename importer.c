@@ -39,12 +39,10 @@ static dict* import_mtl(const char* filename) {
     }
     // texture path
     else if (strstr(line, "map_Kd ") != NULL) {
-      printf("ASDADDASDASD\n");
       strncpy(current_mat->texture_path, ASSETS_PATH, 256);
       char tex_path[256];
       sscanf(line, "map_Kd %s", tex_path);
       strncat(current_mat->texture_path, tex_path, strlen(tex_path));
-      printf("TEEEX %s\n", current_mat->texture_path);
     }
   }
 

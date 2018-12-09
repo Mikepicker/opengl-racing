@@ -26,13 +26,15 @@ int main()
     return -1;
   }
 
-  // Compile shaders
-  shader_compile("triangle.vs", "triangle.fs", &shader_id);
-
   // import obj
   mesh* meshes;
   int num_meshes;
   importer_load_obj("./assets/tower.obj", &meshes, &num_meshes);
+
+  // Compile shaders
+  shader_compile("shaders/lighting.vs", "shaders/lighting.fs", &shader_id);
+
+  /* objects */
 
   // init object list
   object* objects[1];
@@ -42,6 +44,9 @@ int main()
   t1.position[0] = 0.0f;
   t1.position[1] = -2.0f;
   t1.position[2] = -9.0f;
+
+  // set scale
+  t1.scale = 1.0f;
 
   // set geometry data
   t1.meshes = meshes;
@@ -53,7 +58,29 @@ int main()
   // add the object to the renderer
   renderer_add_object(&t1);
 
+  // add object to objects list
   objects[0] = &t1;
+
+  /* lights */
+  light* lights[2];
+  light l1;
+  l1.position[0] = 0.0f;
+  l1.position[1] = 1.0f;
+  l1.position[2] = 0.0f;
+  l1.color[0] = 1.0f;
+  l1.color[1] = 0.0f;
+  l1.color[2] = 0.0f;
+
+  light l2;
+  l2.position[0] = 0.0f;
+  l2.position[1] = 1.0f;
+  l2.position[2] = 0.0f;
+  l2.color[0] = 0.0f;
+  l2.color[1] = 0.0f;
+  l2.color[2] = 1.0f;
+
+  lights[0] = &l1;
+  lights[1] = &l2;
 
   int macMoved = 0;
   while (!renderer_should_close()) {
@@ -61,10 +88,13 @@ int main()
     // render
     vec3 y_axis = {0.0f, 1.0f, 0.0f};
     quat_rotate(t1.rotation, (float)glfwGetTime(), y_axis);
+    // t1.scale = 1.0f + sinf(t1.scale + (float)glfwGetTime());
     // t1.position[1] = sinf((float)glfwGetTime());
     // quat_rotate(t2.rotation, (float)glfwGetTime(), z_axis);
 
-    renderer_render_objects(objects, 1, window, shader_id);
+    l1.position[0] = cosf((float)glfwGetTime() * 10);
+    l2.position[0] = 100 * sinf((float)glfwGetTime() * 10);
+    renderer_render_objects(objects, 1, lights, 2, shader_id);
     #ifdef __APPLE__ // TODO: remove this workaround with glfw 3.3
       if (macMoved == 0)
       {
