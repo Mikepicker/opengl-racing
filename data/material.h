@@ -6,7 +6,8 @@
 typedef struct {
   char name[256];
   char texture_path[256]; 
-  vec3 ambient;
+  vec3 diffuse;
+  vec3 specular;
 } material;
 
 #endif

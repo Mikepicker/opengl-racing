@@ -1,12 +1,14 @@
 #include "importer.h"
 
-const int INIT_SIZE = 256;
+const int INIT_SIZE = 256 * 10000;
 const char* ASSETS_PATH = "assets/";
 
 vec3* temp_vertices;
 vec2* temp_uvs;
 vec3* temp_normals;
 GLuint* indices;
+
+dict* vh;
 
 int vsize, vcount;
 int vtsize, vtcount;
@@ -35,6 +37,7 @@ static dict* import_mtl(const char* filename) {
         first = 0;
       }
       current_mat = (material*)malloc(sizeof(material));
+      strcpy(current_mat->texture_path, "\0");
       sscanf(line, "newmtl %s", current_mat->name);
     }
     // texture path
@@ -43,6 +46,14 @@ static dict* import_mtl(const char* filename) {
       char tex_path[256];
       sscanf(line, "map_Kd %s", tex_path);
       strncat(current_mat->texture_path, tex_path, strlen(tex_path));
+    }
+    // diffuse
+    else if (strstr(line, "Kd ") != NULL) {
+      sscanf(line, "Kd %f %f %f\n", &current_mat->diffuse[0], &current_mat->diffuse[1], &current_mat->diffuse[2]);
+    }
+    // specular
+    else if (strstr(line, "Ks ") != NULL) {
+      sscanf(line, "Ks %f %f %f\n", &current_mat->specular[0], &current_mat->specular[1], &current_mat->specular[2]);
     }
   }
 
@@ -55,7 +66,7 @@ static dict* import_mtl(const char* filename) {
   return materials;
 }
 
-static void push_index(dict* vh, const char* vkey) {
+static void push_index(const char* vkey) {
   // search face in the hashmap
   int* found = dict_search(vh, vkey);
 
@@ -65,7 +76,12 @@ static void push_index(dict* vh, const char* vkey) {
   } else {
     // get vertex indices (vertex, texcoords, normals)
     int v_index, vt_index, vn_index = -1;
-    sscanf(vkey, "%d/%d/%d", &v_index, &vt_index, &vn_index);
+    int matches = sscanf(vkey, "%d/%d/%d", &v_index, &vt_index, &vn_index);
+    if (matches != 3) {
+      v_index = vt_index = vn_index = -1;
+      matches = sscanf(vkey, "%d//%d", &v_index, &vn_index);
+    }
+
     v_index--; vt_index--; vn_index--;
 
     // push vertex
@@ -97,6 +113,40 @@ static void push_index(dict* vh, const char* vkey) {
 
 static void new_mesh() {
   // temp vertices
+  /*vsize = INIT_SIZE;
+  vcount = 0;
+  temp_vertices = malloc(vsize * sizeof(vec3));
+
+  // temp uvs
+  vtsize = INIT_SIZE;
+  vtcount = 0;
+  temp_uvs = malloc(vtsize * sizeof(vec2));
+  
+  // temp normals
+  vnsize = INIT_SIZE;
+  vncount = 0;
+  temp_normals = malloc(vnsize * sizeof(vec3)); */
+
+  // temp indices
+  isize = INIT_SIZE;
+  icount = 0;
+  indices = malloc(isize * sizeof(GLuint));
+
+  // vertices to return
+  total_vertices_size = INIT_SIZE;
+  total_vertices = 0;
+  vertices = malloc(total_vertices_size * sizeof(vertex));
+
+  // init hastable (it will be resized if needed)
+  //vh = dict_new(INIT_SIZE);
+}
+
+int importer_load_obj(const char* filename, mesh* out_meshes[], int* out_meshes_size)
+{
+  /* parse vertices */
+  FILE* file = fopen(filename, "r");
+  char line[256];
+
   vsize = INIT_SIZE;
   vcount = 0;
   temp_vertices = malloc(vsize * sizeof(vec3));
@@ -111,22 +161,7 @@ static void new_mesh() {
   vncount = 0;
   temp_normals = malloc(vnsize * sizeof(vec3));
 
-  // temp indices
-  isize = INIT_SIZE;
-  icount = 0;
-  indices = malloc(isize * sizeof(GLuint));
-
-  // vertices to return
-  total_vertices_size = INIT_SIZE;
-  total_vertices = 0;
-  vertices = malloc(total_vertices_size * sizeof(vertex));
-}
-
-int importer_load_obj(const char* filename, mesh* out_meshes[], int* out_meshes_size)
-{
-  /* parse vertices */
-  FILE* file = fopen(filename, "r");
-  char line[256];
+  vh = dict_new(INIT_SIZE);
 
   new_mesh();
 
@@ -134,9 +169,6 @@ int importer_load_obj(const char* filename, mesh* out_meshes[], int* out_meshes_
   meshes_count = 0;
   meshes_size = INIT_SIZE;
   meshes = malloc(meshes_size * sizeof(mesh));
-
-  // init hastable (it will be resized if needed)
-  dict* vh = dict_new(INIT_SIZE);
 
   // materials dictionary
   dict* materials;
@@ -152,13 +184,7 @@ int importer_load_obj(const char* filename, mesh* out_meshes[], int* out_meshes_
 
     // new mesh
     if (strstr(line, "o ") != NULL) {
-      if (first_mesh) {
-        char mesh_name[256];
-        sscanf(line, "o %s", mesh_name);
-        strncpy(meshes[meshes_count].name, mesh_name, sizeof(mesh_name)-1);
-        
-        first_mesh = 0;
-      } else {
+      if (!first_mesh) {
         meshes[meshes_count].vertices = vertices;
         meshes[meshes_count].indices = indices;
         meshes[meshes_count].num_vertices = total_vertices;
@@ -166,7 +192,14 @@ int importer_load_obj(const char* filename, mesh* out_meshes[], int* out_meshes_
         meshes_count++;
 
         new_mesh();
+      } else {
+        first_mesh = 0;
       }
+
+      char mesh_name[256];
+      sscanf(line, "o %s", mesh_name);
+      printf("MESH %s\n", mesh_name);
+      strncpy(meshes[meshes_count].name, mesh_name, 256);
     }
 
     // new vertex
@@ -215,16 +248,18 @@ int importer_load_obj(const char* filename, mesh* out_meshes[], int* out_meshes_
       sscanf(line, "f %s %s %s", v1, v2, v3);
 
       // update indices
-      push_index(vh, v1);
-      push_index(vh, v2);
-      push_index(vh, v3);
+      push_index(v1);
+      push_index(v2);
+      push_index(v3);
     }
 
     // load mtl
     if (strstr(line, "mtllib ") != NULL) {
       char mtl_name[128];
       sscanf(line, "mtllib %s\n", mtl_name);
-      char mtl_path[128] = "assets/";
+      char mtl_path[128];
+      strncpy(mtl_path, ASSETS_PATH, 128);
+      printf("TEST %s\n", mtl_path);
       strncat(mtl_path, mtl_name, 128);
       materials = import_mtl(mtl_path);
     }

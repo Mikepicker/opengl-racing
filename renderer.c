@@ -37,8 +37,8 @@ unsigned int load_image(char* filename) {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
   }
-  else {
-    printf("Error loading texture\n");
+  else if (strlen(filename) > 0) {
+    printf("Error loading texture: %s\n", filename);
   }
   stbi_image_free(data);
   return texture;
@@ -119,17 +119,11 @@ void renderer_add_object(object* o) {
 
 void renderer_render_objects(object* objects[], int objects_length, light* lights[], int lights_length, GLuint shader_id) {
   GLint m_location, v_location, p_location, time;
-  GLint uniform_light_pos, uniform_camera_pos;
+  GLint uniform_diffuse, uniform_specular;
   float ratio;
   int width, height;
 
   glUseProgram(shader_id);
-
-  // uniforms
-  m_location = glGetUniformLocation(shader_id, "M");
-  v_location = glGetUniformLocation(shader_id, "V");
-  p_location = glGetUniformLocation(shader_id, "P");
-  time = glGetUniformLocation(shader_id, "time");
 
   // set bg color
   glClearColor(183.0f / 255.0f, 220.0f / 255.0f, 244.0f / 255.0f, 1.0f);
@@ -140,9 +134,22 @@ void renderer_render_objects(object* objects[], int objects_length, light* light
   glViewport(0, 0, width, height);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+
+  // matrices uniforms
+  m_location = glGetUniformLocation(shader_id, "M");
+  v_location = glGetUniformLocation(shader_id, "V");
+  p_location = glGetUniformLocation(shader_id, "P");
+
+  // time uniform
+  time = glGetUniformLocation(shader_id, "time");
+
+  // material uniforms
+  uniform_diffuse = glGetUniformLocation(shader_id, "material.diffuse");
+  uniform_specular = glGetUniformLocation(shader_id, "material.specular");
+
   // camera position
   vec3 camera_pos = {0.0f, 0.0f, 0.0f};
-  uniform_camera_pos = glGetUniformLocation(shader_id, "cameraPos");
+  GLint uniform_camera_pos = glGetUniformLocation(shader_id, "cameraPos");
   glUniform3fv(uniform_camera_pos, 1, (const GLfloat*) camera_pos);
   
   // process lights
@@ -195,6 +202,11 @@ void renderer_render_objects(object* objects[], int objects_length, light* light
 
     for (int i = 0; i < o->num_meshes; i++) {
       mesh* mesh = &o->meshes[i];
+
+      // pass material
+      glUniform3fv(uniform_diffuse, 1, mesh->mat.diffuse);
+      glUniform3fv(uniform_specular, 1, mesh->mat.specular);
+
       // bind texture
       glUniform1i(glGetUniformLocation(mesh->texture_id, "texture1"), 0);
       glActiveTexture(GL_TEXTURE0);

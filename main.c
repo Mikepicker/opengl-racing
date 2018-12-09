@@ -29,7 +29,7 @@ int main()
   // import obj
   mesh* meshes;
   int num_meshes;
-  importer_load_obj("./assets/tower.obj", &meshes, &num_meshes);
+  importer_load_obj("assets/tower.obj", &meshes, &num_meshes);
 
   // Compile shaders
   shader_compile("shaders/lighting.vs", "shaders/lighting.fs", &shader_id);

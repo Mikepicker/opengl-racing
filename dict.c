@@ -15,10 +15,11 @@ static unsigned long hash(const char str[256])
 dict* dict_new(int capacity) {
   dict *h = calloc(1, sizeof(dict));
   h->keys = calloc(capacity, sizeof(char*));
+  h->values = calloc(capacity, sizeof(void*));
   for (int i = 0; i < capacity; i++) {
     h->keys[i] = NULL;
+    h->values[i] = NULL;
   }
-  h->values = calloc(capacity, sizeof(void*));
   h->capacity = capacity;
   h->size = 0;
   return h;
@@ -44,10 +45,11 @@ void dict_insert(dict* h, const char key[256], void* value) {
   if (h->size >= h->capacity) {
     int new_capacity = (int)(h->capacity * 1.5f);
     h->keys = realloc(h->keys, new_capacity * sizeof(char*));
+    h->values = realloc(h->values, new_capacity * sizeof(void*));
     for (int i = h->capacity; i < new_capacity; i++) {
       h->keys[i] = NULL; 
+      h->values[i] = NULL;
     }
-    h->values = realloc(h->values, new_capacity * sizeof(void*));
     h->capacity = new_capacity;
   }
 }

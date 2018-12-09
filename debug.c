@@ -6,3 +6,8 @@ void print4x4Mat(mat4x4 m) {
   }
   printf("------------\n");
 }
+
+void print_vec3(vec3 v) {
+  printf("%f %f %f\n", v[0], v[1], v[2]);
+  printf("------------\n");
+}
