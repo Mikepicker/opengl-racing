@@ -2,7 +2,11 @@
 #include "renderer.h"
 
 unsigned int load_image(char* filename) {
-  unsigned int texture = -1;
+  int texture = -1;
+
+  if (strlen(filename) == 0) {
+    return 0;
+  }
 
   glGenTextures(1, &texture);
   glBindTexture(GL_TEXTURE_2D, texture);
@@ -37,9 +41,10 @@ unsigned int load_image(char* filename) {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
   }
-  else if (strlen(filename) > 0) {
+  else {
     printf("Error loading texture: %s\n", filename);
   }
+  
   stbi_image_free(data);
   return texture;
 }
@@ -134,7 +139,6 @@ void renderer_render_objects(object* objects[], int objects_length, light* light
   glViewport(0, 0, width, height);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-
   // matrices uniforms
   m_location = glGetUniformLocation(shader_id, "M");
   v_location = glGetUniformLocation(shader_id, "V");
@@ -208,9 +212,14 @@ void renderer_render_objects(object* objects[], int objects_length, light* light
       glUniform3fv(uniform_specular, 1, mesh->mat.specular);
 
       // bind texture
-      glUniform1i(glGetUniformLocation(mesh->texture_id, "texture1"), 0);
-      glActiveTexture(GL_TEXTURE0);
-      glBindTexture(GL_TEXTURE_2D, mesh->texture_id);
+      if (strlen(mesh->mat.texture_path) > 0) {
+        glUniform1i(glGetUniformLocation(mesh->texture_id, "texture1"), 0);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, mesh->texture_id);
+        glUniform1i(glGetUniformLocation(shader_id, "hasTexture"), 1);
+      } else {
+        glUniform1i(glGetUniformLocation(shader_id, "hasTexture"), 0);
+      }
 
       // render the triangle
       glBindVertexArray(mesh->vao);

@@ -20,6 +20,4 @@ typedef struct {
   GLuint texture_id;
 } mesh;
 
-void mesh_free(mesh* m);
-
 #endif
