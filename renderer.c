@@ -2,7 +2,7 @@
 #include "renderer.h"
 
 unsigned int load_image(char* filename) {
-  int texture = -1;
+  GLuint texture = -1;
 
   if (strlen(filename) == 0) {
     return 0;
@@ -44,7 +44,7 @@ unsigned int load_image(char* filename) {
   else {
     printf("Error loading texture: %s\n", filename);
   }
-  
+
   stbi_image_free(data);
   return texture;
 }
@@ -155,7 +155,7 @@ void renderer_render_objects(object* objects[], int objects_length, light* light
   vec3 camera_pos = {0.0f, 0.0f, 0.0f};
   GLint uniform_camera_pos = glGetUniformLocation(shader_id, "cameraPos");
   glUniform3fv(uniform_camera_pos, 1, (const GLfloat*) camera_pos);
-  
+
   // process lights
   glUniform1i(glGetUniformLocation(shader_id, "lightsNr"), lights_length);
   for (int i = 0; i < lights_length; i++) {

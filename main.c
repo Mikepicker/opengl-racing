@@ -51,7 +51,7 @@ int main()
   // set geometry data
   t1.meshes = meshes;
   t1.num_meshes = num_meshes;
-  
+
   // init rotation quaternion
   quat_identity(t1.rotation);
 
@@ -109,7 +109,7 @@ int main()
   // cleanup
   renderer_cleanup();
   for (int i = 0; i < num_meshes; i++) {
-    mesh_free(&meshes[i]);
+    // mesh_free(&meshes[i]);
   }
   free(meshes);
 
