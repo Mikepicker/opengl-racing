@@ -7,21 +7,99 @@ const GLuint SCREEN_HEIGHT = 600;
 GLuint shader_id;
 char* vertexShader, fragmentShader;
 
-// Mouse
-float lastX;
-float lastY;
-bool firstMouse;
+float delta_time = 0.0f; // time between current frame and last frame
+float last_frame = 0.0f;
+float camera_speed = 250.0f;
 
-static void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods)
+// Camera
+camera_obj camera = {
+  .pos = {0.0f, 0.0f, 0.3f},
+  .up = {0.0f, 1.0f, 0.0f},
+  .front = {0.0f, 0.0f, -1.0f}
+};
+
+// Mouse
+int first_mouse = 1;
+float yaw = -90.0f;
+float pitch = 0.0f;
+float mouse_last_x = SCREEN_WIDTH / 2.0;
+float mouse_last_y = SCREEN_HEIGHT / 2.0;
+float fov = 45.0f;
+float sensitivity = 0.01f; // change this value to your liking
+
+static void key_callback(GLFWwindow * window, int key, int scancode, int action, int mods)
 {
+  float camera_delta = camera_speed * delta_time;
   if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
     glfwSetWindowShouldClose(window, GLFW_TRUE);
+  if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
+    // camera.pos[2] -= camera_delta;
+    vec3 vec3_scaled;
+    vec3_scale(vec3_scaled, camera.front, camera_delta);
+    vec3_add(camera.pos, camera.pos, vec3_scaled);
+  }
+  if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
+    vec3 vec3_temp;
+    vec3_scale(vec3_temp, camera.front, camera_delta);
+    vec3_sub(camera.pos, camera.pos, vec3_temp);
+  }
+  if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
+    vec3 vec3_crossed, vec3_scaled, vec3_normalized;
+    vec3_mul_cross(vec3_crossed, camera.front, camera.up);
+    vec3_norm(vec3_normalized, vec3_crossed);
+    vec3_scale(vec3_scaled, vec3_normalized, camera_delta);
+    vec3_sub(camera.pos, camera.pos, vec3_scaled);
+  }
+  if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
+    vec3 vec3_crossed, vec3_scaled, vec3_normalized;
+    vec3_mul_cross(vec3_crossed, camera.front, camera.up);
+    vec3_norm(vec3_normalized, vec3_crossed);
+    vec3_scale(vec3_scaled, vec3_normalized, camera_delta);
+    vec3_add(camera.pos, camera.pos, vec3_scaled);
+  }
+}
+
+static void mouse_callback(GLFWwindow *window, double x_pos, double y_pos)
+{
+  if (first_mouse == 1) {
+    mouse_last_x = x_pos;
+    mouse_last_y = y_pos;
+    first_mouse = false;
+  }
+
+  float x_offset = x_pos - mouse_last_x;
+  float y_offset = mouse_last_y - y_pos; // reversed since y-coordinates go from bottom to top
+  mouse_last_x = x_pos;
+  mouse_last_y = y_pos;
+
+  x_offset *= sensitivity;
+  y_offset *= sensitivity;
+
+  yaw += x_offset;
+  pitch += y_offset;
+
+  // make sure that when pitch is out of bounds, screen doesn't get flipped
+  if (pitch > 89.0f)
+    pitch = 89.0f;
+  if (pitch < -89.0f)
+    pitch = -89.0f;
+
+  /* vec3 front = {
+    cosf(yaw) * cosf(pitch),
+    sinf(pitch),
+    sinf(yaw) * cosf(pitch)
+  };
+  vec3_norm(front, front);
+  memcpy(camera.front, front, sizeof(front)); */
+  camera.front[0] = cosf(yaw) * cosf(pitch);
+  camera.front[1] = sinf(pitch);
+  camera.front[2] = sinf(yaw) * cosf(pitch);
 }
 
 int main()
 {
   // Init context
-  if (renderer_init("Microdrag", SCREEN_WIDTH, SCREEN_HEIGHT, key_callback) < 0) {
+  if (renderer_init("Microdrag", SCREEN_WIDTH, SCREEN_HEIGHT, key_callback, mouse_callback) < 0) {
     printf("Error initializing renderer!\n");
     return -1;
   }
@@ -37,7 +115,8 @@ int main()
   /* objects */
 
   // init object list
-  object* objects[1];
+  object *
+  objects[1];
   object t1;
 
   // set position
@@ -84,18 +163,23 @@ int main()
 
   int macMoved = 0;
   while (!renderer_should_close()) {
+    // per-frame time logic
+    // --------------------
+    float current_frame = glfwGetTime();
+    delta_time = current_frame - last_frame;
+    last_frame = current_frame;
 
     // render
     vec3 y_axis = {0.0f, 1.0f, 0.0f};
-    quat_rotate(t1.rotation, (float)glfwGetTime(), y_axis);
+    // quat_rotate(t1.rotation, (float)glfwGetTime(), y_axis);
     // t1.scale = 1.0f + sinf(t1.scale + (float)glfwGetTime());
     // t1.position[1] = sinf((float)glfwGetTime());
     // quat_rotate(t2.rotation, (float)glfwGetTime(), z_axis);
 
     l1.position[0] = cosf((float)glfwGetTime() * 10);
     l2.position[0] = 100 * sinf((float)glfwGetTime() * 10);
-    renderer_render_objects(objects, 1, lights, 2, shader_id);
-    #ifdef __APPLE__ // TODO: remove this workaround with glfw 3.3
+    renderer_render_objects(objects, 1, lights, 2, shader_id, &camera);
+#ifdef __APPLE__ // TODO: remove this workaround with glfw 3.3
       if (macMoved == 0)
       {
         int x, y;

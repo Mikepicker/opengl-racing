@@ -49,7 +49,7 @@ unsigned int load_image(char* filename) {
   return texture;
 }
 
-int renderer_init(char* title, int width, int height, void* key_callback) {
+int renderer_init(char* title, int width, int height, void* key_callback, void* mouse_callback) {
   glfwInit();
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
@@ -68,6 +68,7 @@ int renderer_init(char* title, int width, int height, void* key_callback) {
   }
   glfwMakeContextCurrent(window);
   glfwSetKeyCallback(window, key_callback);
+  glfwSetCursorPosCallback(window, mouse_callback);
 
   if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
   {
@@ -122,7 +123,8 @@ void renderer_add_object(object* o) {
   }
 }
 
-void renderer_render_objects(object* objects[], int objects_length, light* lights[], int lights_length, GLuint shader_id) {
+void renderer_render_objects(object *objects[], int objects_length, light *lights[], int lights_length, GLuint shader_id, camera_obj *camera)
+{
   GLint m_location, v_location, p_location, time;
   GLint uniform_diffuse, uniform_specular;
   float ratio;
@@ -186,14 +188,15 @@ void renderer_render_objects(object* objects[], int objects_length, light* light
     // rotate
     mat4x4_mul(m, m, mat_rot);
 
-    mat4x4_identity(v);
+    // mat4x4_identity(v);
 
     // compute mvp matrix
     // mat4x4_ortho(p, -ratio, ratio, -1.f, 1.f, 1.f, -1.f);
-    vec3 eye = {0.0f, 0.0f, 0.0f};
-    vec3 center = {0.0f, 0.0f, -1.0f};
-    vec3 up = {0.0f, 1.0f, 0.0f};
-    // mat4x4_look_at(v, eye, center, up);
+    vec3 cameraDirection;
+    vec3_add(cameraDirection, camera->pos, camera->front);
+    // printf("Camera Pos: (%f, %f, %f)\n", camera->pos[0], camera->pos[1], camera->pos[2]);
+    // printf("Camera Front: (%f, %f, %f)\n", camera->front[0], camera->front[1], camera->front[2]);
+    mat4x4_look_at(v, camera->pos, cameraDirection, camera->up);
     mat4x4_perspective(p, to_radians(45.0f), ratio, 0.1f, 100.0f);
 
     // pass mvp to shader

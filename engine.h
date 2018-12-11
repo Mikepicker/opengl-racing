@@ -22,4 +22,11 @@
 /* math */
 #include "linmath.h"
 
+typedef struct
+{
+  vec3 front;
+  vec3 up;
+  vec3 pos;
+} camera_obj;
+
 #endif
