@@ -33,7 +33,6 @@ static void key_callback(GLFWwindow * window, int key, int scancode, int action,
   if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
     glfwSetWindowShouldClose(window, GLFW_TRUE);
   if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
-    // camera.pos[2] -= camera_delta;
     vec3 vec3_scaled;
     vec3_scale(vec3_scaled, camera.front, camera_delta);
     vec3_add(camera.pos, camera.pos, vec3_scaled);
@@ -84,13 +83,6 @@ static void mouse_callback(GLFWwindow *window, double x_pos, double y_pos)
   if (pitch < -89.0f)
     pitch = -89.0f;
 
-  /* vec3 front = {
-    cosf(yaw) * cosf(pitch),
-    sinf(pitch),
-    sinf(yaw) * cosf(pitch)
-  };
-  vec3_norm(front, front);
-  memcpy(camera.front, front, sizeof(front)); */
   camera.front[0] = cosf(yaw) * cosf(pitch);
   camera.front[1] = sinf(pitch);
   camera.front[2] = sinf(yaw) * cosf(pitch);
