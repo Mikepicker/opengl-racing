@@ -99,7 +99,7 @@ int main()
   // import obj
   mesh* meshes;
   int num_meshes;
-  importer_load_obj("assets/tower.obj", &meshes, &num_meshes);
+  importer_load_obj("assets/racing/rail.obj", &meshes, &num_meshes);
 
   // Compile shaders
   shader_compile("shaders/lighting.vs", "shaders/lighting.fs", &shader_id);
@@ -139,8 +139,8 @@ int main()
   l1.position[1] = 1.0f;
   l1.position[2] = 0.0f;
   l1.color[0] = 1.0f;
-  l1.color[1] = 0.0f;
-  l1.color[2] = 0.0f;
+  l1.color[1] = 1.0f;
+  l1.color[2] = 1.0f;
 
   light l2;
   l2.position[0] = 0.0f;
@@ -184,9 +184,6 @@ int main()
 
   // cleanup
   renderer_cleanup();
-  for (int i = 0; i < num_meshes; i++) {
-    // mesh_free(&meshes[i]);
-  }
   free(meshes);
 
   return 0;
