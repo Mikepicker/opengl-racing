@@ -1,5 +1,5 @@
 #OBJS specifies which files to compile as part of the project
-OBJS = main.c glad.c shader.c renderer.c importer.c vertex_hashtable.c dict.c debug.c
+OBJS = game/main.c engine/glad.c engine/shader.c engine/renderer.c engine/importer.c engine/dict.c engine/debug.c
 
 #CC specifies which compiler we're using
 CC = gcc -g -std=c99 `pkg-config --cflags glfw3`
@@ -11,7 +11,7 @@ CC = gcc -g -std=c99 `pkg-config --cflags glfw3`
 #  #LINKER_FLAGS specifies the libraries we're linking against
 
 #OBJ_NAME specifies the name of our exectuable
-OBJ_NAME = microdrag
+OBJ_NAME = game/microdrag
 LINKER_FLAGS = `pkg-config --static --libs glfw3`
 
 #This is the target that compiles our executable
