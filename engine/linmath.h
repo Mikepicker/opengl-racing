@@ -57,13 +57,18 @@ static inline void vec##n##_norm(vec##n r, vec##n const v) \
 { \
 	float k = 1.f / vec##n##_len(v); \
 	vec##n##_scale(r, v, k); \
-}
+} \
+static inline void vec##n##_copy(vec##n r, vec##n const v) \
+{ \
+  for(int i=0; i<n; ++i) \
+    r[i] = v[i]; \
+} \
 
-    LINMATH_H_DEFINE_VEC(2)
-        LINMATH_H_DEFINE_VEC(3)
-            LINMATH_H_DEFINE_VEC(4)
+LINMATH_H_DEFINE_VEC(2)
+LINMATH_H_DEFINE_VEC(3)
+LINMATH_H_DEFINE_VEC(4)
 
-                static inline void vec3_mul_cross(vec3 r, vec3 const a, vec3 const b)
+static inline void vec3_mul_cross(vec3 r, vec3 const a, vec3 const b)
 {
 	r[0] = a[1]*b[2] - a[2]*b[1];
 	r[1] = a[2]*b[0] - a[0]*b[2];

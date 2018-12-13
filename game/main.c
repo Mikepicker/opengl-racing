@@ -27,6 +27,9 @@ float mouse_last_y = SCREEN_HEIGHT / 2.0;
 float fov = 45.0f;
 float sensitivity = 0.01f; // change this value to your liking
 
+// Track
+object* objects[4];
+
 static void key_callback(GLFWwindow * window, int key, int scancode, int action, int mods)
 {
   float camera_delta = camera_speed * delta_time;
@@ -88,6 +91,31 @@ static void mouse_callback(GLFWwindow *window, double x_pos, double y_pos)
   cam.front[2] = sinf(yaw) * cosf(pitch);
 }
 
+object* load_asset(const char* filename) {
+  object* obj = malloc(sizeof(object));
+  mesh* meshes;
+  int num_meshes;
+  importer_load_obj(filename, &meshes, &num_meshes);
+  obj->meshes = meshes;
+  obj->num_meshes = num_meshes;
+  quat_identity(obj->rotation);
+  obj->scale = 1.0f;
+  return obj;
+}
+
+void init_track() {
+  objects[0] = load_asset("assets/racing/track.obj");
+  vec3 pos_1 = {0.0f, -2.0f, -9.0f};
+  vec3_copy(objects[0]->position, pos_1);
+  renderer_add_object(objects[0]);
+
+  objects[1] = load_asset("assets/racing/raceCarRed.obj");
+  vec3 pos_2 = {-0.5f, -2.0f, -9.2f};
+  vec3_copy(objects[1]->position, pos_2);
+  objects[1]->scale = 0.25f;
+  renderer_add_object(objects[1]);
+}
+
 int main()
 {
   // Init context
@@ -97,43 +125,13 @@ int main()
   }
 
   // import obj
-  mesh* meshes;
-  int num_meshes;
-  importer_load_obj("assets/racing/raceCarRed.obj", &meshes, &num_meshes);
+  init_track();
 
   // Compile shaders
   shader_compile("shaders/lighting.vs", "shaders/lighting.fs", &shader_id);
 
-  /* objects */
-
-  // init object list
-  object *
-  objects[1];
-  object t1;
-
-  // set position
-  t1.position[0] = 0.0f;
-  t1.position[1] = -2.0f;
-  t1.position[2] = -9.0f;
-
-  // set scale
-  t1.scale = 1.0f;
-
-  // set geometry data
-  t1.meshes = meshes;
-  t1.num_meshes = num_meshes;
-
-  // init rotation quaternion
-  quat_identity(t1.rotation);
-
-  // add the object to the renderer
-  renderer_add_object(&t1);
-
-  // add object to objects list
-  objects[0] = &t1;
-
   /* lights */
-  light* lights[2];
+  light* lights[1];
   light l1;
   l1.position[0] = 0.0f;
   l1.position[1] = 1.0f;
@@ -142,16 +140,7 @@ int main()
   l1.color[1] = 1.0f;
   l1.color[2] = 1.0f;
 
-  light l2;
-  l2.position[0] = 0.0f;
-  l2.position[1] = 1.0f;
-  l2.position[2] = 0.0f;
-  l2.color[0] = 0.0f;
-  l2.color[1] = 0.0f;
-  l2.color[2] = 1.0f;
-
   lights[0] = &l1;
-  lights[1] = &l2;
 
   int macMoved = 0;
   while (!renderer_should_close()) {
@@ -168,9 +157,7 @@ int main()
     // t1.position[1] = sinf((float)glfwGetTime());
     // quat_rotate(t2.rotation, (float)glfwGetTime(), z_axis);
 
-    l1.position[0] = cosf((float)glfwGetTime() * 10);
-    l2.position[0] = 100 * sinf((float)glfwGetTime() * 10);
-    renderer_render_objects(objects, 1, lights, 2, shader_id, &cam);
+    renderer_render_objects(objects, 2, lights, 1, shader_id, &cam);
 #ifdef __APPLE__ // TODO: remove this workaround with glfw 3.3
       if (macMoved == 0)
       {
@@ -184,7 +171,7 @@ int main()
 
   // cleanup
   renderer_cleanup();
-  free(meshes);
+  free(objects[0]->meshes);
 
   return 0;
 }
