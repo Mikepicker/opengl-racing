@@ -1,5 +1,7 @@
 #include "../engine/steve.h"
 
+#include "ui.h"
+
 const GLuint SCREEN_WIDTH = 800;
 const GLuint SCREEN_HEIGHT = 600;
 
@@ -119,7 +121,8 @@ void init_track() {
 int main()
 {
   // Init context
-  if (renderer_init("Microdrag", SCREEN_WIDTH, SCREEN_HEIGHT, key_callback, mouse_callback) < 0) {
+  GLFWwindow* window;
+  if (renderer_init("Microdrag", SCREEN_WIDTH, SCREEN_HEIGHT, key_callback, mouse_callback, &window) < 0) {
     printf("Error initializing renderer!\n");
     return -1;
   }
@@ -129,6 +132,9 @@ int main()
 
   // Compile shaders
   shader_compile("shaders/lighting.vs", "shaders/lighting.fs", &shader_id);
+
+  // init ui
+  ui_init(window);
 
   /* lights */
   light* lights[1];
@@ -157,7 +163,7 @@ int main()
     // t1.position[1] = sinf((float)glfwGetTime());
     // quat_rotate(t2.rotation, (float)glfwGetTime(), z_axis);
 
-    renderer_render_objects(objects, 2, lights, 1, shader_id, &cam);
+    renderer_render_objects(objects, 2, lights, 1, shader_id, &cam, ui_render);
 #ifdef __APPLE__ // TODO: remove this workaround with glfw 3.3
       if (macMoved == 0)
       {
@@ -170,6 +176,7 @@ int main()
   }
 
   // cleanup
+  ui_free();
   renderer_cleanup();
   free(objects[0]->meshes);
 

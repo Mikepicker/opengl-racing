@@ -1,6 +1,11 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "renderer.h"
 
+void set_opengl_state() {
+  glEnable(GL_DEPTH_TEST);
+  glEnable(GL_MULTISAMPLE);
+}
+
 unsigned int load_image(char* filename) {
   GLuint texture = -1;
 
@@ -49,7 +54,7 @@ unsigned int load_image(char* filename) {
   return texture;
 }
 
-int renderer_init(char* title, int width, int height, void* key_callback, void* mouse_callback) {
+int renderer_init(char* title, int width, int height, void* key_callback, void* mouse_callback, GLFWwindow** out_window) {
   glfwInit();
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
@@ -61,6 +66,7 @@ int renderer_init(char* title, int width, int height, void* key_callback, void* 
 #endif
 
   window = glfwCreateWindow(width, height, title, NULL, NULL);
+  *out_window = window;
   if (!window)
   {
     printf("Failed to create GLFW window\n");
@@ -70,15 +76,17 @@ int renderer_init(char* title, int width, int height, void* key_callback, void* 
   glfwMakeContextCurrent(window);
   glfwSetKeyCallback(window, key_callback);
   glfwSetCursorPosCallback(window, mouse_callback);
-  glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+  //glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
   if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
   {
     printf("Failed to initialize GLAD\n");
     return -1;
   }
-  glEnable(GL_DEPTH_TEST);
-  glEnable(GL_MULTISAMPLE);
+
+  // set opengl state
+  set_opengl_state();
+
   return 0;
 }
 
@@ -126,7 +134,7 @@ void renderer_add_object(object* o) {
   }
 }
 
-void renderer_render_objects(object *objects[], int objects_length, light *lights[], int lights_length, GLuint shader_id, camera *camera)
+void renderer_render_objects(object *objects[], int objects_length, light *lights[], int lights_length, GLuint shader_id, camera *camera, void (*ui_render_callback)(void))
 {
   GLint m_location, v_location, p_location, time;
   GLint uniform_diffuse, uniform_specular;
@@ -232,6 +240,12 @@ void renderer_render_objects(object *objects[], int objects_length, light *light
       glDrawElements(GL_TRIANGLES, mesh->num_indices, GL_UNSIGNED_INT , 0);
     }
   }
+
+  // ui callback
+  ui_render_callback();
+
+  // reset opengl state
+  set_opengl_state();
 
   // swap buffers and poll events
   glfwSwapBuffers(window);
