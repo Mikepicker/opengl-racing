@@ -64,8 +64,22 @@ static void key_callback(GLFWwindow * window, int key, int scancode, int action,
   }
 
   // editor
-  if (key == GLFW_KEY_E && action == GLFW_RELEASE) {
-    editor_next_piece();
+  if (action == GLFW_RELEASE) {
+    vec3 pos = { 0.0f, 0.0f, 0.0f };
+    if (key == GLFW_KEY_E) {
+      editor_next_piece();
+    } else if (key == GLFW_KEY_Q) {
+      editor_rotate_piece();
+    } else if (key == GLFW_KEY_LEFT) {
+      pos[0] = -1.0f;
+    } else if (key == GLFW_KEY_RIGHT) {
+      pos[0] = 1.0f;
+    } else if (key == GLFW_KEY_UP) {
+      pos[2] = -1.0f;
+    } else if (key == GLFW_KEY_DOWN) {
+      pos[2] = 1.0f;
+    }
+    editor_move_piece(pos);
   }
 }
 
@@ -164,9 +178,6 @@ int main()
 
     // render editor
     object* editor_obj = editor_current_object();
-    editor_obj->position[0] = 0.0f;
-    editor_obj->position[1] = 0.0f;
-    editor_obj->position[2] = 0.0f;
     renderer_render_objects(&editor_obj, 1, lights, 1, shader_id, &cam, NULL);
 
 #ifdef __APPLE__ // TODO: remove this workaround with glfw 3.3

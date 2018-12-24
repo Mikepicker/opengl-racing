@@ -199,8 +199,6 @@ void renderer_render_objects(object *objects[], int objects_length, light *light
     // rotate
     mat4x4_mul(m, m, mat_rot);
 
-    // mat4x4_identity(v);
-
     // compute mvp matrix
     // mat4x4_ortho(p, -ratio, ratio, -1.f, 1.f, 1.f, -1.f);
     vec3 cameraDirection;

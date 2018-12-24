@@ -1,5 +1,5 @@
 #OBJS specifies which files to compile as part of the project
-OBJS = game/main.c game/ui.c game/editor.c engine/glad.c engine/shader.c engine/renderer.c engine/importer.c engine/dict.c engine/debug.c
+OBJS = game/main.o game/ui.o game/editor.o engine/glad.o engine/shader.o engine/renderer.o engine/importer.o engine/dict.o engine/debug.o
 
 #CC specifies which compiler we're using
 CC = gcc -g -std=c99 `pkg-config --cflags glfw3`
@@ -17,7 +17,7 @@ LINKER_FLAGS = `pkg-config --static --libs glfw3`
 #This is the target that compiles our executable
 
 $(OBJ_NAME): $(OBJS)
-	$(CC) $(OBJS) $(COMPILER_FLAGS) -o $(OBJ_NAME) $(LINKER_FLAGS)
+	$(CC) -o $@ $^ $(LINKER_FLAGS)
 
 clean:
 	rm -f $(OBJ_NAME)
