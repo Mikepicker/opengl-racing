@@ -161,6 +161,11 @@ object* importer_load_obj(const char* filename)
   FILE* file = fopen(filename, "r");
   char line[256];
 
+  if (file == NULL) {
+    printf("[importer] cannot find file: %s\n", filename);
+    exit(1);
+  }
+
   init_structures();
   
   // materials dictionary

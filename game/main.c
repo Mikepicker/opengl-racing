@@ -16,7 +16,7 @@ float camera_speed = 50.0f;
 
 // Camera
 camera cam = {
-  .pos = {0.0f, 0.0f, 0.3f},
+  .pos = {0.0f, 2.0f, 9.0f},
   .up = {0.0f, 1.0f, 0.0f},
   .front = {0.0f, 0.0f, -1.0f}
 };
@@ -61,6 +61,11 @@ static void key_callback(GLFWwindow * window, int key, int scancode, int action,
     vec3_norm(vec3_normalized, vec3_crossed);
     vec3_scale(vec3_scaled, vec3_normalized, camera_delta);
     vec3_add(cam.pos, cam.pos, vec3_scaled);
+  }
+
+  // editor
+  if (key == GLFW_KEY_E && action == GLFW_RELEASE) {
+    editor_next_piece();
   }
 }
 
@@ -125,6 +130,9 @@ int main()
   // init ui
   ui_init(window);
 
+  // init editor
+  editor_init();
+
   /* lights */
   light* lights[1];
   light l1;
@@ -152,7 +160,15 @@ int main()
     // t1.position[1] = sinf((float)glfwGetTime());
     // quat_rotate(t2.rotation, (float)glfwGetTime(), z_axis);
 
-    renderer_render_objects(objects, 2, lights, 1, shader_id, &cam, NULL);
+    // renderer_render_objects(objects, 2, lights, 1, shader_id, &cam, NULL);
+
+    // render editor
+    object* editor_obj = editor_current_object();
+    editor_obj->position[0] = 0.0f;
+    editor_obj->position[1] = 0.0f;
+    editor_obj->position[2] = 0.0f;
+    renderer_render_objects(&editor_obj, 1, lights, 1, shader_id, &cam, NULL);
+
 #ifdef __APPLE__ // TODO: remove this workaround with glfw 3.3
       if (macMoved == 0)
       {

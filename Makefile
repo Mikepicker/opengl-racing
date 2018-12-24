@@ -1,5 +1,5 @@
 #OBJS specifies which files to compile as part of the project
-OBJS = game/main.c game/ui.c engine/glad.c engine/shader.c engine/renderer.c engine/importer.c engine/dict.c engine/debug.c
+OBJS = game/main.c game/ui.c game/editor.c engine/glad.c engine/shader.c engine/renderer.c engine/importer.c engine/dict.c engine/debug.c
 
 #CC specifies which compiler we're using
 CC = gcc -g -std=c99 `pkg-config --cflags glfw3`
