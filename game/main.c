@@ -1,6 +1,7 @@
 #include "../engine/steve.h"
 
 #include "ui.h"
+#include "editor.h"
 
 const GLuint SCREEN_WIDTH = 800;
 const GLuint SCREEN_HEIGHT = 600;
@@ -93,25 +94,13 @@ static void mouse_callback(GLFWwindow *window, double x_pos, double y_pos)
   cam.front[2] = sinf(yaw) * cosf(pitch);
 }
 
-object* load_asset(const char* filename) {
-  object* obj = malloc(sizeof(object));
-  mesh* meshes;
-  int num_meshes;
-  importer_load_obj(filename, &meshes, &num_meshes);
-  obj->meshes = meshes;
-  obj->num_meshes = num_meshes;
-  quat_identity(obj->rotation);
-  obj->scale = 1.0f;
-  return obj;
-}
-
 void init_track() {
-  objects[0] = load_asset("assets/racing/track.obj");
+  objects[0] = importer_load_obj("assets/racing/track.obj");
   vec3 pos_1 = {0.0f, -2.0f, -9.0f};
   vec3_copy(objects[0]->position, pos_1);
   renderer_add_object(objects[0]);
 
-  objects[1] = load_asset("assets/racing/raceCarRed.obj");
+  objects[1] = importer_load_obj("assets/racing/raceCarRed.obj");
   vec3 pos_2 = {-0.5f, -2.0f, -9.2f};
   vec3_copy(objects[1]->position, pos_2);
   objects[1]->scale = 0.25f;
@@ -163,7 +152,7 @@ int main()
     // t1.position[1] = sinf((float)glfwGetTime());
     // quat_rotate(t2.rotation, (float)glfwGetTime(), z_axis);
 
-    renderer_render_objects(objects, 2, lights, 1, shader_id, &cam, ui_render);
+    renderer_render_objects(objects, 2, lights, 1, shader_id, &cam, NULL);
 #ifdef __APPLE__ // TODO: remove this workaround with glfw 3.3
       if (macMoved == 0)
       {

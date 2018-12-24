@@ -63,6 +63,9 @@ void ui_render() {
       bg.a = nk_propertyf(ctx, "#A:", 0, bg.a, 1.0f, 0.01f,0.005f);
       nk_combo_end(ctx);
     }
+
+    nk_label(ctx, "CRISTO:", NK_TEXT_LEFT);
+
   }
   nk_end(ctx);
 

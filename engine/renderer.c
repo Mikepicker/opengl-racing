@@ -242,7 +242,9 @@ void renderer_render_objects(object *objects[], int objects_length, light *light
   }
 
   // ui callback
-  ui_render_callback();
+  if (ui_render_callback != NULL) {
+    ui_render_callback();
+  }
 
   // reset opengl state
   set_opengl_state();

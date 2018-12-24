@@ -3,6 +3,6 @@
 
 #include "engine.h"
 
-int importer_load_obj(const char *filename, mesh* out_meshes[], int* out_meshes_size);
+object* importer_load_obj(const char *filename);
 
 #endif

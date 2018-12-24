@@ -146,7 +146,16 @@ static void init_structures() {
   meshes = malloc(meshes_size * sizeof(mesh));
 }
 
-int importer_load_obj(const char* filename, mesh* out_meshes[], int* out_meshes_size)
+static object* create_obj(mesh* meshes, int num_meshes) {
+  object* obj = malloc(sizeof(object));
+  obj->meshes = meshes;
+  obj->num_meshes = num_meshes;
+  quat_identity(obj->rotation);
+  obj->scale = 1.0f;
+  return obj;
+}
+
+object* importer_load_obj(const char* filename)
 {
   /* parse vertices */
   FILE* file = fopen(filename, "r");
@@ -252,10 +261,6 @@ int importer_load_obj(const char* filename, mesh* out_meshes[], int* out_meshes_
   meshes[meshes_count].num_indices = icount;
   meshes_count++;
 
-  // return values
-  *out_meshes = meshes;
-  *out_meshes_size = meshes_count;
-
   fclose(file);
 
   dict_free(vh);
@@ -264,5 +269,5 @@ int importer_load_obj(const char* filename, mesh* out_meshes[], int* out_meshes_
   free(temp_normals);
   dict_free(materials);
 
-  return 1;
+  return create_obj(meshes, meshes_count);
 }
