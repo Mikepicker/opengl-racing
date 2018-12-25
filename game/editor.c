@@ -36,6 +36,11 @@ void editor_move_piece(vec3 pos) {
   vec3_add(obj->position, obj->position, pos);
 }
 
+void editor_place_piece() {
+  object* obj = editor_objects[editor_current_index];
+  editor_placed_objects[editor_current_place_index++] = obj;
+}
+
 object* editor_current_object() {
   return editor_objects[editor_current_index];
 }
