@@ -5,7 +5,8 @@ void editor_init() {
     "assets/racing/roadStraight.obj",
     "assets/racing/roadCornerSmall.obj",
     "assets/racing/roadCornerLarge.obj",
-    "assets/racing/roadCurved.obj"
+    "assets/racing/roadCurved.obj",
+    "assets/racing/grass.obj"
   };
 
   editor_current_index = 0;

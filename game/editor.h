@@ -3,7 +3,7 @@
 
 #include "../engine/steve.h"
 
-#define EDITOR_OBJECTS_COUNT 4
+#define EDITOR_OBJECTS_COUNT 5
 
 object* editor_objects[EDITOR_OBJECTS_COUNT];
 unsigned int editor_current_index;
