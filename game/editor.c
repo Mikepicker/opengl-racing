@@ -38,10 +38,20 @@ void editor_move_piece(vec3 pos) {
 
 void editor_place_piece() {
   object* obj = editor_objects[editor_current_index];
-  editor_placed_objects[editor_current_place_index++] = obj;
+  object* obj_clone = malloc(sizeof(object));
+  memcpy(obj_clone, obj, sizeof(object));
+  editor_placed_objects[editor_placed_count++] = obj_clone;
 }
 
 object* editor_current_object() {
   return editor_objects[editor_current_index];
 }
 
+void editor_free() {
+  for (int i = 0; i < EDITOR_OBJECTS_COUNT; i++) {
+    free(editor_objects[i]);
+  }
+  for (int i = 0; i < EDITOR_MAX_PLACED_OBJECTS; i++) {
+    free(editor_placed_objects[i]);
+  }
+}

@@ -78,6 +78,8 @@ static void key_callback(GLFWwindow * window, int key, int scancode, int action,
       pos[2] = -1.0f;
     } else if (key == GLFW_KEY_DOWN) {
       pos[2] = 1.0f;
+    } else if (key == GLFW_KEY_ENTER) {
+      editor_place_piece();
     }
     editor_move_piece(pos);
   }
@@ -177,8 +179,11 @@ int main()
     // renderer_render_objects(objects, 2, lights, 1, shader_id, &cam, NULL);
 
     // render editor
-    object* editor_obj = editor_current_object();
-    renderer_render_objects(&editor_placed_objects, editor_current_place_index, lights, 1, shader_id, &cam, NULL);
+    object* editor_objs[editor_placed_count + 1];
+    editor_objs[0] = editor_current_object();
+    for (int i = 0; i < editor_placed_count; i++)
+      editor_objs[i + 1] = editor_placed_objects[i];
+    renderer_render_objects(editor_objs, editor_placed_count + 1, lights, 1, shader_id, &cam, NULL);
 
 #ifdef __APPLE__ // TODO: remove this workaround with glfw 3.3
       if (macMoved == 0)
@@ -195,6 +200,7 @@ int main()
   ui_free();
   renderer_cleanup();
   free(objects[0]->meshes);
+  editor_free();
 
   return 0;
 }

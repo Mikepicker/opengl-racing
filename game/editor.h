@@ -8,7 +8,7 @@
 
 object* editor_objects[EDITOR_OBJECTS_COUNT];
 object* editor_placed_objects[EDITOR_MAX_PLACED_OBJECTS];
-unsigned int editor_current_place_index;
+unsigned int editor_placed_count;
 unsigned int editor_current_index;
 unsigned int editor_current_angle;
 GLFWwindow* editor_window;
@@ -19,5 +19,6 @@ void editor_rotate_piece();
 void editor_move_piece(vec3 pos);
 void editor_place_piece();
 object* editor_current_object();
+void editor_free();
 
 #endif
