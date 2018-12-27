@@ -26,9 +26,7 @@ void editor_next_piece() {
 
 void editor_rotate_piece() {
   object* obj = editor_objects[editor_current_index];
-  vec3 y_axis = {0.0f, 1.0f, 0.0f};
   editor_current_angle = (editor_current_angle + 90) % 360;
-  quat_rotate(obj->rotation, to_radians(editor_current_angle), y_axis);
 }
 
 void editor_move_piece(vec3 pos) {
@@ -44,7 +42,10 @@ void editor_place_piece() {
 }
 
 object* editor_current_object() {
-  return editor_objects[editor_current_index];
+  object* obj = editor_objects[editor_current_index];
+  vec3 y_axis = {0.0f, 1.0f, 0.0f};
+  quat_rotate(obj->rotation, to_radians(editor_current_angle), y_axis);
+  return obj;
 }
 
 void editor_free() {

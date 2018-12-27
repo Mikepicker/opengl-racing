@@ -242,7 +242,7 @@ void renderer_render_objects(object *objects[], int objects_length, light *light
         glUniform1i(glGetUniformLocation(shader_id, "hasTexture"), 0);
       }
 
-      // render the triangle
+      // render the mesh
       glBindVertexArray(mesh->vao);
       glDrawElements(GL_TRIANGLES, mesh->num_indices, GL_UNSIGNED_INT , 0);
     }
