@@ -2,6 +2,7 @@
 #define renderer_h
 
 #include "engine.h"
+#include "shader.h"
 #include "data/object.h"
 #include "data/light.h"
 #include "data/camera.h"
@@ -9,11 +10,12 @@
 #include "debug.h"
 
 GLFWwindow* window;
+GLuint shader_id;
 
 int renderer_init(char* title, int width, int height, void* key_callback, void* mouse_callback, GLFWwindow** out_window);
 void renderer_cleanup();
 int renderer_should_close();
 void renderer_add_object(object* o);
-void renderer_render_objects(object *objects[], int objects_length, light *lights[], int lights_length, GLuint shader_id, camera *camera, void (*ui_render_callback)(void));
+void renderer_render_objects(object *objects[], int objects_length, light *lights[], int lights_length, camera *camera, void (*ui_render_callback)(void));
 
 #endif

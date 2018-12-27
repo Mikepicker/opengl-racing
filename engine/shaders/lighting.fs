@@ -12,14 +12,26 @@ in vec3 Normal;
 in vec2 Uvs;
 in vec3 FragPos;  
 
+// lights
 uniform vec3 lightsPos[NR_LIGHTS]; 
 uniform vec3 lightsColors[NR_LIGHTS];
 uniform int lightsNr;
+
+// camera
 uniform vec3 cameraPos; 
+
+// material
 uniform Material material;
 
+// texture
 uniform int hasTexture;
 uniform sampler2D texture1;
+
+// time
+uniform float time;
+
+// render params
+uniform int glowing;
 
 void main()
 {
@@ -46,5 +58,10 @@ void main()
     result += (ambient + diffuse + specular) * objectColor;
   }
 
-  FragColor = vec4(result, 1.0);
+  // glowing effect
+  if (glowing == 1) {
+    result += vec3((1.0f + sin(time * 5.0f)) / 4.0f);
+  }
+
+  FragColor = vec4(result, 1.0f);
 } 

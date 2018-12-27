@@ -11,6 +11,9 @@ typedef struct {
 
  mesh* meshes;
  int num_meshes;
+
+ // renderer params
+ int glowing;
 } object;
 
 #endif

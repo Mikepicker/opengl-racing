@@ -87,6 +87,9 @@ int renderer_init(char* title, int width, int height, void* key_callback, void* 
   // set opengl state
   set_opengl_state();
 
+  // compile shaders
+  shader_compile("../engine/shaders/lighting.vs", "../engine/shaders/lighting.fs", &shader_id);
+
   return 0;
 }
 
@@ -134,7 +137,7 @@ void renderer_add_object(object* o) {
   }
 }
 
-void renderer_render_objects(object *objects[], int objects_length, light *lights[], int lights_length, GLuint shader_id, camera *camera, void (*ui_render_callback)(void))
+void renderer_render_objects(object *objects[], int objects_length, light *lights[], int lights_length, camera *camera, void (*ui_render_callback)(void))
 {
   GLint m_location, v_location, p_location, time;
   GLint uniform_diffuse, uniform_specular;
@@ -224,6 +227,9 @@ void renderer_render_objects(object *objects[], int objects_length, light *light
 
     // pass time to shader
     glUniform1f(time, (float)glfwGetTime());
+
+    // render params
+    glUniform1i(glGetUniformLocation(shader_id, "glowing"), o->glowing);
 
     for (int i = 0; i < o->num_meshes; i++) {
       mesh* mesh = &o->meshes[i];

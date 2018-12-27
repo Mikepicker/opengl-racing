@@ -7,7 +7,6 @@ const GLuint SCREEN_WIDTH = 800;
 const GLuint SCREEN_HEIGHT = 600;
 
 // Shaders
-GLuint shader_id;
 char* vertexShader, fragmentShader;
 
 float delta_time = 0.0f; // time between current frame and last frame
@@ -140,9 +139,6 @@ int main()
   // import obj
   init_track();
 
-  // Compile shaders
-  shader_compile("shaders/lighting.vs", "shaders/lighting.fs", &shader_id);
-
   // init ui
   ui_init(window);
 
@@ -183,7 +179,7 @@ int main()
     editor_objs[0] = editor_current_object();
     for (int i = 0; i < editor_placed_count; i++)
       editor_objs[i + 1] = editor_placed_objects[i];
-    renderer_render_objects(editor_objs, editor_placed_count + 1, lights, 1, shader_id, &cam, NULL);
+    renderer_render_objects(editor_objs, editor_placed_count + 1, lights, 1, &cam, NULL);
 
 #ifdef __APPLE__ // TODO: remove this workaround with glfw 3.3
       if (macMoved == 0)

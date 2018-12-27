@@ -20,4 +20,4 @@ $(OBJ_NAME): $(OBJS)
 	$(CC) -o $@ $^ $(LINKER_FLAGS)
 
 clean:
-	rm -f $(OBJ_NAME)
+	rm -f $(OBJ_NAME) game/*.o engine/*.o

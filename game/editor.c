@@ -16,6 +16,7 @@ void editor_init() {
     editor_objects[i] = importer_load_obj(editor_objects_names[i]);
     vec3 pos = {0.0f, 0.0f, 0.0f};
     vec3_copy(editor_objects[i]->position, pos);
+    editor_objects[i]->glowing = 1;
     renderer_add_object(editor_objects[i]);
   }
 }
@@ -38,6 +39,7 @@ void editor_place_piece() {
   object* obj = editor_objects[editor_current_index];
   object* obj_clone = malloc(sizeof(object));
   memcpy(obj_clone, obj, sizeof(object));
+  obj_clone->glowing = 0;
   editor_placed_objects[editor_placed_count++] = obj_clone;
 }
 
