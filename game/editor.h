@@ -11,6 +11,7 @@ object* editor_placed_objects[EDITOR_MAX_PLACED_OBJECTS];
 unsigned int editor_placed_count;
 unsigned int editor_current_index;
 unsigned int editor_current_angle;
+vec3 editor_current_pos;
 GLFWwindow* editor_window;
 
 void editor_init();

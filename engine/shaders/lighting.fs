@@ -60,7 +60,7 @@ void main()
 
   // glowing effect
   if (glowing == 1) {
-    result += vec3((1.0f + sin(time * 5.0f)) / 4.0f);
+    result += vec3((1.0f + sin(time * 5.0f)) / 8.0f);
   }
 
   FragColor = vec4(result, 1.0f);

@@ -14,15 +14,18 @@ void editor_init() {
 
   for (int i = 0; i < EDITOR_OBJECTS_COUNT; i++) {
     editor_objects[i] = importer_load_obj(editor_objects_names[i]);
-    vec3 pos = {0.0f, 0.0f, 0.0f};
+    vec3 pos = {0.0f, 0.001f, 0.0f}; // y to 0.001 to avoid z-fighting
     vec3_copy(editor_objects[i]->position, pos);
     editor_objects[i]->glowing = 1;
+    editor_objects[i]->aabb = physics_compute_aabb(editor_objects[i]);
     renderer_add_object(editor_objects[i]);
   }
 }
 
 void editor_next_piece() {
   editor_current_index = (editor_current_index + 1) % EDITOR_OBJECTS_COUNT;
+  object* obj = editor_objects[editor_current_index];
+  vec3_copy(obj->position, editor_current_pos);
 }
 
 void editor_rotate_piece() {
@@ -32,13 +35,15 @@ void editor_rotate_piece() {
 
 void editor_move_piece(vec3 pos) {
   object* obj = editor_objects[editor_current_index];
-  vec3_add(obj->position, obj->position, pos);
+  vec3_add(editor_current_pos, editor_current_pos, pos);
+  vec3_copy(obj->position, editor_current_pos);
 }
 
 void editor_place_piece() {
   object* obj = editor_objects[editor_current_index];
   object* obj_clone = malloc(sizeof(object));
   memcpy(obj_clone, obj, sizeof(object));
+  obj_clone->position[1] = 0.0f;
   obj_clone->glowing = 0;
   editor_placed_objects[editor_placed_count++] = obj_clone;
 }

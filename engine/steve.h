@@ -8,5 +8,6 @@
 #include "shader.h"
 #include "renderer.h"
 #include "importer.h"
+#include "physics.h"
 
 #endif

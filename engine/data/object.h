@@ -3,6 +3,7 @@
 
 #include "../engine.h"
 #include "mesh.h"
+#include "aabb.h"
 
 typedef struct {
  vec3 position;
@@ -12,8 +13,9 @@ typedef struct {
  mesh* meshes;
  int num_meshes;
 
- // renderer params
  int glowing;
+
+ aabb aabb;
 } object;
 
 #endif

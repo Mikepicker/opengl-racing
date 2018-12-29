@@ -4,6 +4,7 @@
 void set_opengl_state() {
   glEnable(GL_DEPTH_TEST);
   glEnable(GL_MULTISAMPLE);
+  // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 }
 
 unsigned int load_image(char* filename) {
@@ -101,6 +102,45 @@ int renderer_should_close() {
   return glfwWindowShouldClose(window);
 }
 
+static void add_aabb(object* o) {
+  aabb* aabb = &o->aabb;
+  GLfloat vertices[] = {
+    -0.5, -0.5, -0.5, 1.0,
+     0.5, -0.5, -0.5, 1.0,
+     0.5,  0.5, -0.5, 1.0,
+    -0.5,  0.5, -0.5, 1.0,
+    -0.5, -0.5,  0.5, 1.0,
+     0.5, -0.5,  0.5, 1.0,
+     0.5,  0.5,  0.5, 1.0,
+    -0.5,  0.5,  0.5, 1.0,
+  };
+
+  glGenVertexArrays(1, &(aabb->vao)); // Vertex Array Object
+  glGenBuffers(1, &(aabb->vbo));      // Vertex Buffer Object
+  glGenBuffers(1, &(aabb->ebo));      // Element Buffer Object
+
+  glBindVertexArray(aabb->vao);
+
+  glBindBuffer(GL_ARRAY_BUFFER, aabb->vbo);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+  GLushort elements[] = {
+    0, 1, 2, 3,
+    4, 5, 6, 7,
+    0, 4, 1, 5, 2, 6, 3, 7
+  };
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, aabb->ebo);
+  glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(elements), elements, GL_STATIC_DRAW);
+
+  glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0);
+  glEnableVertexAttribArray(0);
+
+  
+  //glDisableVertexAttribArray(0);
+  glBindBuffer(GL_ARRAY_BUFFER, 0);
+  glBindVertexArray(0);
+}
+
 void renderer_add_object(object* o) {
 
   for (int i = 0; i < o->num_meshes; i++) {
@@ -134,8 +174,38 @@ void renderer_add_object(object* o) {
 
     // texture
     mesh->texture_id = load_image(mesh->mat.texture_path);
+
+    add_aabb(o);
   }
 }
+
+static void render_aabb(object* o) {
+  aabb* aabb = &o->aabb;
+  mat4x4 m;
+  mat4x4_identity(m);
+
+  vec3 size = {aabb->w, aabb->h, aabb->d};
+  mat4x4_scale_aniso(m, m, size[0], size[1], size[2]);
+
+  mat4x4 translation;
+  vec3 pos = {
+    (o->position[0] + aabb->offset[0]) / size[0],
+    (o->position[1] + aabb->offset[1]) / size[1],
+    (o->position[2] + aabb->offset[2]) / size[2]
+  };
+
+  mat4x4_translate(translation, pos[0], pos[1], pos[2]);
+  mat4x4_mul(m, m, translation);
+  glUniformMatrix4fv(glGetUniformLocation(shader_id, "M"), 1, GL_FALSE, (const GLfloat*) m);
+
+  glBindVertexArray(aabb->vao);
+  glDrawElements(GL_LINE_LOOP, 4, GL_UNSIGNED_SHORT, 0);
+  glDrawElements(GL_LINE_LOOP, 4, GL_UNSIGNED_SHORT, (GLvoid*)(4 * sizeof(GLushort)));
+  glDrawElements(GL_LINES, 8, GL_UNSIGNED_SHORT, (GLvoid*)(8 * sizeof(GLushort)));
+
+  glBindBuffer(GL_ARRAY_BUFFER, 0);
+}
+
 
 void renderer_render_objects(object *objects[], int objects_length, light *lights[], int lights_length, camera *camera, void (*ui_render_callback)(void))
 {
@@ -252,6 +322,8 @@ void renderer_render_objects(object *objects[], int objects_length, light *light
       glBindVertexArray(mesh->vao);
       glDrawElements(GL_TRIANGLES, mesh->num_indices, GL_UNSIGNED_INT , 0);
     }
+
+    render_aabb(o);
   }
 
   // ui callback
