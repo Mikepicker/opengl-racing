@@ -34,5 +34,15 @@ aabb physics_compute_aabb(object* object) {
   aabb.h = max_y - min_y;
   aabb.d = max_z - min_z;
 
+  if (aabb.w > aabb.d) {
+    aabb.d = aabb.w;
+  } else {
+    aabb.w = aabb.d;
+  }
+
+  if (aabb.h < 0.1f) {
+    aabb.h = 0.1f;
+  }
+
   return aabb;
 }
