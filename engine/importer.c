@@ -3,23 +3,23 @@
 const int INIT_SIZE = 256 * 10000;
 const char* ASSETS_PATH = "assets/racing/";
 
-vec3* temp_vertices;
-vec2* temp_uvs;
-vec3* temp_normals;
-GLuint* indices;
+static vec3* temp_vertices;
+static vec2* temp_uvs;
+static vec3* temp_normals;
+static GLuint* indices;
 
-dict* vh;
+static dict* vh;
 
-int vsize, vcount;
-int vtsize, vtcount;
-int vnsize, vncount;
-int isize, icount;
+static int vsize, vcount;
+static int vtsize, vtcount;
+static int vnsize, vncount;
+static int isize, icount;
 
-int total_vertices_size, total_vertices;
-vertex* vertices;
+static int total_vertices_size, total_vertices;
+static vertex* vertices;
 
-int meshes_size, meshes_count;
-mesh* meshes;
+static int meshes_size, meshes_count;
+static mesh* meshes;
 
 static dict* import_mtl(const char* filename) {
   FILE* file = fopen(filename, "r");
@@ -146,17 +146,42 @@ static void init_structures() {
   meshes = malloc(meshes_size * sizeof(mesh));
 }
 
+static void set_obj_center(object* object) {
+  mesh* first_mesh = &object->meshes[0];
+  float min_x = first_mesh->vertices[0].x;
+  float max_x = first_mesh->vertices[0].x;
+  float min_y = first_mesh->vertices[0].y;
+  float max_y = first_mesh->vertices[0].y;
+  float min_z = first_mesh->vertices[0].z;
+  float max_z = first_mesh->vertices[0].z;
+
+  for (int i = 0; i < object->num_meshes; i++) {
+    mesh* mesh = &object->meshes[i];
+    for (int j = 0; j < mesh->num_vertices; j++) {
+      vertex* v = &mesh->vertices[j];
+      if (v->x < min_x) { min_x = v->x; } 
+      if (v->x > max_x) { max_x = v->x; }
+      if (v->y < min_y) { min_y = v->y; } 
+      if (v->y > max_y) { max_y = v->y; }
+      if (v->z < min_z) { min_z = v->z; } 
+      if (v->z > max_z) { max_z = v->z; }
+    }
+  } 
+  vec3 center = {(min_x + max_x) / 2, (min_y + max_y) / 2, (min_z + max_z) / 2};
+  vec3_copy(object->center, center);
+}
+
 static object* create_obj(mesh* meshes, int num_meshes) {
   object* obj = malloc(sizeof(object));
   obj->meshes = meshes;
   obj->num_meshes = num_meshes;
   quat_identity(obj->rotation);
   obj->scale = 1.0f;
+  set_obj_center(obj);
   return obj;
 }
 
-object* importer_load_obj(const char* filename)
-{
+object* importer_load_obj(const char* filename) {
   /* parse vertices */
   FILE* file = fopen(filename, "r");
   char line[256];

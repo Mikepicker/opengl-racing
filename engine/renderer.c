@@ -272,13 +272,12 @@ void renderer_render_objects(object *objects[], int objects_length, light *light
     mat4x4_from_quat(mat_rot, o->rotation);
 
     // rotate around center
-    vec3 c = { 0.5f, 0.0f, -0.5f };
     mat4x4 t1;
-    mat4x4_translate(t1, -c[0], -c[1], -c[2]);
+    mat4x4_translate(t1, o->center[0], o->center[1], o->center[2]);
     mat4x4_mul(m, m, t1);
     mat4x4_mul(m, m, mat_rot);
     mat4x4 t2;
-    mat4x4_translate(t2, c[0], c[1], c[2]);
+    mat4x4_translate(t2, -o->center[0], -o->center[1], -o->center[2]);
     mat4x4_mul(m, m, t2);
 
     // compute mvp matrix

@@ -7,6 +7,7 @@
 
 typedef struct {
  vec3 position;
+ vec3 center;
  GLfloat scale;
  quat rotation;
 
