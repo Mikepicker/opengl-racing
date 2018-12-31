@@ -184,14 +184,20 @@ static void render_aabb(object* o) {
   mat4x4 m;
   mat4x4_identity(m);
 
-  vec3 size = {aabb->w, aabb->h, aabb->d};
+  vec3 size = {aabb->max_x - aabb->min_x, aabb->max_y - aabb->min_y, aabb->max_z - aabb->min_z};
   mat4x4_scale_aniso(m, m, size[0], size[1], size[2]);
+
+  vec3 center = {
+    (aabb->min_x + aabb->max_x) / 2,
+    (aabb->min_y + aabb->max_y) / 2,
+    (aabb->min_z + aabb->max_z) / 2
+  };
 
   mat4x4 translation;
   vec3 pos = {
-    (o->position[0] + aabb->offset[0]) / size[0],
-    (o->position[1] + aabb->offset[1]) / size[1],
-    (o->position[2] + aabb->offset[2]) / size[2]
+    (o->position[0] + center[0]) / size[0],
+    (o->position[1] + center[1]) / size[1],
+    (o->position[2] + center[2]) / size[2]
   };
 
   mat4x4_translate(translation, pos[0], pos[1], pos[2]);

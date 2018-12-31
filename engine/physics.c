@@ -34,21 +34,24 @@ aabb physics_compute_aabb(object* object) {
   aabb.min_z = min_z;
   aabb.max_z = max_z;
 
-  vec3 center = {(min_x + max_x) / 2, (min_y + max_y) / 2, (min_z + max_z) / 2};
-  vec3_copy(aabb.offset, center);
-
-  aabb.w = max_x - min_x;
-  aabb.h = max_y - min_y;
-  aabb.d = max_z - min_z;
-
-  if (aabb.w > aabb.d) {
-    aabb.d = aabb.w;
+  // make aabb squared
+  float w = aabb.max_x - aabb.min_x;
+  float d = aabb.max_z - aabb.min_z;
+  float diff_wd = fabsf(w - d);
+  if (w > d) {
+    aabb.max_z += diff_wd / 2;
+    aabb.min_z -= diff_wd / 2;
   } else {
-    aabb.w = aabb.d;
+    aabb.max_x += diff_wd / 2;
+    aabb.min_x -= diff_wd / 2;
   }
 
-  if (aabb.h < 0.1f) {
-    aabb.h = 0.1f;
+  // make aabb at least 0.1 high
+  float h = aabb.max_y - aabb.min_y;
+  if (h < 0.1f) {
+    float diff_h = fabsf(h - 0.1f);
+    aabb.min_y += diff_h / 2;
+    aabb.max_y -= diff_h / 2;
   }
 
   return aabb;
