@@ -105,14 +105,14 @@ int renderer_should_close() {
 static void add_aabb(object* o) {
   aabb* aabb = &o->aabb;
   GLfloat vertices[] = {
-    -0.5, -0.5, -0.5, 1.0,
-     0.5, -0.5, -0.5, 1.0,
-     0.5,  0.5, -0.5, 1.0,
-    -0.5,  0.5, -0.5, 1.0,
-    -0.5, -0.5,  0.5, 1.0,
-     0.5, -0.5,  0.5, 1.0,
-     0.5,  0.5,  0.5, 1.0,
-    -0.5,  0.5,  0.5, 1.0,
+    -0.5, -0.5, -0.5,
+     0.5, -0.5, -0.5,
+     0.5,  0.5, -0.5,
+    -0.5,  0.5, -0.5,
+    -0.5, -0.5,  0.5,
+     0.5, -0.5,  0.5,
+     0.5,  0.5,  0.5,
+    -0.5,  0.5,  0.5,
   };
 
   glGenVertexArrays(1, &(aabb->vao)); // Vertex Array Object
@@ -132,7 +132,7 @@ static void add_aabb(object* o) {
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, aabb->ebo);
   glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(elements), elements, GL_STATIC_DRAW);
 
-  glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0);
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
   glEnableVertexAttribArray(0);
 
   
@@ -197,26 +197,6 @@ static void render_aabb(object* o) {
   mat4x4_translate(translation, pos[0], pos[1], pos[2]);
   mat4x4_mul(m, m, translation);
 
-  // compute rotation matrix from quaternion
-  mat4x4 mat_rot;
-  mat4x4_identity(mat_rot);
-  //mat4x4_from_quat(mat_rot, o->rotation);
-
-  // rotate around center
-  /*vec3 cpos = {
-    (o->center[0]) / size[0],
-    (o->center[1]) / size[1],
-    (o->center[2]) / size[2]
-  };
-  mat4x4 t1;
-  mat4x4_translate(t1, -cpos[0], -cpos[1], -cpos[2]);
-  mat4x4_mul(m, m, t1);
-  mat4x4_mul(m, m, mat_rot);
-  mat4x4 t2;
-  mat4x4_translate(t2, cpos[0], cpos[1], cpos[2]);
-  
-  mat4x4_mul(m, m, t2);*/
-
   glUniformMatrix4fv(glGetUniformLocation(shader_id, "M"), 1, GL_FALSE, (const GLfloat*) m);
 
   glBindVertexArray(aabb->vao);
@@ -226,7 +206,6 @@ static void render_aabb(object* o) {
 
   glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
-
 
 void renderer_render_objects(object *objects[], int objects_length, light *lights[], int lights_length, camera *camera, void (*ui_render_callback)(void))
 {

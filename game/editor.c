@@ -20,6 +20,10 @@ void editor_init() {
     editor_objects[i]->aabb = physics_compute_aabb(editor_objects[i]);
     renderer_add_object(editor_objects[i]);
   }
+
+  for (int i = 0; i < EDITOR_MAX_PLACED_OBJECTS; i++) {
+    editor_placed_objects[i] = NULL;
+  }
 }
 
 void editor_next_piece() {
@@ -39,8 +43,21 @@ void editor_move_piece(vec3 pos) {
   vec3_copy(obj->position, editor_current_pos);
 }
 
+static int collide(object* o) {
+  for (int i = 0; i < EDITOR_MAX_PLACED_OBJECTS; i++) {
+    if (editor_placed_objects[i] != NULL && physics_objects_collide(o, editor_placed_objects[i])) {
+      return 1;
+    }
+  }
+  return 0;
+}
+
 void editor_place_piece() {
   object* obj = editor_objects[editor_current_index];
+  if (collide(obj)) {
+    printf("[editor] collision!\n");
+    return;
+  }
   object* obj_clone = malloc(sizeof(object));
   memcpy(obj_clone, obj, sizeof(object));
   obj_clone->position[1] = 0.0f;

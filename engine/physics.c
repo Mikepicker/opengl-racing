@@ -27,8 +27,15 @@ aabb physics_compute_aabb(object* object) {
     }
   } 
 
-  vec3 pos = {(min_x + max_x) / 2, (min_y + max_y) / 2, (min_z + max_z) / 2};
-  vec3_copy(aabb.offset, pos);
+  aabb.min_x = min_x;
+  aabb.max_x = max_x;
+  aabb.min_y = min_y;
+  aabb.max_y = max_y;
+  aabb.min_z = min_z;
+  aabb.max_z = max_z;
+
+  vec3 center = {(min_x + max_x) / 2, (min_y + max_y) / 2, (min_z + max_z) / 2};
+  vec3_copy(aabb.offset, center);
 
   aabb.w = max_x - min_x;
   aabb.h = max_y - min_y;
@@ -45,4 +52,14 @@ aabb physics_compute_aabb(object* object) {
   }
 
   return aabb;
+}
+
+
+int physics_objects_collide(object* a, object* b) {
+    return a->position[0] + a->aabb.min_x < b->position[0] + b->aabb.max_x &&
+    a->position[0] + a->aabb.max_x > b->position[0] + b->aabb.min_x &&
+    a->position[1] + a->aabb.min_y < b->position[1] + b->aabb.max_y &&
+    a->position[1] + a->aabb.max_y > b->position[1] + b->aabb.min_y &&
+    a->position[2] + a->aabb.min_z < b->position[2] + b->aabb.max_z &&
+    a->position[2] + a->aabb.max_z > b->position[2] + b->aabb.min_z;
 }

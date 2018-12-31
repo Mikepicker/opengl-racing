@@ -53,7 +53,7 @@ void main()
     vec3 reflectDir = reflect(-lightDir, norm);  
     float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32);
     vec3 specular = specularStrength * spec * lightsColors[i] * material.specular;  
-
+    
     vec3 objectColor = hasTexture > 0 ? texture(texture1, Uvs).rgb : vec3(1.0);
     result += (ambient + diffuse + specular) * objectColor;
   }
