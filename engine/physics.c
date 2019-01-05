@@ -35,7 +35,7 @@ aabb physics_compute_aabb(object* object) {
   aabb.max_z = max_z;
 
   // make aabb squared
-  float w = aabb.max_x - aabb.min_x;
+  /*float w = aabb.max_x - aabb.min_x;
   float d = aabb.max_z - aabb.min_z;
   float diff_wd = fabsf(w - d);
   if (w > d) {
@@ -52,14 +52,14 @@ aabb physics_compute_aabb(object* object) {
     float diff_h = fabsf(h - 0.1f);
     aabb.min_y += diff_h / 2;
     aabb.max_y -= diff_h / 2;
-  }
+  }*/
 
   return aabb;
 }
 
 
 int physics_objects_collide(object* a, object* b) {
-    return a->position[0] + a->aabb.min_x < b->position[0] + b->aabb.max_x &&
+  return a->position[0] + a->aabb.min_x < b->position[0] + b->aabb.max_x &&
     a->position[0] + a->aabb.max_x > b->position[0] + b->aabb.min_x &&
     a->position[1] + a->aabb.min_y < b->position[1] + b->aabb.max_y &&
     a->position[1] + a->aabb.max_y > b->position[1] + b->aabb.min_y &&

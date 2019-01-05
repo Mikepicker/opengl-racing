@@ -79,6 +79,8 @@ static void key_callback(GLFWwindow * window, int key, int scancode, int action,
       pos[2] = 1.0f;
     } else if (key == GLFW_KEY_ENTER) {
       editor_place_piece();
+    } else if (key == GLFW_KEY_R) {
+      editor_remove_piece();
     }
     editor_move_piece(pos);
   }
@@ -177,8 +179,10 @@ int main()
     // render editor
     object* editor_objs[editor_placed_count + 1];
     editor_objs[0] = editor_current_object();
-    for (int i = 0; i < editor_placed_count; i++)
-      editor_objs[i + 1] = editor_placed_objects[i];
+    for (int i = 0; i < EDITOR_MAX_PLACED_OBJECTS; i++) {
+      if (editor_placed_objects[i] != NULL)
+        editor_objs[i + 1] = editor_placed_objects[i];
+    }
     renderer_render_objects(editor_objs, editor_placed_count + 1, lights, 1, &cam, NULL);
 
 #ifdef __APPLE__ // TODO: remove this workaround with glfw 3.3

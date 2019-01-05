@@ -43,18 +43,18 @@ void editor_move_piece(vec3 pos) {
   vec3_copy(obj->position, editor_current_pos);
 }
 
-static int collide(object* o) {
+static object* collide_with(object* o) {
   for (int i = 0; i < EDITOR_MAX_PLACED_OBJECTS; i++) {
     if (editor_placed_objects[i] != NULL && physics_objects_collide(o, editor_placed_objects[i])) {
-      return 1;
+      return editor_placed_objects[i];
     }
   }
-  return 0;
+  return NULL;
 }
 
 void editor_place_piece() {
   object* obj = editor_objects[editor_current_index];
-  if (collide(obj)) {
+  if (collide_with(obj) != NULL) {
     printf("[editor] collision!\n");
     return;
   }
@@ -63,6 +63,17 @@ void editor_place_piece() {
   obj_clone->position[1] = 0.0f;
   obj_clone->glowing = 0;
   editor_placed_objects[editor_placed_count++] = obj_clone;
+}
+
+void editor_remove_piece() {
+  object* o = editor_objects[editor_current_index];
+  for (int i = 0; i < EDITOR_MAX_PLACED_OBJECTS; i++) {
+    if (editor_placed_objects[i] != NULL && physics_objects_collide(o, editor_placed_objects[i])) {
+      free(editor_placed_objects[i]);
+      editor_placed_objects[i] = NULL;
+      editor_placed_count--;
+    }
+  }
 }
 
 object* editor_current_object() {
