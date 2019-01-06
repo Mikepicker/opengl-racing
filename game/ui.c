@@ -32,7 +32,7 @@ void ui_render() {
   nk_glfw3_new_frame();
 
   /* GUI */
-  if (nk_begin(ctx, "Demo", nk_rect(50, 50, 230, 250),
+  if (nk_begin(ctx, "Microdrag", nk_rect(50, 50, 230, 250),
         NK_WINDOW_BORDER|NK_WINDOW_MOVABLE|NK_WINDOW_SCALABLE|
         NK_WINDOW_MINIMIZABLE|NK_WINDOW_TITLE))
   {
@@ -64,7 +64,9 @@ void ui_render() {
       nk_combo_end(ctx);
     }
 
-    nk_label(ctx, "CRISTO:", NK_TEXT_LEFT);
+    char camera_pos[128];
+    snprintf(camera_pos, 128, "camera: %f %f %f\n", ui_camera.pos[0], ui_camera.pos[1], ui_camera.pos[2]);
+    nk_label(ctx, camera_pos, NK_TEXT_LEFT);
 
   }
   nk_end(ctx);
@@ -75,3 +77,5 @@ void ui_render() {
 void ui_free() {
   nk_glfw3_shutdown();
 }
+
+void ui_set_camera(camera cam) { ui_camera = cam; }

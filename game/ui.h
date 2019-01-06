@@ -20,8 +20,12 @@
 #define MAX_VERTEX_BUFFER 512 * 1024
 #define MAX_ELEMENT_BUFFER 128 * 1024
 
+camera ui_camera;
+
 void ui_init();
 void ui_render();
 void ui_free();
+
+void ui_set_camera(camera cam);
 
 #endif
