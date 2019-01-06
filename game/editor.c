@@ -35,6 +35,8 @@ int editor_placed_count() {
   return count;
 }
 
+int editor_render_count() { return editor_placed_count() + 1; }
+
 void editor_next_piece() {
   editor_current_index = (editor_current_index + 1) % EDITOR_OBJECTS_COUNT;
   object* obj = editor_objects[editor_current_index];

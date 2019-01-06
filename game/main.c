@@ -6,9 +6,6 @@
 const GLuint SCREEN_WIDTH = 800;
 const GLuint SCREEN_HEIGHT = 600;
 
-// Shaders
-char* vertexShader, fragmentShader;
-
 float delta_time = 0.0f; // time between current frame and last frame
 float last_frame = 0.0f;
 float camera_speed = 50.0f;
@@ -180,9 +177,9 @@ int main()
     ui_set_camera(cam);
 
     // render editor
-    object* editor_objs[editor_placed_count() + 1];
+    object* editor_objs[editor_render_count()];
     editor_objects_to_render(editor_objs);
-    renderer_render_objects(editor_objs, editor_placed_count() + 1, lights, 1, &cam, ui_render);
+    renderer_render_objects(editor_objs, editor_render_count(), lights, 1, &cam, ui_render);
 
 #ifdef __APPLE__ // TODO: remove this workaround with glfw 3.3
       if (macMoved == 0)

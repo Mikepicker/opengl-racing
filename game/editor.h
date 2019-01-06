@@ -15,6 +15,7 @@ GLFWwindow* editor_window;
 
 void editor_init();
 int editor_placed_count();
+int editor_render_count();
 void editor_next_piece();
 void editor_rotate_piece();
 void editor_move_piece(vec3 pos);
