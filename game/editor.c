@@ -26,6 +26,15 @@ void editor_init() {
   }
 }
 
+int editor_placed_count() {
+  int count = 0;
+  for (int i = 0; i < EDITOR_MAX_PLACED_OBJECTS; i++) {
+    if (editor_placed_objects[i] != NULL) 
+      count++;
+  }
+  return count;
+}
+
 void editor_next_piece() {
   editor_current_index = (editor_current_index + 1) % EDITOR_OBJECTS_COUNT;
   object* obj = editor_objects[editor_current_index];
@@ -33,7 +42,6 @@ void editor_next_piece() {
 }
 
 void editor_rotate_piece() {
-  object* obj = editor_objects[editor_current_index];
   editor_current_angle = (editor_current_angle + 90) % 360;
 }
 
@@ -52,7 +60,21 @@ static object* collide_with(object* o) {
   return NULL;
 }
 
+static int editor_find_empty_index() {
+  for (int i = 0; i < EDITOR_MAX_PLACED_OBJECTS; i++) {
+    if (editor_placed_objects[i] == NULL) {
+      return i;
+    }
+  }
+  return -1;
+}
+
 void editor_place_piece() {
+  int i = editor_find_empty_index();
+  if (i == -1) {
+    printf("[editor] no more space!");
+  }
+
   object* obj = editor_objects[editor_current_index];
   if (collide_with(obj) != NULL) {
     printf("[editor] collision!\n");
@@ -62,7 +84,8 @@ void editor_place_piece() {
   memcpy(obj_clone, obj, sizeof(object));
   obj_clone->position[1] = 0.0f;
   obj_clone->glowing = 0;
-  editor_placed_objects[editor_placed_count++] = obj_clone;
+
+  editor_placed_objects[i] = obj_clone;
 }
 
 void editor_remove_piece() {
@@ -71,7 +94,16 @@ void editor_remove_piece() {
     if (editor_placed_objects[i] != NULL && physics_objects_collide(o, editor_placed_objects[i])) {
       free(editor_placed_objects[i]);
       editor_placed_objects[i] = NULL;
-      editor_placed_count--;
+    }
+  }
+}
+
+void editor_objects_to_render(object* out_objects[]) {
+  out_objects[0] = editor_current_object();
+  int c = 1;
+  for (int i = 0; i < EDITOR_MAX_PLACED_OBJECTS; i++) {
+    if (editor_placed_objects[i] != NULL) {
+      out_objects[c++] = editor_placed_objects[i];
     }
   }
 }

@@ -177,13 +177,9 @@ int main()
     // renderer_render_objects(objects, 2, lights, 1, shader_id, &cam, NULL);
 
     // render editor
-    object* editor_objs[editor_placed_count + 1];
-    editor_objs[0] = editor_current_object();
-    for (int i = 0; i < EDITOR_MAX_PLACED_OBJECTS; i++) {
-      if (editor_placed_objects[i] != NULL)
-        editor_objs[i + 1] = editor_placed_objects[i];
-    }
-    renderer_render_objects(editor_objs, editor_placed_count + 1, lights, 1, &cam, NULL);
+    object* editor_objs[editor_placed_count() + 1];
+    editor_objects_to_render(editor_objs);
+    renderer_render_objects(editor_objs, editor_placed_count() + 1, lights, 1, &cam, NULL);
 
 #ifdef __APPLE__ // TODO: remove this workaround with glfw 3.3
       if (macMoved == 0)
