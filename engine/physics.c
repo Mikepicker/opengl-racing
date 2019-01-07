@@ -59,10 +59,10 @@ aabb physics_compute_aabb(object* object) {
 
 
 int physics_objects_collide(object* a, object* b) {
-  return a->position[0] + a->aabb.min_x < b->position[0] + b->aabb.max_x &&
-    a->position[0] + a->aabb.max_x > b->position[0] + b->aabb.min_x &&
-    a->position[1] + a->aabb.min_y < b->position[1] + b->aabb.max_y &&
-    a->position[1] + a->aabb.max_y > b->position[1] + b->aabb.min_y &&
-    a->position[2] + a->aabb.min_z < b->position[2] + b->aabb.max_z &&
-    a->position[2] + a->aabb.max_z > b->position[2] + b->aabb.min_z;
+  return a->position[0] + a->box.min_x < b->position[0] + b->box.max_x &&
+    a->position[0] + a->box.max_x > b->position[0] + b->box.min_x &&
+    a->position[1] + a->box.min_y < b->position[1] + b->box.max_y &&
+    a->position[1] + a->box.max_y > b->position[1] + b->box.min_y &&
+    a->position[2] + a->box.min_z < b->position[2] + b->box.max_z &&
+    a->position[2] + a->box.max_z > b->position[2] + b->box.min_z;
 }

@@ -1,5 +1,21 @@
 #include "editor.h"
 
+static void editor_render_list_update() {
+  int c = 1;
+
+  for (int i = 0; i < EDITOR_MAX_PLACED_OBJECTS + 1; i++)
+    editor_render_list[i] = NULL;
+
+  editor_render_list[0] = editor_current_object();
+
+  for (int i = 0; i < EDITOR_MAX_PLACED_OBJECTS; i++) {
+    if (editor_placed_objects[i] != NULL) {
+      editor_render_list[c++] = editor_placed_objects[i];
+    }
+  }
+  editor_render_list_size = c;
+}
+
 void editor_init() {
   const char* editor_objects_names[EDITOR_OBJECTS_COUNT] = {
     "assets/racing/roadStraight.obj",
@@ -11,19 +27,22 @@ void editor_init() {
 
   editor_current_index = 0;
   editor_current_angle = 0;
+  editor_render_list_size = 1;
 
   for (int i = 0; i < EDITOR_OBJECTS_COUNT; i++) {
     editor_objects[i] = importer_load_obj(editor_objects_names[i]);
     vec3 pos = {0.0f, 0.001f, 0.0f}; // y to 0.001 to avoid z-fighting
     vec3_copy(editor_objects[i]->position, pos);
     editor_objects[i]->glowing = 1;
-    editor_objects[i]->aabb = physics_compute_aabb(editor_objects[i]);
+    editor_objects[i]->box = physics_compute_aabb(editor_objects[i]);
     renderer_add_object(editor_objects[i]);
   }
 
   for (int i = 0; i < EDITOR_MAX_PLACED_OBJECTS; i++) {
     editor_placed_objects[i] = NULL;
   }
+
+  editor_render_list_update();
 }
 
 int editor_placed_count() {
@@ -35,16 +54,16 @@ int editor_placed_count() {
   return count;
 }
 
-int editor_render_count() { return editor_placed_count() + 1; }
-
 void editor_next_piece() {
   editor_current_index = (editor_current_index + 1) % EDITOR_OBJECTS_COUNT;
   object* obj = editor_objects[editor_current_index];
   vec3_copy(obj->position, editor_current_pos);
+  editor_render_list_update();
 }
 
 void editor_rotate_piece() {
   editor_current_angle = (editor_current_angle + 90) % 360;
+  editor_render_list_update();
 }
 
 void editor_move_piece(vec3 pos) {
@@ -88,6 +107,8 @@ void editor_place_piece() {
   obj_clone->glowing = 0;
 
   editor_placed_objects[i] = obj_clone;
+
+  editor_render_list_update();
 }
 
 void editor_remove_piece() {
@@ -98,16 +119,7 @@ void editor_remove_piece() {
       editor_placed_objects[i] = NULL;
     }
   }
-}
-
-void editor_objects_to_render(object* out_objects[]) {
-  out_objects[0] = editor_current_object();
-  int c = 1;
-  for (int i = 0; i < EDITOR_MAX_PLACED_OBJECTS; i++) {
-    if (editor_placed_objects[i] != NULL) {
-      out_objects[c++] = editor_placed_objects[i];
-    }
-  }
+  editor_render_list_update();
 }
 
 object* editor_current_object() {

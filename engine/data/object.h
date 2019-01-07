@@ -16,7 +16,9 @@ typedef struct {
 
  int glowing;
 
- aabb aabb;
+ aabb box;
 } object;
+
+void object_free(object* o);
 
 #endif

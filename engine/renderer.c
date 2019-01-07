@@ -103,7 +103,7 @@ int renderer_should_close() {
 }
 
 static void add_aabb(object* o) {
-  aabb* aabb = &o->aabb;
+  aabb* aabb = &o->box;
   GLfloat vertices[] = {
     -0.5, -0.5, -0.5,
      0.5, -0.5, -0.5,
@@ -180,7 +180,7 @@ void renderer_add_object(object* o) {
 }
 
 static void render_aabb(object* o) {
-  aabb* aabb = &o->aabb;
+  aabb* aabb = &o->box;
   mat4x4 m;
   mat4x4_identity(m);
 

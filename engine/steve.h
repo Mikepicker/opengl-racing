@@ -1,7 +1,3 @@
-#ifndef steve_h
-#define steve_h
-
-/* include engine */
 #include "engine.h"
 
 /* include modules */
@@ -10,4 +6,4 @@
 #include "importer.h"
 #include "physics.h"
 
-#endif
+#include "render_list.h"

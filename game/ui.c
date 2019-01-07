@@ -32,7 +32,7 @@ void ui_render() {
   nk_glfw3_new_frame();
 
   /* GUI */
-  if (nk_begin(ctx, "Microdrag", nk_rect(50, 50, 230, 250),
+  if (nk_begin(ctx, "Microdrag", nk_rect(50, 50, 300, 300),
         NK_WINDOW_BORDER|NK_WINDOW_MOVABLE|NK_WINDOW_SCALABLE|
         NK_WINDOW_MINIMIZABLE|NK_WINDOW_TITLE))
   {

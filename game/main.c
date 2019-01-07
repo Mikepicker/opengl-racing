@@ -26,8 +26,12 @@ float mouse_last_y = SCREEN_HEIGHT / 2.0;
 float fov = 45.0f;
 float sensitivity = 0.01f; // change this value to your liking
 
-// Track
-object* objects[4];
+// game objects
+#define GAME_OBJECTS_COUNT 1
+object* game_objects[GAME_OBJECTS_COUNT];
+
+// render list
+render_list* rl;
 
 static void key_callback(GLFWwindow * window, int key, int scancode, int action, int mods)
 {
@@ -114,16 +118,16 @@ static void mouse_callback(GLFWwindow *window, double x_pos, double y_pos)
 }
 
 void init_track() {
-  objects[0] = importer_load_obj("assets/racing/track.obj");
-  vec3 pos_1 = {0.0f, -2.0f, -9.0f};
-  vec3_copy(objects[0]->position, pos_1);
-  renderer_add_object(objects[0]);
+  // objects[0] = importer_load_obj("assets/racing/track.obj");
+  // vec3 pos_1 = {0.0f, -2.0f, -9.0f};
+  // vec3_copy(objects[0]->position, pos_1);
+  // renderer_add_object(objects[0]);
 
-  objects[1] = importer_load_obj("assets/racing/raceCarRed.obj");
+  game_objects[0] = importer_load_obj("assets/racing/raceCarRed.obj");
   vec3 pos_2 = {-0.5f, -2.0f, -9.2f};
-  vec3_copy(objects[1]->position, pos_2);
-  objects[1]->scale = 0.25f;
-  renderer_add_object(objects[1]);
+  vec3_copy(game_objects[0]->position, pos_2);
+  game_objects[0]->scale = 0.25f;
+  renderer_add_object(game_objects[0]);
 }
 
 int main()
@@ -143,6 +147,9 @@ int main()
 
   // init editor
   editor_init();
+
+  // render list
+  rl = render_list_new();
 
   /* lights */
   light* lights[1];
@@ -173,13 +180,15 @@ int main()
 
     // renderer_render_objects(objects, 2, lights, 1, shader_id, &cam, NULL);
 
+    render_list_clear(rl);
+    render_list_add(rl, game_objects[0]);
+    render_list_add_batch(rl, editor_render_list, editor_render_list_size);
+
     // ui
     ui_set_camera(cam);
 
     // render editor
-    object* editor_objs[editor_render_count()];
-    editor_objects_to_render(editor_objs);
-    renderer_render_objects(editor_objs, editor_render_count(), lights, 1, &cam, ui_render);
+    renderer_render_objects(rl->objects, rl->size, lights, 1, &cam, ui_render);
 
 #ifdef __APPLE__ // TODO: remove this workaround with glfw 3.3
       if (macMoved == 0)
@@ -195,7 +204,7 @@ int main()
   // cleanup
   ui_free();
   renderer_cleanup();
-  free(objects[0]->meshes);
+  render_list_free(rl);
   editor_free();
 
   return 0;

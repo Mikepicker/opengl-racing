@@ -6,8 +6,6 @@
 #include "data/object.h"
 #include "data/light.h"
 #include "data/camera.h"
-#include "stb_image.h"
-#include "debug.h"
 
 GLFWwindow* window;
 GLuint shader_id;

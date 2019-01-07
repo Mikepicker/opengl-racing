@@ -22,13 +22,19 @@
 /* math */
 #include "linmath.h"
 
+/* libraries */
+#include "stb_image.h"
+
 /* include data structures */
 #include "dict.h"
 
 /* include data */
-#include "data/object.h"
+/*#include "data/vertex.h"
 #include "data/material.h"
 #include "data/camera.h"
+#include "data/light.h"
+#include "data/aabb.h"
 #include "data/mesh.h"
+#include "data/object.h"*/
 
 #endif
