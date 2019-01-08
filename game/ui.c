@@ -25,6 +25,7 @@ void ui_init(GLFWwindow* window) {
    nk_glfw3_font_stash_end();}
 
  bg.r = 0.10f, bg.g = 0.18f, bg.b = 0.24f, bg.a = 1.0f;
+  ui_debug = 1;
 }
 
 void ui_render() {
@@ -39,9 +40,9 @@ void ui_render() {
     enum {EASY, HARD};
     static int op = EASY;
     static int property = 20;
-    nk_layout_row_static(ctx, 30, 80, 1);
-    if (nk_button_label(ctx, "button"))
-      fprintf(stdout, "button pressed\n");
+    nk_layout_row_static(ctx, 30, 120, 1);
+    if (nk_button_label(ctx, "Toggle AABB"))
+      ui_debug = ui_debug == 0 ? 1 : 0;
 
     nk_layout_row_dynamic(ctx, 30, 2);
     if (nk_option_label(ctx, "easy", op == EASY)) op = EASY;

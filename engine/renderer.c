@@ -200,6 +200,7 @@ static void render_aabb(object* o) {
     (o->position[2] + center[2]) / size[2]
   };
 
+  mat4x4_scale(m, m, o->scale);
   mat4x4_translate(translation, pos[0], pos[1], pos[2]);
   mat4x4_mul(m, m, translation);
 
@@ -213,7 +214,7 @@ static void render_aabb(object* o) {
   glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
-void renderer_render_objects(object *objects[], int objects_length, light *lights[], int lights_length, camera *camera, void (*ui_render_callback)(void))
+void renderer_render_objects(object *objects[], int objects_length, light *lights[], int lights_length, camera *camera, void (*ui_render_callback)(void), int debug)
 {
   GLint m_location, v_location, p_location, time;
   GLint uniform_diffuse, uniform_specular;
@@ -328,7 +329,8 @@ void renderer_render_objects(object *objects[], int objects_length, light *light
       glDrawElements(GL_TRIANGLES, mesh->num_indices, GL_UNSIGNED_INT , 0);
     }
 
-    render_aabb(o);
+    if (debug)
+      render_aabb(o);
   }
 
   // ui callback

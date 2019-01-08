@@ -124,9 +124,10 @@ void init_track() {
   // renderer_add_object(objects[0]);
 
   game_objects[0] = importer_load_obj("assets/racing/raceCarRed.obj");
-  vec3 pos_2 = {-0.5f, -2.0f, -9.2f};
+  vec3 pos_2 = {-0.5f, 0.0f, -9.2f};
   vec3_copy(game_objects[0]->position, pos_2);
   game_objects[0]->scale = 0.25f;
+  game_objects[0]->box = physics_compute_aabb(game_objects[0]);
   renderer_add_object(game_objects[0]);
 }
 
@@ -188,7 +189,7 @@ int main()
     ui_set_camera(cam);
 
     // render editor
-    renderer_render_objects(rl->objects, rl->size, lights, 1, &cam, ui_render);
+    renderer_render_objects(rl->objects, rl->size, lights, 1, &cam, ui_render, ui_debug);
 
 #ifdef __APPLE__ // TODO: remove this workaround with glfw 3.3
       if (macMoved == 0)
@@ -198,7 +199,7 @@ int main()
         glfwSetWindowPos(window, ++x, y);
         macMoved = 1;
       }
-    #endif
+#endif
   }
 
   // cleanup

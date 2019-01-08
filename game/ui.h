@@ -21,6 +21,7 @@
 #define MAX_ELEMENT_BUFFER 128 * 1024
 
 camera ui_camera;
+int ui_debug;
 
 void ui_init();
 void ui_render();

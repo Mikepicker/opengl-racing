@@ -28,11 +28,11 @@ void editor_init() {
   editor_current_index = 0;
   editor_current_angle = 0;
   editor_render_list_size = 1;
+  editor_current_pos[1] = 0.001f; // y to 0.001 to avoid z-fighting
 
   for (int i = 0; i < EDITOR_OBJECTS_COUNT; i++) {
     editor_objects[i] = importer_load_obj(editor_objects_names[i]);
-    vec3 pos = {0.0f, 0.001f, 0.0f}; // y to 0.001 to avoid z-fighting
-    vec3_copy(editor_objects[i]->position, pos);
+    vec3_copy(editor_objects[i]->position, editor_current_pos);
     editor_objects[i]->glowing = 1;
     editor_objects[i]->box = physics_compute_aabb(editor_objects[i]);
     renderer_add_object(editor_objects[i]);
