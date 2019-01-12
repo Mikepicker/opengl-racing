@@ -55,7 +55,7 @@ unsigned int load_image(char* filename) {
   return texture;
 }
 
-int renderer_init(char* title, int width, int height, void* key_callback, void* mouse_callback, GLFWwindow** out_window) {
+int renderer_init(char* title, int width, int height, void* key_callback, void* mouse_callback, void* mouse_button_callback, GLFWwindow** out_window) {
   glfwInit();
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
@@ -77,6 +77,7 @@ int renderer_init(char* title, int width, int height, void* key_callback, void* 
   glfwMakeContextCurrent(window);
   glfwSetKeyCallback(window, key_callback);
   glfwSetCursorPosCallback(window, mouse_callback);
+  glfwSetMouseButtonCallback(window, mouse_button_callback);
   //glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
   if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
@@ -135,8 +136,6 @@ static void add_aabb(object* o) {
   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
   glEnableVertexAttribArray(0);
 
-  
-  //glDisableVertexAttribArray(0);
   glBindBuffer(GL_ARRAY_BUFFER, 0);
   glBindVertexArray(0);
 }
@@ -346,4 +345,9 @@ void renderer_render_objects(object *objects[], int objects_length, light *light
 
   // poll events
   glfwPollEvents();
+}
+
+void renderer_capture_mouse(int toggle) {
+  printf("TEEEST %d\n", toggle);
+  glfwSetInputMode(window, GLFW_CURSOR, toggle ? GLFW_CURSOR_NORMAL : GLFW_CURSOR_DISABLED);
 }

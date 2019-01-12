@@ -3,8 +3,8 @@
 #include "ui.h"
 #include "editor.h"
 
-const GLuint SCREEN_WIDTH = 800;
-const GLuint SCREEN_HEIGHT = 600;
+const GLuint SCREEN_WIDTH = 1200;
+const GLuint SCREEN_HEIGHT = 800;
 
 float delta_time = 0.0f; // time between current frame and last frame
 float last_frame = 0.0f;
@@ -85,6 +85,13 @@ static void key_callback(GLFWwindow * window, int key, int scancode, int action,
     }
     editor_move_piece(pos);
   }
+
+  // capture mouse
+  if (action == GLFW_RELEASE) {
+    if (key == GLFW_KEY_P) {
+      renderer_capture_mouse(!(glfwGetInputMode(window, GLFW_CURSOR) == GLFW_CURSOR_NORMAL));
+    }
+  }
 }
 
 static void mouse_callback(GLFWwindow *window, double x_pos, double y_pos)
@@ -117,6 +124,11 @@ static void mouse_callback(GLFWwindow *window, double x_pos, double y_pos)
   cam.front[2] = sinf(yaw) * cosf(pitch);
 }
 
+static void mouse_button_callback(GLFWwindow* window, int button, int action, int mods) {
+  if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS)
+    renderer_capture_mouse(!(glfwGetInputMode(window, GLFW_CURSOR) == GLFW_CURSOR_NORMAL));
+}
+
 void init_track() {
   // objects[0] = importer_load_obj("assets/racing/track.obj");
   // vec3 pos_1 = {0.0f, -2.0f, -9.0f};
@@ -124,9 +136,9 @@ void init_track() {
   // renderer_add_object(objects[0]);
 
   game_objects[0] = importer_load_obj("assets/racing/raceCarRed.obj");
-  vec3 pos_2 = {-0.5f, 0.0f, -9.2f};
+  vec3 pos_2 = {0.0f, 0.0f, 0.0f};
   vec3_copy(game_objects[0]->position, pos_2);
-  game_objects[0]->scale = 0.25f;
+  // game_objects[0]->scale = 0.25f;
   game_objects[0]->box = physics_compute_aabb(game_objects[0]);
   renderer_add_object(game_objects[0]);
 }
@@ -135,7 +147,7 @@ int main()
 {
   // Init context
   GLFWwindow* window;
-  if (renderer_init("Microdrag", SCREEN_WIDTH, SCREEN_HEIGHT, key_callback, mouse_callback, &window) < 0) {
+  if (renderer_init("Microdrag", SCREEN_WIDTH, SCREEN_HEIGHT, key_callback, mouse_callback, mouse_button_callback, &window) < 0) {
     printf("Error initializing renderer!\n");
     return -1;
   }
@@ -180,6 +192,23 @@ int main()
     // quat_rotate(t2.rotation, (float)glfwGetTime(), z_axis);
 
     // renderer_render_objects(objects, 2, lights, 1, shader_id, &cam, NULL);
+    
+    // test road collision
+    for (int i = 0; i < EDITOR_MAX_PLACED_OBJECTS; i++) {
+      object* o = editor_placed_objects[i];
+      if (o != NULL) {
+        // vec3 p = { game_objects[0]->box.max_x, game_objects[0]->box.max_y, game_objects[0]->box.max_z };
+        vec3 p = { -0.1f, 10.0f, 0 };
+        ray ray_test;
+        vec3 ray_dir = { 0, -1.0f, 0 };
+        vec3_copy(ray_test.o, p);
+        vec3_copy(ray_test.dir, ray_dir);
+        mesh* m = physics_ray_hit_mesh(ray_test, o);
+        if (m != NULL) {
+          printf("COLLIDE MESH %s\n", m->mat.name);
+        }
+      }
+    }
 
     render_list_clear(rl);
     render_list_add(rl, game_objects[0]);

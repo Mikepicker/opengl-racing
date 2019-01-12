@@ -11,8 +11,8 @@
 #define NK_GLFW_GL3_IMPLEMENTATION
 #define NK_KEYSTATE_BASED_INPUT
 
-#include "../engine/nuklear.h"
-#include "../engine/nuklear_glfw_gl3.h"
+#include "../libs/nuklear.h"
+#include "../libs/nuklear_glfw_gl3.h"
 
 struct nk_context *ctx;
 struct nk_colorf bg;
@@ -25,7 +25,7 @@ void ui_init(GLFWwindow* window) {
    nk_glfw3_font_stash_end();}
 
  bg.r = 0.10f, bg.g = 0.18f, bg.b = 0.24f, bg.a = 1.0f;
-  ui_debug = 1;
+ ui_debug = 1;
 }
 
 void ui_render() {

@@ -28,7 +28,9 @@ void editor_init() {
   editor_current_index = 0;
   editor_current_angle = 0;
   editor_render_list_size = 1;
+  editor_current_pos[0] = 0.0f;
   editor_current_pos[1] = 0.001f; // y to 0.001 to avoid z-fighting
+  editor_current_pos[2] = 0.0f;
 
   for (int i = 0; i < EDITOR_OBJECTS_COUNT; i++) {
     editor_objects[i] = importer_load_obj(editor_objects_names[i]);
