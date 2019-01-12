@@ -25,6 +25,7 @@ float mouse_last_x = SCREEN_WIDTH / 2.0;
 float mouse_last_y = SCREEN_HEIGHT / 2.0;
 float fov = 45.0f;
 float sensitivity = 0.01f; // change this value to your liking
+int capture_cursor = 1;
 
 // game objects
 #define GAME_OBJECTS_COUNT 1
@@ -64,7 +65,7 @@ static void key_callback(GLFWwindow * window, int key, int scancode, int action,
   }
 
   // editor
-  if (action == GLFW_RELEASE) {
+  if (editor_enabled && action == GLFW_RELEASE) {
     vec3 pos = { 0.0f, 0.0f, 0.0f };
     if (key == GLFW_KEY_E) {
       editor_next_piece();
@@ -88,14 +89,17 @@ static void key_callback(GLFWwindow * window, int key, int scancode, int action,
 
   // capture mouse
   if (action == GLFW_RELEASE) {
-    if (key == GLFW_KEY_P) {
-      renderer_capture_mouse(!(glfwGetInputMode(window, GLFW_CURSOR) == GLFW_CURSOR_NORMAL));
+    if (key == GLFW_KEY_C) {
+      capture_cursor = !(glfwGetInputMode(window, GLFW_CURSOR) == GLFW_CURSOR_NORMAL);
+      renderer_capture_mouse(capture_cursor);
     }
   }
 }
 
 static void mouse_callback(GLFWwindow *window, double x_pos, double y_pos)
 {
+  if (capture_cursor != 0) return;
+
   if (first_mouse == 1) {
     mouse_last_x = x_pos;
     mouse_last_y = y_pos;
@@ -205,7 +209,7 @@ int main()
         vec3_copy(ray_test.dir, ray_dir);
         mesh* m = physics_ray_hit_mesh(ray_test, o);
         if (m != NULL) {
-          printf("COLLIDE MESH %s\n", m->mat.name);
+          // printf("COLLIDE MESH %s\n", m->mat.name);
         }
       }
     }

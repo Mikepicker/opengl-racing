@@ -1,12 +1,15 @@
 #include "editor.h"
 
 static void editor_render_list_update() {
-  int c = 1;
-
   for (int i = 0; i < EDITOR_MAX_PLACED_OBJECTS + 1; i++)
     editor_render_list[i] = NULL;
 
-  editor_render_list[0] = editor_current_object();
+  int c = 0;
+
+  if (editor_enabled > 0) {
+    editor_render_list[0] = editor_current_object();
+    c = 1;
+  }
 
   for (int i = 0; i < EDITOR_MAX_PLACED_OBJECTS; i++) {
     if (editor_placed_objects[i] != NULL) {
@@ -14,6 +17,11 @@ static void editor_render_list_update() {
     }
   }
   editor_render_list_size = c;
+}
+
+void editor_set_enabled(int on) {
+  editor_enabled = on;
+  editor_render_list_update();
 }
 
 void editor_init() {
@@ -25,6 +33,7 @@ void editor_init() {
     "assets/racing/grass.obj"
   };
 
+  editor_enabled = 0;
   editor_current_index = 0;
   editor_current_angle = 0;
   editor_render_list_size = 1;

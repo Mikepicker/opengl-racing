@@ -348,6 +348,5 @@ void renderer_render_objects(object *objects[], int objects_length, light *light
 }
 
 void renderer_capture_mouse(int toggle) {
-  printf("TEEEST %d\n", toggle);
   glfwSetInputMode(window, GLFW_CURSOR, toggle ? GLFW_CURSOR_NORMAL : GLFW_CURSOR_DISABLED);
 }

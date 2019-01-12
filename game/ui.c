@@ -40,9 +40,14 @@ void ui_render() {
     enum {EASY, HARD};
     static int op = EASY;
     static int property = 20;
+
     nk_layout_row_static(ctx, 30, 120, 1);
     if (nk_button_label(ctx, "Toggle AABB"))
       ui_debug = ui_debug == 0 ? 1 : 0;
+
+    nk_layout_row_static(ctx, 30, 120, 1);
+    if (nk_button_label(ctx, "Editor on"))
+      editor_set_enabled(editor_enabled == 0 ? 1 : 0);
 
     nk_layout_row_dynamic(ctx, 30, 2);
     if (nk_option_label(ctx, "easy", op == EASY)) op = EASY;

@@ -17,6 +17,8 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
+#include "editor.h"
+
 #define MAX_VERTEX_BUFFER 512 * 1024
 #define MAX_ELEMENT_BUFFER 128 * 1024
 
