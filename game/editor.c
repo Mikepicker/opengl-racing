@@ -2,25 +2,25 @@
 
 static void editor_render_list_update() {
   for (int i = 0; i < EDITOR_MAX_PLACED_OBJECTS + 1; i++)
-    editor_render_list[i] = NULL;
+    game_editor.render_list[i] = NULL;
 
   int c = 0;
 
-  if (editor_enabled > 0) {
-    editor_render_list[0] = editor_current_object();
+  if (game_editor.enabled > 0) {
+    game_editor.render_list[0] = editor_current_object();
     c = 1;
   }
 
   for (int i = 0; i < EDITOR_MAX_PLACED_OBJECTS; i++) {
-    if (editor_placed_objects[i] != NULL) {
-      editor_render_list[c++] = editor_placed_objects[i];
+    if (game_editor.placed_objects[i] != NULL) {
+      game_editor.render_list[c++] = game_editor.placed_objects[i];
     }
   }
-  editor_render_list_size = c;
+  game_editor.render_list_size = c;
 }
 
 void editor_set_enabled(int on) {
-  editor_enabled = on;
+  game_editor.enabled = on;
   editor_render_list_update();
 }
 
@@ -33,24 +33,24 @@ void editor_init() {
     "assets/racing/grass.obj"
   };
 
-  editor_enabled = 0;
-  editor_current_index = 0;
-  editor_current_angle = 0;
-  editor_render_list_size = 1;
-  editor_current_pos[0] = 0.0f;
-  editor_current_pos[1] = 0.001f; // y to 0.001 to avoid z-fighting
-  editor_current_pos[2] = 0.0f;
+  game_editor.enabled = 0;
+  game_editor.current_index = 0;
+  game_editor.current_angle = 0;
+  game_editor.render_list_size = 1;
+  game_editor.current_pos[0] = 0.0f;
+  game_editor.current_pos[1] = 0.001f; // y to 0.001 to avoid z-fighting
+  game_editor.current_pos[2] = 0.0f;
 
   for (int i = 0; i < EDITOR_OBJECTS_COUNT; i++) {
-    editor_objects[i] = importer_load_obj(editor_objects_names[i]);
-    vec3_copy(editor_objects[i]->position, editor_current_pos);
-    editor_objects[i]->glowing = 1;
-    editor_objects[i]->box = physics_compute_aabb(editor_objects[i]);
-    renderer_add_object(editor_objects[i]);
+    game_editor.objects[i] = importer_load_obj(editor_objects_names[i]);
+    vec3_copy(game_editor.objects[i]->position, game_editor.current_pos);
+    game_editor.objects[i]->glowing = 1;
+    game_editor.objects[i]->box = physics_compute_aabb(game_editor.objects[i]);
+    renderer_add_object(game_editor.objects[i]);
   }
 
   for (int i = 0; i < EDITOR_MAX_PLACED_OBJECTS; i++) {
-    editor_placed_objects[i] = NULL;
+    game_editor.placed_objects[i] = NULL;
   }
 
   editor_render_list_update();
@@ -59,34 +59,34 @@ void editor_init() {
 int editor_placed_count() {
   int count = 0;
   for (int i = 0; i < EDITOR_MAX_PLACED_OBJECTS; i++) {
-    if (editor_placed_objects[i] != NULL) 
+    if (game_editor.placed_objects[i] != NULL) 
       count++;
   }
   return count;
 }
 
 void editor_next_piece() {
-  editor_current_index = (editor_current_index + 1) % EDITOR_OBJECTS_COUNT;
-  object* obj = editor_objects[editor_current_index];
-  vec3_copy(obj->position, editor_current_pos);
+  game_editor.current_index = (game_editor.current_index + 1) % EDITOR_OBJECTS_COUNT;
+  object* obj = game_editor.objects[game_editor.current_index];
+  vec3_copy(obj->position, game_editor.current_pos);
   editor_render_list_update();
 }
 
 void editor_rotate_piece() {
-  editor_current_angle = (editor_current_angle + 90) % 360;
+  game_editor.current_angle = (game_editor.current_angle + 90) % 360;
   editor_render_list_update();
 }
 
 void editor_move_piece(vec3 pos) {
-  object* obj = editor_objects[editor_current_index];
-  vec3_add(editor_current_pos, editor_current_pos, pos);
-  vec3_copy(obj->position, editor_current_pos);
+  object* obj = game_editor.objects[game_editor.current_index];
+  vec3_add(game_editor.current_pos, game_editor.current_pos, pos);
+  vec3_copy(obj->position, game_editor.current_pos);
 }
 
 static object* collide_with(object* o) {
   for (int i = 0; i < EDITOR_MAX_PLACED_OBJECTS; i++) {
-    if (editor_placed_objects[i] != NULL && physics_objects_collide(o, editor_placed_objects[i])) {
-      return editor_placed_objects[i];
+    if (game_editor.placed_objects[i] != NULL && physics_objects_collide(o, game_editor.placed_objects[i])) {
+      return game_editor.placed_objects[i];
     }
   }
   return NULL;
@@ -94,7 +94,7 @@ static object* collide_with(object* o) {
 
 static int editor_find_empty_index() {
   for (int i = 0; i < EDITOR_MAX_PLACED_OBJECTS; i++) {
-    if (editor_placed_objects[i] == NULL) {
+    if (game_editor.placed_objects[i] == NULL) {
       return i;
     }
   }
@@ -107,7 +107,7 @@ void editor_place_piece() {
     printf("[editor] no more space!");
   }
 
-  object* obj = editor_objects[editor_current_index];
+  object* obj = game_editor.objects[game_editor.current_index];
   if (collide_with(obj) != NULL) {
     printf("[editor] collision!\n");
     return;
@@ -117,34 +117,34 @@ void editor_place_piece() {
   obj_clone->position[1] = 0.0f;
   obj_clone->glowing = 0;
 
-  editor_placed_objects[i] = obj_clone;
+  game_editor.placed_objects[i] = obj_clone;
 
   editor_render_list_update();
 }
 
 void editor_remove_piece() {
-  object* o = editor_objects[editor_current_index];
+  object* o = game_editor.objects[game_editor.current_index];
   for (int i = 0; i < EDITOR_MAX_PLACED_OBJECTS; i++) {
-    if (editor_placed_objects[i] != NULL && physics_objects_collide(o, editor_placed_objects[i])) {
-      free(editor_placed_objects[i]);
-      editor_placed_objects[i] = NULL;
+    if (game_editor.placed_objects[i] != NULL && physics_objects_collide(o, game_editor.placed_objects[i])) {
+      free(game_editor.placed_objects[i]);
+      game_editor.placed_objects[i] = NULL;
     }
   }
   editor_render_list_update();
 }
 
 object* editor_current_object() {
-  object* obj = editor_objects[editor_current_index];
+  object* obj = game_editor.objects[game_editor.current_index];
   vec3 y_axis = {0.0f, 1.0f, 0.0f};
-  quat_rotate(obj->rotation, to_radians(editor_current_angle), y_axis);
+  quat_rotate(obj->rotation, to_radians(game_editor.current_angle), y_axis);
   return obj;
 }
 
 void editor_free() {
   for (int i = 0; i < EDITOR_OBJECTS_COUNT; i++) {
-    free(editor_objects[i]);
+    free(game_editor.objects[i]);
   }
   for (int i = 0; i < EDITOR_MAX_PLACED_OBJECTS; i++) {
-    free(editor_placed_objects[i]);
+    free(game_editor.placed_objects[i]);
   }
 }

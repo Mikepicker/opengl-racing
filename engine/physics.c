@@ -58,12 +58,18 @@ aabb physics_compute_aabb(object* object) {
 }
 
 int physics_objects_collide(object* a, object* b) {
-  return a->position[0] + a->box.min_x < b->position[0] + b->box.max_x &&
-    a->position[0] + a->box.max_x > b->position[0] + b->box.min_x &&
-    a->position[1] + a->box.min_y < b->position[1] + b->box.max_y &&
-    a->position[1] + a->box.max_y > b->position[1] + b->box.min_y &&
-    a->position[2] + a->box.min_z < b->position[2] + b->box.max_z &&
-    a->position[2] + a->box.max_z > b->position[2] + b->box.min_z;
+  aabb box_a = a->box;
+  aabb box_b = b->box;
+
+  object_aabb_to_object_space(a, box_a);
+  object_aabb_to_object_space(b, box_b);
+
+  return box_a.min_x < box_b.max_x &&
+    box_a.max_x > box_b.min_x &&
+    box_a.min_y < box_b.max_y &&
+    box_a.max_y > box_b.min_y &&
+    box_a.min_z < box_b.max_z &&
+    box_a.max_z > box_b.min_z;
 }
 
 int physics_point_in_triangle(vec3 p, vec3 v0, vec3 v1, vec3 v2) {
@@ -139,6 +145,9 @@ mesh* physics_ray_hit_mesh(const ray ray, const object* o) {
 
       // check triangle behind the ray
       if (t < 0) continue;
+
+      // check ray length
+      if (t > ray.length) continue;
 
       // compute intersection point
       vec3 p, tdir;

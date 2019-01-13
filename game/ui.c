@@ -32,6 +32,8 @@ void ui_render() {
 
   nk_glfw3_new_frame();
 
+  camera* cam = &microdrag.game_camera;
+
   /* GUI */
   if (nk_begin(ctx, "Microdrag", nk_rect(50, 50, 300, 300),
         NK_WINDOW_BORDER|NK_WINDOW_MOVABLE|NK_WINDOW_SCALABLE|
@@ -47,7 +49,17 @@ void ui_render() {
 
     nk_layout_row_static(ctx, 30, 120, 1);
     if (nk_button_label(ctx, "Editor on"))
-      editor_set_enabled(editor_enabled == 0 ? 1 : 0);
+      editor_set_enabled(game_editor.enabled == 0 ? 1 : 0);
+
+    nk_layout_row_static(ctx, 30, 120, 1);
+    if (nk_button_label(ctx, "Reset camera")) {
+      cam->pos[0] = 0.0f; 
+      cam->pos[1] = 2.0f; 
+      cam->pos[2] = 9.0f; 
+      cam->front[0] = 0.0f;
+      cam->front[1] = 0.0f;
+      cam->front[2] = -1.0f;
+    }
 
     nk_layout_row_dynamic(ctx, 30, 2);
     if (nk_option_label(ctx, "easy", op == EASY)) op = EASY;
@@ -71,7 +83,7 @@ void ui_render() {
     }
 
     char camera_pos[128];
-    snprintf(camera_pos, 128, "camera: %f %f %f\n", ui_camera.pos[0], ui_camera.pos[1], ui_camera.pos[2]);
+    snprintf(camera_pos, 128, "camera: %f %f %f\n", cam->pos[0], cam->pos[1], cam->pos[2]);
     nk_label(ctx, camera_pos, NK_TEXT_LEFT);
 
   }
@@ -83,5 +95,3 @@ void ui_render() {
 void ui_free() {
   nk_glfw3_shutdown();
 }
-
-void ui_set_camera(camera cam) { ui_camera = cam; }

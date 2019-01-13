@@ -5,7 +5,7 @@ void object_get_transform(const object* o, mat4x4 m) {
 
   // scale
   mat4x4_identity(m);
-  //mat4x4_scale(m, m, o->scale);
+  mat4x4_scale(m, m, o->scale);
 
   // translate
   mat4x4 translation;
@@ -35,6 +35,15 @@ void object_vec3_to_object_space(const object* o, vec3 v) {
   v[0] = r[0];
   v[1] = r[1];
   v[2] = r[2];
+}
+
+void object_aabb_to_object_space(const object* o, aabb box) {
+  vec3 x = { box.min_x, box.max_x };
+  vec3 y = { box.min_y, box.max_y };
+  vec3 z = { box.min_z, box.max_z };
+  object_vec3_to_object_space(o, x);
+  object_vec3_to_object_space(o, y);
+  object_vec3_to_object_space(o, z);
 }
 
 void object_free(object* o) {

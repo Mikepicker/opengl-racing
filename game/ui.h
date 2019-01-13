@@ -17,18 +17,16 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
+#include "game.h"
 #include "editor.h"
 
 #define MAX_VERTEX_BUFFER 512 * 1024
 #define MAX_ELEMENT_BUFFER 128 * 1024
 
-camera ui_camera;
 int ui_debug;
 
 void ui_init();
 void ui_render();
 void ui_free();
-
-void ui_set_camera(camera cam);
 
 #endif
