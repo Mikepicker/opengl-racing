@@ -32,6 +32,7 @@ uniform float time;
 
 // render params
 uniform int glowing;
+uniform vec3 glow_color;
 
 void main()
 {
@@ -61,6 +62,7 @@ void main()
   // glowing effect
   if (glowing == 1) {
     result += vec3((1.0f + sin(time * 5.0f)) / 8.0f);
+    result *= glow_color;
   }
 
   FragColor = vec4(result, 1.0f);

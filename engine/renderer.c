@@ -305,6 +305,7 @@ void renderer_render_objects(object *objects[], int objects_length, light *light
 
     // render params
     glUniform1i(glGetUniformLocation(shader_id, "glowing"), o->glowing);
+    glUniform3fv(glGetUniformLocation(shader_id, "glow_color"), 1, o->glow_color);
 
     for (int i = 0; i < o->num_meshes; i++) {
       mesh* mesh = &o->meshes[i];
@@ -345,8 +346,4 @@ void renderer_render_objects(object *objects[], int objects_length, light *light
 
   // poll events
   glfwPollEvents();
-}
-
-void renderer_capture_mouse(int toggle) {
-  glfwSetInputMode(window, GLFW_CURSOR, toggle ? GLFW_CURSOR_NORMAL : GLFW_CURSOR_DISABLED);
 }

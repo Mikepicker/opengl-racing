@@ -37,13 +37,13 @@ void object_vec3_to_object_space(const object* o, vec3 v) {
   v[2] = r[2];
 }
 
-void object_aabb_to_object_space(const object* o, aabb box) {
-  vec3 x = { box.min_x, box.max_x };
-  vec3 y = { box.min_y, box.max_y };
-  vec3 z = { box.min_z, box.max_z };
-  object_vec3_to_object_space(o, x);
-  object_vec3_to_object_space(o, y);
-  object_vec3_to_object_space(o, z);
+void object_aabb_to_object_space(const object* o, aabb* box) {
+  box->min_x += o->position[0];
+  box->max_x += o->position[0];
+  box->min_y += o->position[1];
+  box->max_y += o->position[1];
+  box->min_z += o->position[2];
+  box->max_z += o->position[2];
 }
 
 void object_free(object* o) {

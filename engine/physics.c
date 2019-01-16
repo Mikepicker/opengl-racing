@@ -50,8 +50,8 @@ aabb physics_compute_aabb(object* object) {
   float h = aabb.max_y - aabb.min_y;
   if (h < 0.1f) {
     float diff_h = fabsf(h - 0.1f);
-    aabb.min_y += diff_h / 2;
-    aabb.max_y -= diff_h / 2;
+    aabb.min_y -= diff_h / 2;
+    aabb.max_y += diff_h / 2;
   }
 
   return aabb;
@@ -61,8 +61,8 @@ int physics_objects_collide(object* a, object* b) {
   aabb box_a = a->box;
   aabb box_b = b->box;
 
-  object_aabb_to_object_space(a, box_a);
-  object_aabb_to_object_space(b, box_b);
+  object_aabb_to_object_space(a, &box_a);
+  object_aabb_to_object_space(b, &box_b);
 
   return box_a.min_x < box_b.max_x &&
     box_a.max_x > box_b.min_x &&

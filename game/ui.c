@@ -17,9 +17,9 @@
 struct nk_context *ctx;
 struct nk_colorf bg;
 
-void ui_init(GLFWwindow* window) {
+void ui_init() {
 
- ctx = nk_glfw3_init(window, NK_GLFW3_INSTALL_CALLBACKS);
+ ctx = nk_glfw3_init(microdrag.window, NK_GLFW3_INSTALL_CALLBACKS);
  {struct nk_font_atlas *atlas;
    nk_glfw3_font_stash_begin(&atlas);
    nk_glfw3_font_stash_end();}

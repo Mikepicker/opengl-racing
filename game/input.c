@@ -7,37 +7,14 @@ void input_init() {
   game_input.mouse_last_y = GAME_HEIGHT / 2.0f;
   game_input.fov = 45.0f;
   game_input.capture_cursor = 1;
+  game_input.first_mouse = 1;
+  game_input.sensitivity = 0.01f;
 }
 
 void input_key_callback(GLFWwindow* window, int key, int scancode, int action, int mods) {
-  float camera_delta = microdrag.game_camera.speed * microdrag.delta_time;
   if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
     glfwSetWindowShouldClose(window, GLFW_TRUE);
-  if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
-    vec3 vec3_scaled;
-    vec3_scale(vec3_scaled, microdrag.game_camera.front, camera_delta);
-    vec3_add(microdrag.game_camera.pos, microdrag.game_camera.pos, vec3_scaled);
-  }
-  if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
-    vec3 vec3_temp;
-    vec3_scale(vec3_temp, microdrag.game_camera.front, camera_delta);
-    vec3_sub(microdrag.game_camera.pos, microdrag.game_camera.pos, vec3_temp);
-  }
-  if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
-    vec3 vec3_crossed, vec3_scaled, vec3_normalized;
-    vec3_mul_cross(vec3_crossed, microdrag.game_camera.front, microdrag.game_camera.up);
-    vec3_norm(vec3_normalized, vec3_crossed);
-    vec3_scale(vec3_scaled, vec3_normalized, camera_delta);
-    vec3_sub(microdrag.game_camera.pos, microdrag.game_camera.pos, vec3_scaled);
-  }
-  if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
-    vec3 vec3_crossed, vec3_scaled, vec3_normalized;
-    vec3_mul_cross(vec3_crossed, microdrag.game_camera.front, microdrag.game_camera.up);
-    vec3_norm(vec3_normalized, vec3_crossed);
-    vec3_scale(vec3_scaled, vec3_normalized, camera_delta);
-    vec3_add(microdrag.game_camera.pos, microdrag.game_camera.pos, vec3_scaled);
-  }
-
+  
   // editor
   if (game_editor.enabled && action == GLFW_RELEASE) {
     vec3 pos = { 0.0f, 0.0f, 0.0f };
@@ -65,7 +42,7 @@ void input_key_callback(GLFWwindow* window, int key, int scancode, int action, i
   if (action == GLFW_RELEASE) {
     if (key == GLFW_KEY_C) {
       game_input.capture_cursor = !(glfwGetInputMode(window, GLFW_CURSOR) == GLFW_CURSOR_NORMAL);
-      renderer_capture_mouse(game_input.capture_cursor);
+      glfwSetInputMode(window, GLFW_CURSOR, game_input.capture_cursor ? GLFW_CURSOR_NORMAL : GLFW_CURSOR_DISABLED);
     }
   }
 }
@@ -77,7 +54,7 @@ void input_mouse_callback(GLFWwindow* window, double x_pos, double y_pos)
   if (game_input.first_mouse == 1) {
     game_input.mouse_last_x = x_pos;
     game_input.mouse_last_y = y_pos;
-    game_input.first_mouse = false;
+    game_input.first_mouse = 0;
   }
 
   float x_offset = x_pos - game_input.mouse_last_x;
@@ -100,9 +77,38 @@ void input_mouse_callback(GLFWwindow* window, double x_pos, double y_pos)
   microdrag.game_camera.front[0] = cosf(game_input.yaw) * cosf(game_input.pitch);
   microdrag.game_camera.front[1] = sinf(game_input.pitch);
   microdrag.game_camera.front[2] = sinf(game_input.yaw) * cosf(game_input.pitch);
+  //debug_print_vec3(microdrag.game_camera.front);
 }
 
 void input_mouse_button_callback(GLFWwindow* window, int button, int action, int mods) {
-  if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS)
-    renderer_capture_mouse(!(glfwGetInputMode(window, GLFW_CURSOR) == GLFW_CURSOR_NORMAL));
+}
+
+void input_update() {
+  GLFWwindow* window = microdrag.window;
+  float camera_delta = microdrag.game_camera.speed * microdrag.delta_time;
+
+  if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
+    vec3 vec3_scaled;
+    vec3_scale(vec3_scaled, microdrag.game_camera.front, camera_delta);
+    vec3_add(microdrag.game_camera.pos, microdrag.game_camera.pos, vec3_scaled);
+  }
+  if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
+    vec3 vec3_temp;
+    vec3_scale(vec3_temp, microdrag.game_camera.front, camera_delta);
+    vec3_sub(microdrag.game_camera.pos, microdrag.game_camera.pos, vec3_temp);
+  }
+  if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
+    vec3 vec3_crossed, vec3_scaled, vec3_normalized;
+    vec3_mul_cross(vec3_crossed, microdrag.game_camera.front, microdrag.game_camera.up);
+    vec3_norm(vec3_normalized, vec3_crossed);
+    vec3_scale(vec3_scaled, vec3_normalized, camera_delta);
+    vec3_sub(microdrag.game_camera.pos, microdrag.game_camera.pos, vec3_scaled);
+  }
+  if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
+    vec3 vec3_crossed, vec3_scaled, vec3_normalized;
+    vec3_mul_cross(vec3_crossed, microdrag.game_camera.front, microdrag.game_camera.up);
+    vec3_norm(vec3_normalized, vec3_crossed);
+    vec3_scale(vec3_scaled, vec3_normalized, camera_delta);
+    vec3_add(microdrag.game_camera.pos, microdrag.game_camera.pos, vec3_scaled);
+  }
 }

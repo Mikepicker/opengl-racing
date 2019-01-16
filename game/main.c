@@ -4,18 +4,11 @@
 #include "ui.h"
 #include "editor.h"
 #include "input.h"
+#include "entities.h"
+#include "data/car.h"
 
 // game objects
-object* car;
-
-void init_track() {
-  car = importer_load_obj("assets/racing/raceCarRed.obj");
-  vec3 pos_2 = {0.0f, 0.0f, 0.0f};
-  vec3_copy(car->position, pos_2);
-  //car->scale = 0.25f;
-  car->box = physics_compute_aabb(car);
-  renderer_add_object(car);
-}
+car* red_car;
 
 int main()
 {
@@ -29,11 +22,11 @@ int main()
   // init game
   game_init(window);
 
-  // import obj
-  init_track();
+  // init input
+  input_init();
 
   // init ui
-  ui_init(window);
+  ui_init(&microdrag);
 
   // init editor
   editor_init();
@@ -50,10 +43,12 @@ int main()
 
   lights[0] = &l1;
 
+  // init car
+  vec3 car_pos = {-10.0f, 0.0f, 0.0f};
+  red_car = entities_new_car(car_pos);
+
   int macMoved = 0;
   while (!renderer_should_close()) {
-    // per-frame time logic
-    // --------------------
     float current_frame = glfwGetTime();
     microdrag.delta_time = current_frame - microdrag.last_frame;
     microdrag.last_frame = current_frame;
@@ -65,30 +60,24 @@ int main()
     // t1.position[1] = sinf((float)glfwGetTime());
     // quat_rotate(t2.rotation, (float)glfwGetTime(), z_axis);
     
-    car->position[0] = sinf((float)glfwGetTime());
-    quat_rotate(car->rotation, (float)glfwGetTime(), y_axis);
+    // test car
+    red_car->obj->position[0] += red_car->speed;
+    quat_rotate(red_car->obj->rotation, (float)glfwGetTime(), y_axis);
 
-    // test road collision
-    for (int i = 0; i < EDITOR_MAX_PLACED_OBJECTS; i++) {
-      object* o = game_editor.placed_objects[i];
-      if (o != NULL) {
-        // vec3 p = { -0.1f, 10.0f, 0 };
-        vec3 p = { car->position[0], car->position[1], car->position[2] };
-        ray ray_test;
-        vec3 ray_dir = { 0, -1.0f, 0 };
-        vec3_copy(ray_test.o, p);
-        vec3_copy(ray_test.dir, ray_dir);
-        ray_test.length = 10;
-        mesh* m = physics_ray_hit_mesh(ray_test, o);
-        if (m != NULL) {
-          //printf("COLLIDE MESH %s\n", m->mat.name);
-        }
-      }
-    }
+    // input
+    input_update();
+
+    // update editor
+    editor_update();
+
+    // update entities
+    car* cars[1];
+    cars[0] = red_car;
+    entities_update(cars, 1, game_editor.placed_objects, game_editor.placed_objects_size);
 
     // render entities
     render_list_clear(microdrag.game_render_list);
-    render_list_add(microdrag.game_render_list, car);
+    render_list_add(microdrag.game_render_list, red_car->obj);
     render_list_add_batch(microdrag.game_render_list, game_editor.render_list, game_editor.render_list_size);
 
     // render editor

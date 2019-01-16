@@ -24,13 +24,14 @@ void editor_set_enabled(int on) {
   editor_render_list_update();
 }
 
+
 void editor_init() {
   const char* editor_objects_names[EDITOR_OBJECTS_COUNT] = {
     "assets/racing/roadStraight.obj",
     "assets/racing/roadCornerSmall.obj",
     "assets/racing/roadCornerLarge.obj",
-    "assets/racing/roadCurved.obj",
-    "assets/racing/grass.obj"
+    "assets/racing/grass.obj",
+    "assets/racing/pylon.obj",
   };
 
   game_editor.enabled = 0;
@@ -40,11 +41,17 @@ void editor_init() {
   game_editor.current_pos[0] = 0.0f;
   game_editor.current_pos[1] = 0.001f; // y to 0.001 to avoid z-fighting
   game_editor.current_pos[2] = 0.0f;
+  
+  game_editor.placed_objects_size = 0;
 
   for (int i = 0; i < EDITOR_OBJECTS_COUNT; i++) {
     game_editor.objects[i] = importer_load_obj(editor_objects_names[i]);
     vec3_copy(game_editor.objects[i]->position, game_editor.current_pos);
+
     game_editor.objects[i]->glowing = 1;
+    vec3 glow_color = { 1.0f, 1.0f, 1.0f };
+    vec3_copy(game_editor.objects[i]->glow_color, glow_color);
+
     game_editor.objects[i]->box = physics_compute_aabb(game_editor.objects[i]);
     renderer_add_object(game_editor.objects[i]);
   }
@@ -54,15 +61,6 @@ void editor_init() {
   }
 
   editor_render_list_update();
-}
-
-int editor_placed_count() {
-  int count = 0;
-  for (int i = 0; i < EDITOR_MAX_PLACED_OBJECTS; i++) {
-    if (game_editor.placed_objects[i] != NULL) 
-      count++;
-  }
-  return count;
 }
 
 void editor_next_piece() {
@@ -90,6 +88,14 @@ static object* collide_with(object* o) {
     }
   }
   return NULL;
+}
+
+void editor_update() {
+  object* obj = game_editor.objects[game_editor.current_index];
+  vec3 red = { 1.0f, 0, 0 };
+  vec3 white = { 1.0f, 1.0f, 1.0f };
+  vec3_copy(obj->glow_color, white);
+  if (collide_with(obj) != NULL) vec3_copy(obj->glow_color, red);
 }
 
 static int editor_find_empty_index() {
@@ -120,6 +126,7 @@ void editor_place_piece() {
   game_editor.placed_objects[i] = obj_clone;
 
   editor_render_list_update();
+  game_editor.placed_objects_size++;
 }
 
 void editor_remove_piece() {
@@ -128,6 +135,7 @@ void editor_remove_piece() {
     if (game_editor.placed_objects[i] != NULL && physics_objects_collide(o, game_editor.placed_objects[i])) {
       free(game_editor.placed_objects[i]);
       game_editor.placed_objects[i] = NULL;
+      game_editor.placed_objects_size--;
     }
   }
   editor_render_list_update();

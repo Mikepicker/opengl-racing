@@ -22,4 +22,7 @@ void input_key_callback(GLFWwindow* window, int key, int scancode, int action, i
 void input_mouse_callback(GLFWwindow* window, double x_pos, double y_pos);
 void input_mouse_button_callback(GLFWwindow* window, int button, int action, int mods);
 
+void input_init();
+void input_update();
+
 #endif
