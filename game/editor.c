@@ -42,8 +42,6 @@ void editor_init() {
   game_editor.current_pos[1] = 0.001f; // y to 0.001 to avoid z-fighting
   game_editor.current_pos[2] = 0.0f;
   
-  game_editor.placed_objects_size = 0;
-
   for (int i = 0; i < EDITOR_OBJECTS_COUNT; i++) {
     game_editor.objects[i] = importer_load_obj(editor_objects_names[i]);
     vec3_copy(game_editor.objects[i]->position, game_editor.current_pos);
@@ -126,7 +124,6 @@ void editor_place_piece() {
   game_editor.placed_objects[i] = obj_clone;
 
   editor_render_list_update();
-  game_editor.placed_objects_size++;
 }
 
 void editor_remove_piece() {
@@ -135,7 +132,6 @@ void editor_remove_piece() {
     if (game_editor.placed_objects[i] != NULL && physics_objects_collide(o, game_editor.placed_objects[i])) {
       free(game_editor.placed_objects[i]);
       game_editor.placed_objects[i] = NULL;
-      game_editor.placed_objects_size--;
     }
   }
   editor_render_list_update();

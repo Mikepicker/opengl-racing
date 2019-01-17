@@ -194,12 +194,13 @@ static void render_aabb(object* o) {
 
   mat4x4 translation;
   vec3 pos = {
-    (o->position[0] + center[0]) / size[0],
-    (o->position[1] + center[1]) / size[1],
-    (o->position[2] + center[2]) / size[2]
+    (o->position[0] * o->scale + center[0]) / size[0],
+    (o->position[1] * o->scale + center[1]) / size[1],
+    (o->position[2] * o->scale + center[2]) / size[2]
   };
 
-  mat4x4_scale(m, m, o->scale);
+  //mat4x4_scale(m, m, o->scale);
+  debug_print_vec3(o->position);
   mat4x4_translate(translation, pos[0], pos[1], pos[2]);
   mat4x4_mul(m, m, translation);
 

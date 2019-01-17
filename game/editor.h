@@ -13,7 +13,6 @@ typedef struct {
   object* render_list[EDITOR_MAX_PLACED_OBJECTS + 1];
   unsigned int current_index;
   unsigned int current_angle;
-  unsigned int placed_objects_size;
   unsigned int render_list_size;
   vec3 current_pos;
 } editor;

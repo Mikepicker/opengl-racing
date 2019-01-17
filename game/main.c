@@ -44,7 +44,7 @@ int main()
   lights[0] = &l1;
 
   // init car
-  vec3 car_pos = {-10.0f, 0.0f, 0.0f};
+  vec3 car_pos = {-5.0f, 0.0f, 0.0f};
   red_car = entities_new_car(car_pos);
 
   int macMoved = 0;
@@ -73,7 +73,7 @@ int main()
     // update entities
     car* cars[1];
     cars[0] = red_car;
-    entities_update(cars, 1, game_editor.placed_objects, game_editor.placed_objects_size);
+    entities_update(cars, 1, game_editor.placed_objects, EDITOR_MAX_PLACED_OBJECTS);
 
     // render entities
     render_list_clear(microdrag.game_render_list);

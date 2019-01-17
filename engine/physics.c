@@ -1,29 +1,41 @@
 #include "physics.h"
 
+static vertex scale_vertex(float scale, vertex v) {
+  vec4 v4 = { v.x, v.y, v.z, 1.0f };
+  mat4x4 m;
+  mat4x4_identity(m);
+  mat4x4_scale(m, m, scale);
+  vec4 scaled_v4;
+  mat4x4_mul_vec4(scaled_v4, m, v4);
+  vertex res = { .x = scaled_v4[0], .y = scaled_v4[1], .z = scaled_v4[2] };
+  return res;
+}
+
 aabb physics_compute_aabb(object* object) {
   aabb aabb;
 
   mesh* first_mesh = &object->meshes[0];
-  float min_x = first_mesh->vertices[0].x;
-  float max_x = first_mesh->vertices[0].x;
-  float min_y = first_mesh->vertices[0].y;
-  float max_y = first_mesh->vertices[0].y;
-  float min_z = first_mesh->vertices[0].z;
-  float max_z = first_mesh->vertices[0].z;
+  vertex first_vertex = scale_vertex(object->scale, first_mesh->vertices[0]);
+  float min_x = first_vertex.x;
+  float max_x = first_vertex.x;
+  float min_y = first_vertex.y;
+  float max_y = first_vertex.y;
+  float min_z = first_vertex.z;
+  float max_z = first_vertex.y;
 
   for (int i = 0; i < object->num_meshes; i++) {
     mesh* mesh = &object->meshes[i];
     for (int j = 0; j < mesh->num_vertices; j++) {
-      vertex* v = &mesh->vertices[j];
+      vertex v = scale_vertex(object->scale, mesh->vertices[j]);
 
-      if (v->x < min_x) { min_x = v->x; } 
-      if (v->x > max_x) { max_x = v->x; }
+      if (v.x < min_x) { min_x = v.x; } 
+      if (v.x > max_x) { max_x = v.x; }
 
-      if (v->y < min_y) { min_y = v->y; } 
-      if (v->y > max_y) { max_y = v->y; }
+      if (v.y < min_y) { min_y = v.y; } 
+      if (v.y > max_y) { max_y = v.y; }
 
-      if (v->z < min_z) { min_z = v->z; } 
-      if (v->z > max_z) { max_z = v->z; }
+      if (v.z < min_z) { min_z = v.z; } 
+      if (v.z > max_z) { max_z = v.z; }
     }
   } 
 
@@ -58,11 +70,8 @@ aabb physics_compute_aabb(object* object) {
 }
 
 int physics_objects_collide(object* a, object* b) {
-  aabb box_a = a->box;
-  aabb box_b = b->box;
-
-  object_aabb_to_object_space(a, &box_a);
-  object_aabb_to_object_space(b, &box_b);
+  aabb box_a = object_aabb_to_object_space(a, a->box);
+  aabb box_b = object_aabb_to_object_space(b, b->box);
 
   return box_a.min_x < box_b.max_x &&
     box_a.max_x > box_b.min_x &&

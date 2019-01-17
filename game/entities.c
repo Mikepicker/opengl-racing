@@ -3,6 +3,7 @@
 car* entities_new_car(vec3 pos) {
   car* c = malloc(sizeof(car));
   c->obj = importer_load_obj("assets/racing/raceCarRed.obj");
+  c->obj->scale = 0.5;
   c->speed = CAR_ROAD_SPEED;
   vec3_copy(c->obj->position, pos);
   c->obj->box = physics_compute_aabb(c->obj);
@@ -27,17 +28,18 @@ void entities_update(car* cars[], int size_cars, object* track_pieces[], int siz
     car->speed = CAR_ROAD_SPEED;
     for (int j = 0; j < size_track_pieces; j++) {
       object* track_piece = track_pieces[j];
-      if (track_piece == NULL) continue;
-      mesh* m = physics_ray_hit_mesh(compute_car_ray(car), track_piece);
-      if (m != NULL) {
-        if (strcmp(m->mat.name, "grass") == 0) {
-          car->speed = CAR_GRASS_SPEED;
+      if (track_piece != NULL && physics_objects_collide(car->obj, track_piece)) {
+        mesh* m = physics_ray_hit_mesh(compute_car_ray(car), track_piece);
+        if (m != NULL) {
+          if (strcmp(m->mat.name, "grass") == 0) {
+            car->speed = CAR_GRASS_SPEED;
+          } else {
+            car->speed = CAR_ROAD_SPEED;
+          }
+          break;
         } else {
           car->speed = CAR_ROAD_SPEED;
         }
-        break;
-      } else {
-        car->speed = CAR_ROAD_SPEED;
       }
     }
   }
