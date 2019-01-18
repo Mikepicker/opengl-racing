@@ -39,12 +39,12 @@ void object_vec3_to_object_space(const object* o, vec3 v) {
 
 aabb object_aabb_to_object_space(const object* o, aabb box) {
   aabb res = box;
-  res.min_x += o->position[0];
-  res.max_x += o->position[0];
-  res.min_y += o->position[1];
-  res.max_y += o->position[1];
-  res.min_z += o->position[2];
-  res.max_z += o->position[2];
+  res.min_x += o->position[0] * o->scale;
+  res.max_x += o->position[0] * o->scale;
+  res.min_y += o->position[1] * o->scale;
+  res.max_y += o->position[1] * o->scale;
+  res.min_z += o->position[2] * o->scale;
+  res.max_z += o->position[2] * o->scale;
   return res;
 }
 

@@ -3,7 +3,7 @@
 car* entities_new_car(vec3 pos) {
   car* c = malloc(sizeof(car));
   c->obj = importer_load_obj("assets/racing/raceCarRed.obj");
-  c->obj->scale = 0.5;
+  c->obj->scale = 0.25;
   c->speed = CAR_ROAD_SPEED;
   vec3_copy(c->obj->position, pos);
   c->obj->box = physics_compute_aabb(c->obj);
