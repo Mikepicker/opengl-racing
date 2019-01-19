@@ -3,12 +3,15 @@
 
 #include "../../engine/steve.h"
 
-#define CAR_ROAD_SPEED 0.01f
-#define CAR_GRASS_SPEED 0.001f
+#define CAR_ACCEL 0.1f
+#define CAR_TURN_RATE 2.5f
+#define CAR_MAX_SPEED 0.7f
+#define CAR_MAX_SPEED_GRASS 0.05f
 
 typedef struct {
   object* obj;
-  ray road_detector;
+  vec3 dir;
+  float accel;
   float speed;
 } car;
 

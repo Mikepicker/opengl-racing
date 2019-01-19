@@ -90,8 +90,9 @@ void input_mouse_button_callback(GLFWwindow* window, int button, int action, int
 
 void input_update() {
   GLFWwindow* window = microdrag.window;
-  float camera_delta = microdrag.game_camera.speed * microdrag.delta_time;
 
+  // camera
+  float camera_delta = microdrag.game_camera.speed * microdrag.delta_time;
   if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
     vec3 vec3_scaled;
     vec3_scale(vec3_scaled, microdrag.game_camera.front, camera_delta);
@@ -115,5 +116,28 @@ void input_update() {
     vec3_norm(vec3_normalized, vec3_crossed);
     vec3_scale(vec3_scaled, vec3_normalized, camera_delta);
     vec3_add(microdrag.game_camera.pos, microdrag.game_camera.pos, vec3_scaled);
+  }
+
+  // car
+  vec3 y_axis = { 0.0f, 1.0f, 0.0f };
+  quat rot, res;
+  if (!game_editor.enabled) {
+    if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) {
+      microdrag.cars[0].accel = CAR_ACCEL;
+    } else if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS) {
+      microdrag.cars[0].accel = -CAR_ACCEL;
+    } else {
+      microdrag.cars[0].accel = 0.0f;
+    }
+    
+    if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS) {
+      quat_rotate(rot, to_radians(CAR_TURN_RATE), y_axis);
+      quat_mul(res, microdrag.cars[0].obj->rotation, rot);
+      vec4_copy(microdrag.cars[0].obj->rotation, res);
+    } else if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS) {
+      quat_rotate(rot, to_radians(-CAR_TURN_RATE), y_axis);
+      quat_mul(res, microdrag.cars[0].obj->rotation, rot);
+      vec4_copy(microdrag.cars[0].obj->rotation, res);
+    } 
   }
 }

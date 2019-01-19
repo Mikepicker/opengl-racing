@@ -4,7 +4,8 @@ car* entities_new_car(vec3 pos) {
   car* c = malloc(sizeof(car));
   c->obj = importer_load_obj("assets/racing/raceCarRed.obj");
   c->obj->scale = 0.25;
-  c->speed = CAR_ROAD_SPEED;
+  c->accel = 0.0f;
+  c->speed = 0.0f;
   vec3_copy(c->obj->position, pos);
   c->obj->box = physics_compute_aabb(c->obj);
   renderer_add_object(c->obj);
@@ -25,27 +26,49 @@ static ray compute_car_ray(car* c) {
 void entities_update() {
   for (int i = 0; i < microdrag.num_cars; i++) {
     car* car = &microdrag.cars[i];
-    car->speed = CAR_ROAD_SPEED;
 
-    car->obj->position[0] += car->speed;
     vec3 y_axis = {0.0f, 1.0f, 0.0f};
-    quat_rotate(car->obj->rotation, (float)glfwGetTime(), y_axis);
+    //quat_rotate(car->obj->rotation, (float)glfwGetTime(), y_axis);
 
+    // rotation
+    vec4 front = { 0.0f, 0.0f, -1.0f, 1.0f };
+    vec4 vel;
+    mat4x4 m;
+    mat4x4_from_quat(m, car->obj->rotation);
+    mat4x4_mul_vec4(vel, m, front);
+    vec4_norm(vel, vel);
+
+    // speed
+    car->speed += car->accel * microdrag.delta_time;
+    if (fabsf(car->speed) > CAR_MAX_SPEED) car->speed = (car->speed / fabsf(car->speed)) * CAR_MAX_SPEED;
+
+    // damping
+    if (car->accel == 0) {
+      car->speed -= car->speed * 0.01f;
+    }
+
+    // collide with track
+    int on_grass = 1;
     for (int j = 0; j < EDITOR_MAX_PLACED_OBJECTS; j++) {
       object* track_piece = game_editor.placed_objects[j];
       if (track_piece != NULL && physics_objects_collide(car->obj, track_piece)) {
         mesh* m = physics_ray_hit_mesh(compute_car_ray(car), track_piece);
         if (m != NULL) {
-          if (strcmp(m->mat.name, "grass") == 0) {
-            car->speed = CAR_GRASS_SPEED;
-          } else {
-            car->speed = CAR_ROAD_SPEED;
+          if (strcmp(m->mat.name, "grass") != 0) {
+            on_grass = 0;
           }
           break;
-        } else {
-          car->speed = CAR_ROAD_SPEED;
         }
       }
     }
+
+    if (on_grass) {
+      if (fabsf(car->speed) > CAR_MAX_SPEED_GRASS)
+        car->speed = (car->speed / fabsf(car->speed)) * CAR_MAX_SPEED_GRASS;
+    }
+
+    // apply velocity
+    vec4_scale(vel, vel, car->speed);
+    vec3_add(car->obj->position, car->obj->position, vel);
   }
 }
