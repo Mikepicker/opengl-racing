@@ -45,6 +45,11 @@ void input_key_callback(GLFWwindow* window, int key, int scancode, int action, i
       glfwSetInputMode(window, GLFW_CURSOR, game_input.capture_cursor ? GLFW_CURSOR_NORMAL : GLFW_CURSOR_DISABLED);
     }
   }
+
+  // recompile shader
+  if (action == GLFW_RELEASE && key == GLFW_KEY_O) {
+    renderer_recompile_shader(); 
+  }
 }
 
 void input_mouse_callback(GLFWwindow* window, double x_pos, double y_pos)

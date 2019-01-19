@@ -90,13 +90,17 @@ int renderer_init(char* title, int width, int height, void* key_callback, void* 
   set_opengl_state();
 
   // compile shaders
-  shader_compile("../engine/shaders/lighting.vs", "../engine/shaders/lighting.fs", &shader_id);
+  renderer_recompile_shader();
 
   return 0;
 }
 
 void renderer_cleanup() {
   glfwTerminate();
+}
+
+void renderer_recompile_shader() {
+  shader_compile("../engine/shaders/normal.vs", "../engine/shaders/toon.fs", &shader_id);
 }
 
 int renderer_should_close() {
@@ -243,9 +247,8 @@ void renderer_render_objects(object *objects[], int objects_length, light *light
   uniform_specular = glGetUniformLocation(shader_id, "material.specular");
 
   // camera position
-  vec3 camera_pos = {0.0f, 0.0f, 0.0f};
   GLint uniform_camera_pos = glGetUniformLocation(shader_id, "cameraPos");
-  glUniform3fv(uniform_camera_pos, 1, (const GLfloat*) camera_pos);
+  glUniform3fv(uniform_camera_pos, 1, (const GLfloat*) camera->pos);
 
   // process lights
   glUniform1i(glGetUniformLocation(shader_id, "lightsNr"), lights_length);

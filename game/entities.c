@@ -22,12 +22,17 @@ static ray compute_car_ray(car* c) {
   return r;
 }
 
-void entities_update(car* cars[], int size_cars, object* track_pieces[], int size_track_pieces) {
-  for (int i = 0; i < size_cars; i++) {
-    car* car = cars[i];
+void entities_update() {
+  for (int i = 0; i < microdrag.num_cars; i++) {
+    car* car = &microdrag.cars[i];
     car->speed = CAR_ROAD_SPEED;
-    for (int j = 0; j < size_track_pieces; j++) {
-      object* track_piece = track_pieces[j];
+
+    car->obj->position[0] += car->speed;
+    vec3 y_axis = {0.0f, 1.0f, 0.0f};
+    quat_rotate(car->obj->rotation, (float)glfwGetTime(), y_axis);
+
+    for (int j = 0; j < EDITOR_MAX_PLACED_OBJECTS; j++) {
+      object* track_piece = game_editor.placed_objects[j];
       if (track_piece != NULL && physics_objects_collide(car->obj, track_piece)) {
         mesh* m = physics_ray_hit_mesh(compute_car_ray(car), track_piece);
         if (m != NULL) {

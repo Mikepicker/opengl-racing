@@ -61,6 +61,16 @@ void ui_render() {
       cam->front[2] = -1.0f;
     }
 
+    nk_layout_row_static(ctx, 30, 120, 1);
+    if (nk_button_label(ctx, "Compile shader")) {
+      renderer_recompile_shader();
+    }
+
+    nk_layout_row_static(ctx, 30, 120, 1);
+    if (nk_button_label(ctx, "Set light here")) {
+      vec3_copy(microdrag.lights[0].position, cam->pos);
+    }
+
     nk_layout_row_dynamic(ctx, 30, 2);
     if (nk_option_label(ctx, "easy", op == EASY)) op = EASY;
     if (nk_option_label(ctx, "hard", op == HARD)) op = HARD;

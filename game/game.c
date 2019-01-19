@@ -15,4 +15,13 @@ void game_init(GLFWwindow* window) {
   microdrag.last_frame = 0.0f;
 
   microdrag.game_render_list = render_list_new();
+
+  microdrag.cars = malloc(MAX_CARS * sizeof(car));
+  microdrag.lights = malloc(MAX_LIGHTS * sizeof(light));
+}
+
+void game_free() {
+  render_list_free(microdrag.game_render_list);
+  free(microdrag.cars);
+  free(microdrag.lights);
 }
