@@ -4,6 +4,7 @@
 void set_opengl_state() {
   glEnable(GL_DEPTH_TEST);
   glEnable(GL_MULTISAMPLE);
+  glEnable(GL_CULL_FACE);
   // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 }
 
@@ -55,6 +56,27 @@ unsigned int load_image(char* filename) {
   return texture;
 }
 
+static void init_depth_fbo() {
+  glGenFramebuffers(1, &renderer_depth_fbo);
+  // create depth texture
+  glGenTextures(1, &renderer_depth_map);
+  glBindTexture(GL_TEXTURE_2D, renderer_depth_map);
+  printf("ADSASDAS %d %d\n", SHADOW_WIDTH, SHADOW_HEIGHT);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, SHADOW_WIDTH, SHADOW_HEIGHT, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+  float borderColor[] = { 1.0f, 1.0f, 1.0f, 1.0f };
+  glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
+  // attach depth texture as FBO's depth buffer
+  glBindFramebuffer(GL_FRAMEBUFFER, renderer_depth_fbo);
+  glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, renderer_depth_map, 0);
+  glDrawBuffer(GL_NONE);
+  glReadBuffer(GL_NONE);
+  glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
 int renderer_init(char* title, int width, int height, void* key_callback, void* mouse_callback, void* mouse_button_callback, GLFWwindow** out_window) {
   glfwInit();
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -68,8 +90,7 @@ int renderer_init(char* title, int width, int height, void* key_callback, void* 
 
   window = glfwCreateWindow(width, height, title, NULL, NULL);
   *out_window = window;
-  if (!window)
-  {
+  if (!window) {
     printf("Failed to create GLFW window\n");
     glfwTerminate();
     return -1;
@@ -80,11 +101,18 @@ int renderer_init(char* title, int width, int height, void* key_callback, void* 
   glfwSetMouseButtonCallback(window, mouse_button_callback);
   //glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
-  if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
-  {
+  if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
     printf("Failed to initialize GLAD\n");
     return -1;
   }
+
+  // init vars
+  renderer_debug_vao = 0;
+  renderer_debug_enabled = 0;
+  renderer_shadow_bias = 0.22f;
+
+  // init depth fbo
+  init_depth_fbo();
 
   // set opengl state
   set_opengl_state();
@@ -100,7 +128,9 @@ void renderer_cleanup() {
 }
 
 void renderer_recompile_shader() {
-  shader_compile("../engine/shaders/normal.vs", "../engine/shaders/toon.fs", &shader_id);
+  shader_compile("../engine/shaders/toon.vs", "../engine/shaders/toon.fs", &renderer_main_shader);
+  shader_compile("../engine/shaders/shadow.vs", "../engine/shaders/shadow.fs", &renderer_shadow_shader);
+  shader_compile("../engine/shaders/debug.vs", "../engine/shaders/debug.fs", &renderer_debug_shader);
 }
 
 int renderer_should_close() {
@@ -206,7 +236,7 @@ static void render_aabb(object* o) {
   mat4x4_translate(translation, pos[0], pos[1], pos[2]);
   mat4x4_mul(m, m, translation);
 
-  glUniformMatrix4fv(glGetUniformLocation(shader_id, "M"), 1, GL_FALSE, (const GLfloat*) m);
+  glUniformMatrix4fv(glGetUniformLocation(renderer_main_shader, "M"), 1, GL_FALSE, (const GLfloat*) m);
 
   glBindVertexArray(aabb->vao);
   glDrawElements(GL_LINE_LOOP, 4, GL_UNSIGNED_SHORT, 0);
@@ -216,55 +246,10 @@ static void render_aabb(object* o) {
   glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
-void renderer_render_objects(object *objects[], int objects_length, light *lights[], int lights_length, camera *camera, void (*ui_render_callback)(void), int debug)
-{
-  GLint m_location, v_location, p_location, time;
-  GLint uniform_diffuse, uniform_specular;
-  float ratio;
-  int width, height;
-
-  glUseProgram(shader_id);
-
-  // set bg color
-  glClearColor(183.0f / 255.0f, 220.0f / 255.0f, 244.0f / 255.0f, 1.0f);
-
-  // handle window resize
-  glfwGetFramebufferSize(window, &width, &height);
-  ratio = width / (float)height;
-  glViewport(0, 0, width, height);
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-  // matrices uniforms
-  m_location = glGetUniformLocation(shader_id, "M");
-  v_location = glGetUniformLocation(shader_id, "V");
-  p_location = glGetUniformLocation(shader_id, "P");
-
-  // time uniform
-  time = glGetUniformLocation(shader_id, "time");
-
-  // material uniforms
-  uniform_diffuse = glGetUniformLocation(shader_id, "material.diffuse");
-  uniform_specular = glGetUniformLocation(shader_id, "material.specular");
-
-  // camera position
-  GLint uniform_camera_pos = glGetUniformLocation(shader_id, "cameraPos");
-  glUniform3fv(uniform_camera_pos, 1, (const GLfloat*) camera->pos);
-
-  // process lights
-  glUniform1i(glGetUniformLocation(shader_id, "lightsNr"), lights_length);
-  for (int i = 0; i < lights_length; i++) {
-    char uniform_light_pos[256];
-    sprintf(uniform_light_pos, "lightsPos[%d]", i);
-    char uniform_light_color[256];
-    sprintf(uniform_light_color, "lightsColors[%d]", i);
-    glUniform3fv(glGetUniformLocation(shader_id, uniform_light_pos), 1, (const GLfloat*) lights[i]->position);
-    glUniform3fv(glGetUniformLocation(shader_id, uniform_light_color), 1, (const GLfloat*) lights[i]->color);
-  }
-
-  // process objects
+static void render_objects(object *objects[], int objects_length, GLuint shader_id, int debug) {
   for (int i = 0; i < objects_length; i++) {
     object* o = objects[i];
-    mat4x4 m, p, v;
+    mat4x4 m;
 
     // scale
     mat4x4_identity(m);
@@ -288,33 +273,19 @@ void renderer_render_objects(object *objects[], int objects_length, light *light
     mat4x4_translate(t2, -o->center[0], -o->center[1], -o->center[2]);
     mat4x4_mul(m, m, t2);
 
-    // compute mvp matrix
-    // mat4x4_ortho(p, -ratio, ratio, -1.f, 1.f, 1.f, -1.f);
-    vec3 cameraDirection;
-    vec3_add(cameraDirection, camera->pos, camera->front);
-    // printf("Camera Pos: (%f, %f, %f)\n", camera->pos[0], camera->pos[1], camera->pos[2]);
-    // printf("Camera Front: (%f, %f, %f)\n", camera->front[0], camera->front[1], camera->front[2]);
-    mat4x4_look_at(v, camera->pos, cameraDirection, camera->up);
-    mat4x4_perspective(p, to_radians(45.0f), ratio, 0.1f, 100.0f);
-
-    // pass mvp to shader
-    glUniformMatrix4fv(m_location, 1, GL_FALSE, (const GLfloat*) m);
-    glUniformMatrix4fv(v_location, 1, GL_FALSE, (const GLfloat*) v);
-    glUniformMatrix4fv(p_location, 1, GL_FALSE, (const GLfloat*) p);
-
-    // pass time to shader
-    glUniform1f(time, (float)glfwGetTime());
-
+    glUniformMatrix4fv(glGetUniformLocation(shader_id, "M"), 1, GL_FALSE, (const GLfloat*) m);
+    
     // render params
     glUniform1i(glGetUniformLocation(shader_id, "glowing"), o->glowing);
     glUniform3fv(glGetUniformLocation(shader_id, "glow_color"), 1, o->glow_color);
+    glUniform1i(glGetUniformLocation(shader_id, "receive_shadows"), o->receive_shadows);
 
     for (int i = 0; i < o->num_meshes; i++) {
       mesh* mesh = &o->meshes[i];
 
       // pass material
-      glUniform3fv(uniform_diffuse, 1, mesh->mat.diffuse);
-      glUniform3fv(uniform_specular, 1, mesh->mat.specular);
+      glUniform3fv(glGetUniformLocation(shader_id, "material.diffuse"), 1, mesh->mat.diffuse);
+      glUniform3fv(glGetUniformLocation(shader_id, "material.specular"), 1, mesh->mat.specular);
 
       // bind texture
       if (strlen(mesh->mat.texture_path) > 0) {
@@ -334,6 +305,130 @@ void renderer_render_objects(object *objects[], int objects_length, light *light
     if (debug)
       render_aabb(o);
   }
+}
+
+static void render_debug_quad() {
+  if (renderer_debug_vao == 0) {
+    float quadVertices[] = {
+      // positions        // texture Coords
+      -1.0f,  1.0f, 0.0f, 0.0f, 1.0f,
+      -1.0f, -1.0f, 0.0f, 0.0f, 0.0f,
+      1.0f,  1.0f, 0.0f, 1.0f, 1.0f,
+      1.0f, -1.0f, 0.0f, 1.0f, 0.0f,
+    };
+    // setup plane VAO
+    glGenVertexArrays(1, &renderer_debug_vao);
+    glGenBuffers(1, &renderer_debug_vbo);
+    glBindVertexArray(renderer_debug_vao);
+    glBindBuffer(GL_ARRAY_BUFFER, renderer_debug_vbo);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+  }
+  glBindVertexArray(renderer_debug_vao);
+  glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+  glBindVertexArray(0);
+}
+
+void renderer_render_objects(object *objects[], int objects_length, light *lights[], int lights_length, camera *camera, void (*ui_render_callback)(void), int debug)
+{
+  GLint time;
+  float ratio;
+  int width, height;
+
+  glfwGetFramebufferSize(window, &width, &height);
+
+  /*-------------------------------------------------------------------*/
+  /*------------------------------shadows------------------------------*/
+  /*-------------------------------------------------------------------*/
+  glClearColor(183.0f / 255.0f, 220.0f / 255.0f, 244.0f / 255.0f, 1.0f);
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+  mat4x4 light_proj, light_view, light_space;
+  float near_plane = 1.0f, far_plane = 7.5f;
+  mat4x4_ortho(light_proj, -10.0f, 10.0f, -10.0f, 10.0f, near_plane, far_plane);
+  vec3 up = { 0.0f, 0.0f, 1.0f };
+  vec3 dir = { 0.0f, 0.0f, 0.0f };
+  mat4x4_look_at(light_view, lights[0]->position, dir, up);
+  mat4x4_mul(light_space, light_proj, light_view);
+
+  // render scene from light's point of view
+  glUseProgram(renderer_shadow_shader);
+  glUniformMatrix4fv(glGetUniformLocation(renderer_shadow_shader, "lightSpaceMatrix"), 1, GL_FALSE, (const GLfloat*) light_space);
+
+  // reset viewport and clear color
+  glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
+  glBindFramebuffer(GL_FRAMEBUFFER, renderer_depth_fbo);
+  glClear(GL_DEPTH_BUFFER_BIT);
+  //glCullFace(GL_FRONT);
+  render_objects(objects, objects_length, renderer_shadow_shader, 0);
+  //glCullFace(GL_BACK);
+  glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+  /*-----------------------------------------------------------------*/
+  /*------------------------------scene------------------------------*/
+  /*-----------------------------------------------------------------*/
+  glUseProgram(renderer_main_shader);
+  glClearColor(183.0f / 255.0f, 220.0f / 255.0f, 244.0f / 255.0f, 1.0f);
+  ratio = width / (float)height;
+  glViewport(0, 0, width, height);
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+  // camera position
+  GLint uniform_camera_pos = glGetUniformLocation(renderer_main_shader, "cameraPos");
+  glUniform3fv(uniform_camera_pos, 1, (const GLfloat*) camera->pos);
+
+  // process lights
+  glUniform1i(glGetUniformLocation(renderer_main_shader, "lightsNr"), lights_length);
+  for (int i = 0; i < lights_length; i++) {
+    char uniform_light_pos[256];
+    sprintf(uniform_light_pos, "lightsPos[%d]", i);
+    char uniform_light_color[256];
+    sprintf(uniform_light_color, "lightsColors[%d]", i);
+    glUniform3fv(glGetUniformLocation(renderer_main_shader, uniform_light_pos), 1, (const GLfloat*) lights[i]->position);
+    glUniform3fv(glGetUniformLocation(renderer_main_shader, uniform_light_color), 1, (const GLfloat*) lights[i]->color);
+  }
+
+  // shadow map to shader
+  glUniform1i(glGetUniformLocation(renderer_main_shader, "shadowMap"), 0);
+  glUniform1f(glGetUniformLocation(renderer_main_shader, "shadowBias"), renderer_shadow_bias);
+
+  // compute mvp matrix
+  mat4x4 v, p;
+  vec3 camera_dir;
+  vec3_add(camera_dir, camera->pos, camera->front);
+  mat4x4_look_at(v, camera->pos, camera_dir, camera->up);
+  mat4x4_perspective(p, to_radians(45.0f), ratio, 0.1f, 100.0f);
+
+  // pass mvp to shader
+  glUniformMatrix4fv(glGetUniformLocation(renderer_main_shader, "V"), 1, GL_FALSE, (const GLfloat*) v);
+  glUniformMatrix4fv(glGetUniformLocation(renderer_main_shader, "P"), 1, GL_FALSE, (const GLfloat*) p);
+
+  // pass light-space matrix to shader
+  glUniformMatrix4fv(glGetUniformLocation(renderer_main_shader, "lightSpaceMatrix"), 1, GL_FALSE, (const GLfloat*) light_space);
+
+  // pass time to shader
+  glUniform1f(glGetUniformLocation(renderer_main_shader, "time"), (float)glfwGetTime());
+
+  // pass depth map
+  glActiveTexture(GL_TEXTURE0);
+  glBindTexture(GL_TEXTURE_2D, renderer_depth_map);
+
+  // process objects
+  render_objects(objects, objects_length, renderer_main_shader, debug);
+
+  /*-----------------------------------------------------------------*/
+  /*------------------------------debug------------------------------*/
+  /*-----------------------------------------------------------------*/
+  glUseProgram(renderer_debug_shader);
+  glUniform1f(glGetUniformLocation(renderer_debug_shader, "near_plane"), near_plane);
+  glUniform1f(glGetUniformLocation(renderer_debug_shader, "far_plane"), far_plane);
+  glUniform1i(glGetUniformLocation(renderer_debug_shader, "depthMap"), 0);
+  glActiveTexture(GL_TEXTURE0);
+  glBindTexture(GL_TEXTURE_2D, renderer_depth_map);
+  if (renderer_debug_enabled) render_debug_quad();
 
   // ui callback
   if (ui_render_callback != NULL) {

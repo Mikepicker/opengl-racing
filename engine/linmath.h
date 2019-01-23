@@ -53,15 +53,20 @@ static inline float vec##n##_len(vec##n const v) \
 { \
 	return (float) sqrt(vec##n##_mul_inner(v,v)); \
 } \
-static inline void vec##n##_norm(vec##n r, vec##n const v) \
-{ \
-	float k = 1.f / vec##n##_len(v); \
-	vec##n##_scale(r, v, k); \
-} \
 static inline void vec##n##_copy(vec##n r, vec##n const v) \
 { \
   for(int i=0; i<n; ++i) \
     r[i] = v[i]; \
+} \
+static inline void vec##n##_norm(vec##n r, vec##n const v) \
+{ \
+  float len = vec##n##_len(v); \
+  if (len == 0) { \
+    vec##n##_copy(r, v); \
+    return; \
+  } \
+	float k = 1.f / vec##n##_len(v); \
+	vec##n##_scale(r, v, k); \
 } \
 static inline float vec##n##_dot(vec##n const a, vec##n const b) \
 { \

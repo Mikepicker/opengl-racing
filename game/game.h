@@ -4,8 +4,8 @@
 #include "../engine/steve.h"
 #include "data/car.h"
 
-#define GAME_WIDTH 1200
-#define GAME_HEIGHT 800
+#define GAME_WIDTH 1280
+#define GAME_HEIGHT 720
 
 #define MAX_CARS 128
 #define MAX_LIGHTS 128

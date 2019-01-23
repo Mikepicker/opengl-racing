@@ -8,8 +8,22 @@
 #include "data/camera.h"
 #include "data/ray.h"
 
+#define SHADOW_WIDTH 1024
+#define SHADOW_HEIGHT 1024
+
 GLFWwindow* window;
-GLuint shader_id;
+
+GLuint renderer_main_shader;
+GLuint renderer_shadow_shader;
+GLuint renderer_debug_shader;
+
+GLuint renderer_depth_fbo;
+GLuint renderer_depth_map;
+GLuint renderer_debug_vao;
+GLuint renderer_debug_vbo;
+
+int renderer_debug_enabled;
+float renderer_shadow_bias;
 
 int renderer_init(char* title, int width, int height, void* key_callback, void* mouse_callback, void* mouse_button_callback, GLFWwindow** out_window);
 void renderer_cleanup();

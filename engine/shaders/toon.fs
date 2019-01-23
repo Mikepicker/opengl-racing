@@ -11,6 +11,7 @@ struct Material {
 in vec3 Normal;  
 in vec2 Uvs;
 in vec3 FragPos;  
+in vec4 FragPosLightSpace;
 
 // lights
 uniform vec3 lightsPos[NR_LIGHTS]; 
@@ -23,6 +24,10 @@ uniform vec3 cameraPos;
 // material
 uniform Material material;
 
+// shadow map
+uniform sampler2D shadowMap;
+uniform float shadowBias;
+
 // texture
 uniform int hasTexture;
 uniform sampler2D texture1;
@@ -33,9 +38,29 @@ uniform float time;
 // render params
 uniform int glowing;
 uniform vec3 glow_color;
+uniform int receive_shadows;
 
-void main()
-{
+float shadowCalculation(vec4 fragPosLightSpace, vec3 lightDir) {
+  // perform perspective divide
+  vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
+  // transform to [0,1] range
+  projCoords = projCoords * 0.5 + 0.5;
+  // get closest depth value from light's perspective (using [0,1] range fragPosLight as coords)
+  float closestDepth = texture(shadowMap, projCoords.xy).r; 
+  // get depth of current fragment from light's perspective
+  float currentDepth = projCoords.z;
+  // check whether current frag pos is in shadow
+  //float bias = max(shadowBias * (1.0 - dot(Normal, lightDir)), 0.02);
+  float bias = 0.005;
+  float shadow = currentDepth - bias > closestDepth  ? 1.0 : 0.0;
+
+  if (projCoords.z > 1.0)
+    shadow = 0.0;
+
+  return shadow;
+}
+
+void main() {
   vec3 result = vec3(0.0);
   for (int i = 0; i < min(NR_LIGHTS, lightsNr); i++) {
     // ambient
@@ -46,8 +71,6 @@ void main()
     vec3 norm = normalize(Normal);
     vec3 lightDir = normalize(lightsPos[i] - FragPos);
     float diff = max(dot(norm, lightDir), 0.8);
-    // float diff = smoothstep(0.0, 0.0, max(dot(norm, lightDir), 0.0));
-    // float diff = max(dot(norm, lightDir), 0.0) > 0 ? 1 : 0.8;
     vec3 diffuse = diff * lightsColors[i] * material.diffuse;
 
     // specular
@@ -55,19 +78,18 @@ void main()
     vec3 viewDir = normalize(cameraPos - FragPos);
     vec3 reflectDir = reflect(-lightDir, norm);  
     float spec = pow(max(dot(viewDir, reflectDir), 0.0), 64);
-    // spec = smoothstep(0.005, 0.01, spec);
     spec = spec > 0.01 ? 0.6 : 0;
     vec3 specular = specularStrength * spec * lightsColors[i];  
    
-    // rimdot
-    float rimdot = 1 - dot(viewDir, norm);
-    float rimAmount = 0.71;
-    float rimIntensity = smoothstep(rimAmount - 0.01, rimAmount + 0.01, rimdot);
-    vec3 rim = rimIntensity * vec3(0);
+    // shadows
+    float shadow = 0.0;
+    if (receive_shadows == 1) {
+      shadow = shadowCalculation(FragPosLightSpace, lightDir);
+    }
 
     vec3 objectColor = hasTexture > 0 ? texture(texture1, Uvs).rgb : vec3(1.0);
-    result += (ambient + diffuse + specular) * objectColor;
-    // result = vec3(diff);
+    result += (ambient + (1.0 - shadow) * (diffuse + specular)) * objectColor;
+    //result = texture(shadowMap, FragPos.xy).rgb;
   }
 
   // glowing effect

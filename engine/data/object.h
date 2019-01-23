@@ -16,6 +16,7 @@ typedef struct {
 
  int glowing;
  vec3 glow_color;
+ int receive_shadows;
 
  aabb box;
 } object;

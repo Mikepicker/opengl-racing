@@ -46,9 +46,13 @@ void editor_init() {
     game_editor.objects[i] = importer_load_obj(editor_objects_names[i]);
     vec3_copy(game_editor.objects[i]->position, game_editor.current_pos);
 
+    game_editor.objects[i]->scale = 4.0f;
+
     game_editor.objects[i]->glowing = 1;
     vec3 glow_color = { 1.0f, 1.0f, 1.0f };
     vec3_copy(game_editor.objects[i]->glow_color, glow_color);
+
+    game_editor.objects[i]->receive_shadows = 1;
 
     game_editor.objects[i]->box = physics_compute_aabb(game_editor.objects[i]);
     renderer_add_object(game_editor.objects[i]);

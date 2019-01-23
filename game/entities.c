@@ -1,11 +1,12 @@
 #include "entities.h"
 
-car* entities_new_car(vec3 pos) {
+car* entities_new_car(vec3 pos, float scale) {
   car* c = malloc(sizeof(car));
   c->obj = importer_load_obj("assets/racing/raceCarRed.obj");
-  c->obj->scale = 0.25;
+  c->obj->scale = scale;
   c->accel = 0.0f;
   c->speed = 0.0f;
+  c->obj->receive_shadows = 0;
   vec3_copy(c->obj->position, pos);
   c->obj->box = physics_compute_aabb(c->obj);
   renderer_add_object(c->obj);
