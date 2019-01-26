@@ -42,10 +42,10 @@ int main()
 
   // cars
   vec3 car_pos = {0.0f, 0.1f, 0.0f};
-  microdrag.cars[0] = *entities_new_car(car_pos, 1.0f);
+  microdrag.cars[0] = *entities_new_car(car_pos, "assets/racing/raceCarRed.obj");
   vec3 red_car_pos = {2.0f, 0.0f, 0.0f};
-  microdrag.cars[1] = *entities_new_car(red_car_pos, 1.0f);
-  microdrag.num_cars = 1;
+  microdrag.cars[1] = *entities_new_car(red_car_pos, "assets/racing/raceCarGreen.obj");
+  microdrag.num_cars = 2;
 
   int macMoved = 0;
   while (!renderer_should_close()) {
@@ -53,7 +53,7 @@ int main()
     microdrag.delta_time = current_frame - microdrag.last_frame;
     microdrag.last_frame = current_frame;
 
-    //microdrag.lights[0].position[1] = 3 + sinf(current_frame);
+    // microdrag.lights[0].position[0] = 4 + sinf(current_frame);
     //microdrag.cars[0].obj->position[1] = 1.0f + sinf(2.0f * current_frame);
 
     // input
@@ -68,7 +68,7 @@ int main()
     // render entities
     render_list_clear(microdrag.game_render_list);
     render_list_add(microdrag.game_render_list, microdrag.cars[0].obj);
-    //render_list_add(microdrag.game_render_list, microdrag.cars[1].obj);
+    render_list_add(microdrag.game_render_list, microdrag.cars[1].obj);
     render_list_add_batch(microdrag.game_render_list, game_editor.render_list, game_editor.render_list_size);
 
     // render editor

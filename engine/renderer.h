@@ -8,8 +8,8 @@
 #include "data/camera.h"
 #include "data/ray.h"
 
-#define SHADOW_WIDTH 1024
-#define SHADOW_HEIGHT 1024
+#define SHADOW_WIDTH 1024 * 4
+#define SHADOW_HEIGHT 1024 * 4
 
 GLFWwindow* window;
 

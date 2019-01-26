@@ -9,6 +9,13 @@ void input_init() {
   game_input.capture_cursor = 1;
   game_input.first_mouse = 1;
   game_input.sensitivity = 0.01f;
+
+  // joysticks
+  game_input.joystick_1_present = glfwJoystickPresent(GLFW_JOYSTICK_1);
+  printf("[input_init] joystick 1 present: %d\n", game_input.joystick_1_present);
+
+  game_input.joystick_2_present = glfwJoystickPresent(GLFW_JOYSTICK_2);
+  printf("[input_init] joystick 2 present: %d\n", game_input.joystick_2_present);
 }
 
 void input_key_callback(GLFWwindow* window, int key, int scancode, int action, int mods) {
@@ -85,7 +92,23 @@ void input_mouse_callback(GLFWwindow* window, double x_pos, double y_pos)
   //debug_print_vec3(microdrag.game_camera.front);
 }
 
-void input_mouse_button_callback(GLFWwindow* window, int button, int action, int mods) {
+void input_mouse_button_callback(GLFWwindow* window, int button, int action, int mods) {}
+
+static void rotate_car(car* c, float dir) {
+  vec3 y_axis = { 0.0f, 1.0f, 0.0f };
+  quat rot, res;
+  //float rot_factor = fabsf(c->speed / CAR_MAX_SPEED);
+  float rot_factor = 1.0f;
+
+  if (dir == -1.0f) {
+    quat_rotate(rot, to_radians(CAR_TURN_RATE) * rot_factor, y_axis);
+    quat_mul(res, c->obj->rotation, rot);
+    vec4_copy(c->obj->rotation, res);
+  } else if (dir == 1.0f) {
+    quat_rotate(rot, to_radians(-CAR_TURN_RATE) * rot_factor, y_axis);
+    quat_mul(res, c->obj->rotation, rot);
+    vec4_copy(c->obj->rotation, res);
+  } 
 }
 
 void input_update() {
@@ -118,26 +141,78 @@ void input_update() {
     vec3_add(microdrag.game_camera.pos, microdrag.game_camera.pos, vec3_scaled);
   }
 
-  // car
-  vec3 y_axis = { 0.0f, 1.0f, 0.0f };
-  quat rot, res;
+  // cars
   if (!game_editor.enabled) {
-    if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) {
-      microdrag.cars[0].accel = CAR_ACCEL;
-    } else if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS) {
-      microdrag.cars[0].accel = -CAR_ACCEL;
+
+    // car 1
+    car* c = &microdrag.cars[0];
+    if (!game_input.joystick_1_present) {
+      if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) {
+        c->accel = CAR_ACCEL;
+      } else if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS) {
+        c->accel = -CAR_ACCEL;
+      } else {
+        c->accel = 0.0f;
+      }
+
+      if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS) {
+        rotate_car(c, -1.0f);
+      } else if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS) {
+        rotate_car(c, 1.0f);
+      } 
     } else {
-      microdrag.cars[0].accel = 0.0f;
+      int count;
+      const float* axes = glfwGetJoystickAxes(GLFW_JOYSTICK_1, &count);
+
+      if (axes[1] == -1.0f) {
+        c->accel = CAR_ACCEL;
+      } else if (axes[1] == 1.0f) {
+        c->accel = -CAR_ACCEL;
+      } else {
+        c->accel = 0.0f;
+      }
+
+      if (axes[0] == -1.0f) {
+        rotate_car(c, -1.0f);
+      } else if (axes[0] == 1.0f) {
+        rotate_car(c, 1.0f);
+      } 
+
+      // car 2
+      car* c = &microdrag.cars[1];
+      if (!game_input.joystick_2_present) {
+        if (glfwGetKey(window, GLFW_KEY_Y) == GLFW_PRESS) {
+          c->accel = CAR_ACCEL;
+        } else if (glfwGetKey(window, GLFW_KEY_H) == GLFW_PRESS) {
+          c->accel = -CAR_ACCEL;
+        } else {
+          c->accel = 0.0f;
+        }
+
+        if (glfwGetKey(window, GLFW_KEY_G) == GLFW_PRESS) {
+          rotate_car(c, -1.0f);
+        } else if (glfwGetKey(window, GLFW_KEY_J) == GLFW_PRESS) {
+          rotate_car(c, 1.0f);
+        } 
+      } else {
+        int count;
+        const float* axes = glfwGetJoystickAxes(GLFW_JOYSTICK_2, &count);
+
+        if (axes[1] == -1.0f) {
+          c->accel = CAR_ACCEL;
+        } else if (axes[1] == 1.0f) {
+          c->accel = -CAR_ACCEL;
+        } else {
+          c->accel = 0.0f;
+        }
+
+        if (axes[0] == -1.0f) {
+          rotate_car(c, -1.0f);
+        } else if (axes[0] == 1.0f) {
+          rotate_car(c, 1.0f);
+        } 
+      }
     }
-    
-    if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS) {
-      quat_rotate(rot, to_radians(CAR_TURN_RATE), y_axis);
-      quat_mul(res, microdrag.cars[0].obj->rotation, rot);
-      vec4_copy(microdrag.cars[0].obj->rotation, res);
-    } else if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS) {
-      quat_rotate(rot, to_radians(-CAR_TURN_RATE), y_axis);
-      quat_mul(res, microdrag.cars[0].obj->rotation, rot);
-      vec4_copy(microdrag.cars[0].obj->rotation, res);
-    } 
+
   }
 }

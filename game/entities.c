@@ -1,9 +1,8 @@
 #include "entities.h"
 
-car* entities_new_car(vec3 pos, float scale) {
+car* entities_new_car(vec3 pos, char* filename) {
   car* c = malloc(sizeof(car));
-  c->obj = importer_load_obj("assets/racing/raceCarRed.obj");
-  c->obj->scale = scale;
+  c->obj = importer_load_obj(filename);
   c->accel = 0.0f;
   c->speed = 0.0f;
   c->obj->receive_shadows = 0;

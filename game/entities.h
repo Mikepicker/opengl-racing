@@ -6,7 +6,7 @@
 #include "editor.h"
 #include "data/car.h"
 
-car* entities_new_car(vec3 pos, float scale);
+car* entities_new_car(vec3 pos, char* filename);
 void entities_update();
 
 #endif

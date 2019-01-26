@@ -61,7 +61,6 @@ static void init_depth_fbo() {
   // create depth texture
   glGenTextures(1, &renderer_depth_map);
   glBindTexture(GL_TEXTURE_2D, renderer_depth_map);
-  printf("ADSASDAS %d %d\n", SHADOW_WIDTH, SHADOW_HEIGHT);
   glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, SHADOW_WIDTH, SHADOW_HEIGHT, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
@@ -348,7 +347,7 @@ void renderer_render_objects(object *objects[], int objects_length, light *light
 
   mat4x4 light_proj, light_view, light_space;
   float near_plane = 1.0f, far_plane = 7.5f;
-  mat4x4_ortho(light_proj, -10.0f, 10.0f, -10.0f, 10.0f, near_plane, far_plane);
+  mat4x4_ortho(light_proj, -100.0f, 100.0f, -100.0f, 100.0f, near_plane, far_plane);
   vec3 up = { 0.0f, 0.0f, 1.0f };
   vec3 dir = { 0.0f, 0.0f, 0.0f };
   mat4x4_look_at(light_view, lights[0]->position, dir, up);

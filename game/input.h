@@ -14,6 +14,8 @@ typedef struct {
   float fov;
   float sensitivity;
   int capture_cursor;
+  int joystick_1_present;
+  int joystick_2_present;
 } input;
 
 input game_input;
