@@ -24,6 +24,7 @@
 #define MAX_ELEMENT_BUFFER 128 * 1024
 
 int ui_debug;
+char ui_map_filename[256];
 
 void ui_init();
 void ui_render();

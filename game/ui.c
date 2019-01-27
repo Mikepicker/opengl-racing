@@ -26,6 +26,27 @@ void ui_init() {
 
  bg.r = 0.10f, bg.g = 0.18f, bg.b = 0.24f, bg.a = 1.0f;
  ui_debug = 1;
+
+ //ctx->style.window.background = nk_rgba(0,0,0,0);
+ //ctx->style.window.fixed_background = nk_style_item_color(nk_rgba(0,0,0,0));
+ ctx->style.window.border_color = nk_rgb(255,165,0);
+ ctx->style.window.combo_border_color = nk_rgb(255,165,0);
+ ctx->style.window.contextual_border_color = nk_rgb(255,165,0);
+ ctx->style.window.menu_border_color = nk_rgb(255,165,0);
+ ctx->style.window.group_border_color = nk_rgb(255,165,0);
+ ctx->style.window.tooltip_border_color = nk_rgb(255,165,0);
+ ctx->style.window.scrollbar_size = nk_vec2(16,16);
+ ctx->style.window.border_color = nk_rgba(0,0,0,0);
+ ctx->style.window.border = 1;
+
+ ctx->style.button.normal = nk_style_item_color(nk_rgba(0,0,0,0));
+ ctx->style.button.hover = nk_style_item_color(nk_rgb(255,165,0));
+ ctx->style.button.active = nk_style_item_color(nk_rgb(220,10,0));
+ ctx->style.button.border_color = nk_rgb(255,165,0);
+ ctx->style.button.text_background = nk_rgb(0,0,0);
+ ctx->style.button.text_normal = nk_rgb(255,165,0);
+ ctx->style.button.text_hover = nk_rgb(28,48,62);
+ ctx->style.button.text_active = nk_rgb(28,48,62);
 }
 
 void ui_render() {
@@ -34,22 +55,39 @@ void ui_render() {
 
   camera* cam = &microdrag.game_camera;
 
-  /* GUI */
-  if (nk_begin(ctx, "Microdrag", nk_rect(50, 50, 300, 400),
+  // editor
+  if (nk_begin(ctx, "Editor", nk_rect(50, 50, 160, 225),
+        NK_WINDOW_BORDER|NK_WINDOW_MOVABLE|
+        NK_WINDOW_MINIMIZABLE|NK_WINDOW_TITLE)) {
+
+    nk_layout_row_static(ctx, 30, 120, 1);
+    char* on = "Editor on";
+    char* off = "Editor off";
+    if (nk_button_label(ctx, game_editor.enabled == 0 ? on : off))
+      editor_set_enabled(game_editor.enabled == 0 ? 1 : 0);
+
+    nk_layout_row_static(ctx, 30, 120, 1);
+    nk_label(ctx, "Map name:", NK_TEXT_LEFT);
+    nk_edit_string_zero_terminated(ctx, NK_EDIT_FIELD, ui_map_filename, sizeof(ui_map_filename) - 1, nk_filter_default);
+    if (nk_button_label(ctx, "Save map")) {
+      editor_serialize(ui_map_filename);
+    }
+
+    nk_layout_row_static(ctx, 30, 120, 1);
+    if (nk_button_label(ctx, "Load map")) {
+      editor_deserialize(ui_map_filename);
+    }
+  }
+  nk_end(ctx);
+
+  // debug
+  if (nk_begin(ctx, "Debug", nk_rect(800, 50, 300, 400),
         NK_WINDOW_BORDER|NK_WINDOW_MOVABLE|NK_WINDOW_SCALABLE|
         NK_WINDOW_MINIMIZABLE|NK_WINDOW_TITLE))
   {
-    enum {EASY, HARD};
-    static int op = EASY;
-    static int property = 20;
-
     nk_layout_row_static(ctx, 30, 120, 1);
     if (nk_button_label(ctx, "Toggle AABB"))
       ui_debug = ui_debug == 0 ? 1 : 0;
-
-    nk_layout_row_static(ctx, 30, 120, 1);
-    if (nk_button_label(ctx, "Editor on"))
-      editor_set_enabled(game_editor.enabled == 0 ? 1 : 0);
 
     nk_layout_row_static(ctx, 30, 120, 1);
     if (nk_button_label(ctx, "Reset camera")) {
@@ -74,16 +112,6 @@ void ui_render() {
     nk_layout_row_static(ctx, 30, 120, 1);
     if (nk_button_label(ctx, "Toggle depth map")) {
       renderer_debug_enabled = renderer_debug_enabled == 0 ? 1 : 0;
-    }
-
-    nk_layout_row_static(ctx, 30, 120, 1);
-    if (nk_button_label(ctx, "Save map")) {
-      editor_serialize();
-    }
-
-    nk_layout_row_static(ctx, 30, 120, 1);
-    if (nk_button_label(ctx, "Load map")) {
-      editor_deserialize();
     }
 
     nk_layout_row_begin(ctx, NK_STATIC, 30, 2);

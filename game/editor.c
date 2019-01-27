@@ -152,8 +152,8 @@ object* editor_current_object() {
   return obj;
 }
 
-void editor_serialize() {
-  FILE *f = fopen("map", "w");
+void editor_serialize(const char* filename) {
+  FILE *f = fopen(filename, "w");
   if (f == NULL) {
     printf("[editor_serialize] error opening file!\n");
     return;
@@ -170,8 +170,8 @@ void editor_serialize() {
   fclose(f);
 }
 
-void editor_deserialize() {
-  FILE *f = fopen("map", "r");
+void editor_deserialize(const char* filename) {
+  FILE *f = fopen(filename, "r");
   char line[256];
   if (f == NULL) {
     printf("[editor_deserialize] error opening file!\n");
