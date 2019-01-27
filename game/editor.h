@@ -3,8 +3,9 @@
 
 #include "../engine/steve.h"
 
-#define EDITOR_OBJECTS_COUNT 5
+#define EDITOR_OBJECTS_COUNT 3
 #define EDITOR_MAX_PLACED_OBJECTS 256
+#define EDITOR_MAP_SIZE 10
 
 typedef struct {
   int enabled;

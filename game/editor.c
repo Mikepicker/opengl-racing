@@ -29,9 +29,7 @@ void editor_init() {
   const char* editor_objects_names[EDITOR_OBJECTS_COUNT] = {
     "assets/racing/roadStraight.obj",
     "assets/racing/roadCornerSmall.obj",
-    "assets/racing/roadCornerLarge.obj",
-    "assets/racing/grass.obj",
-    "assets/racing/pylon.obj",
+    "assets/racing/roadCornerLarge.obj"
   };
 
   game_editor.enabled = 0;
@@ -78,9 +76,13 @@ void editor_rotate_piece() {
 }
 
 void editor_move_piece(vec3 pos) {
-  object* obj = game_editor.objects[game_editor.current_index];
-  vec3_add(game_editor.current_pos, game_editor.current_pos, pos);
-  vec3_copy(obj->position, game_editor.current_pos);
+  int new_x = game_editor.current_pos[0] + pos[0];
+  int new_y = game_editor.current_pos[2] + pos[2];
+  if (new_x > -EDITOR_MAP_SIZE && new_x < EDITOR_MAP_SIZE && new_y > -EDITOR_MAP_SIZE && new_y < EDITOR_MAP_SIZE) {
+    object* obj = game_editor.objects[game_editor.current_index];
+    vec3_add(game_editor.current_pos, game_editor.current_pos, pos);
+    vec3_copy(obj->position, game_editor.current_pos);
+  }
 }
 
 static object* collide_with(object* o) {
