@@ -6,6 +6,7 @@
 #define EDITOR_OBJECTS_COUNT 3
 #define EDITOR_MAX_PLACED_OBJECTS 256
 #define EDITOR_MAP_SIZE 10
+#define EDITOR_MAP_DIR "maps/"
 
 typedef struct {
   int enabled;

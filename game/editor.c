@@ -153,18 +153,19 @@ object* editor_current_object() {
 }
 
 void editor_serialize(const char* filename) {
-  FILE *f = fopen(filename, "w");
+  char path[256];
+  strcpy(path, EDITOR_MAP_DIR);
+  strcat(path, filename);
+  FILE *f = fopen(path, "w");
   if (f == NULL) {
     printf("[editor_serialize] error opening file!\n");
     return;
   }
 
-  printf("SERIALIZE\n");
   for (int i = 0; i < EDITOR_MAX_PLACED_OBJECTS; i++) {
     object* o = game_editor.placed_objects[i];
     if (o != NULL) {
       fprintf(f, "%d %d %d %d\n", game_editor.placed_indices[i], (int)o->position[0], (int)o->position[2], game_editor.placed_angles[i]);
-      printf("%d %d %d %d\n", game_editor.placed_indices[i], (int)o->position[0], (int)o->position[2], game_editor.placed_angles[i]);
     }
   }
 
@@ -173,7 +174,10 @@ void editor_serialize(const char* filename) {
 }
 
 void editor_deserialize(const char* filename) {
-  FILE *f = fopen(filename, "r");
+  char path[256];
+  strcpy(path, EDITOR_MAP_DIR);
+  strcat(path, filename);
+  FILE *f = fopen(path, "r");
   char line[256];
   if (f == NULL) {
     printf("[editor_deserialize] error opening file!\n");
