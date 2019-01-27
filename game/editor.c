@@ -29,7 +29,8 @@ void editor_init() {
   const char* editor_objects_names[EDITOR_OBJECTS_COUNT] = {
     "assets/racing/roadStraight.obj",
     "assets/racing/roadCornerSmall.obj",
-    "assets/racing/roadCornerLarge.obj"
+    "assets/racing/roadCornerLarge.obj",
+    "assets/racing/roadStart.obj"
   };
 
   game_editor.enabled = 0;

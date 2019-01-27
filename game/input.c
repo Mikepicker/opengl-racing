@@ -10,6 +10,11 @@ void input_init() {
   game_input.first_mouse = 1;
   game_input.sensitivity = 0.01f;
 
+  glfwSetKeyCallback(microdrag.window, input_key_callback);
+  glfwSetCursorPosCallback(microdrag.window, input_mouse_callback);
+  glfwSetMouseButtonCallback(microdrag.window, input_mouse_button_callback);
+  glfwSetJoystickCallback(input_joystick_callback);
+
   // joysticks
   game_input.joystick_1_present = glfwJoystickPresent(GLFW_JOYSTICK_1);
   printf("[input_init] joystick 1 present: %d\n", game_input.joystick_1_present);
@@ -94,6 +99,27 @@ void input_mouse_callback(GLFWwindow* window, double x_pos, double y_pos)
 
 void input_mouse_button_callback(GLFWwindow* window, int button, int action, int mods) {}
 
+void input_joystick_callback(int joy, int event) {
+  if (event == GLFW_CONNECTED) {
+    if (joy == GLFW_JOYSTICK_1) {
+      game_input.joystick_1_present = 1;
+      printf("[input_joystick_callback] joystick 1 connected\n");
+    } else if (joy == GLFW_JOYSTICK_2) {
+      game_input.joystick_2_present = 1;
+      printf("[input_joystick_callback] joystick 2 connected\n");
+    }
+  }
+  else if (event == GLFW_DISCONNECTED) {
+    if (joy == GLFW_JOYSTICK_1) {
+      game_input.joystick_1_present = 0;
+      printf("[input_joystick_callback] joystick 1 disconnected\n");
+    } else if (joy == GLFW_JOYSTICK_2) {
+      game_input.joystick_2_present = 0;
+      printf("[input_joystick_callback] joystick 2 disconnected\n");
+    }
+  }
+}
+
 static void rotate_car(car* c, float dir) {
   vec3 y_axis = { 0.0f, 1.0f, 0.0f };
   quat rot, res;
@@ -165,19 +191,23 @@ void input_update() {
       const float* axes = glfwGetJoystickAxes(GLFW_JOYSTICK_1, &count);
       const unsigned char* buttons = glfwGetJoystickButtons(GLFW_JOYSTICK_1, &count);
 
-      if (buttons[3] == GLFW_PRESS) {
-        c->accel = CAR_ACCEL;
-      } else if (buttons[2] == GLFW_PRESS) {
-        c->accel = -CAR_ACCEL;
-      } else {
-        c->accel = 0.0f;
-      }
+      if (buttons != NULL) {
+        if (buttons[3] == GLFW_PRESS) {
+          c->accel = CAR_ACCEL;
+        } else if (buttons[2] == GLFW_PRESS) {
+          c->accel = -CAR_ACCEL;
+        } else {
+          c->accel = 0.0f;
+        }
 
-      if (axes[0] == -1.0f) {
-        rotate_car(c, -1.0f);
-      } else if (axes[0] == 1.0f) {
-        rotate_car(c, 1.0f);
-      } 
+        if (axes[0] == -1.0f) {
+          rotate_car(c, -1.0f);
+        } else if (axes[0] == 1.0f) {
+          rotate_car(c, 1.0f);
+        } 
+      } else {
+        printf("[input_update] error joystick 1\n");
+      }
     }
 
     // car 2
@@ -201,19 +231,23 @@ void input_update() {
       const float* axes = glfwGetJoystickAxes(GLFW_JOYSTICK_2, &count);
       const unsigned char* buttons = glfwGetJoystickButtons(GLFW_JOYSTICK_2, &count);
 
-      if (buttons[3] == GLFW_PRESS) {
-        c->accel = CAR_ACCEL;
-      } else if (buttons[2] == GLFW_PRESS) {
-        c->accel = -CAR_ACCEL;
-      } else {
-        c->accel = 0.0f;
-      }
+      if (buttons != NULL) {
+        if (buttons[3] == GLFW_PRESS) {
+          c->accel = CAR_ACCEL;
+        } else if (buttons[2] == GLFW_PRESS) {
+          c->accel = -CAR_ACCEL;
+        } else {
+          c->accel = 0.0f;
+        }
 
-      if (axes[0] == -1.0f) {
-        rotate_car(c, -1.0f);
-      } else if (axes[0] == 1.0f) {
-        rotate_car(c, 1.0f);
-      } 
+        if (axes[0] == -1.0f) {
+          rotate_car(c, -1.0f);
+        } else if (axes[0] == 1.0f) {
+          rotate_car(c, 1.0f);
+        } 
+      } else {
+        printf("[input_update] error joystick 2\n");
+      }
     }
 
   }

@@ -26,7 +26,7 @@ int renderer_debug_enabled;
 float renderer_shadow_bias;
 int renderer_shadow_pcf_enabled;
 
-int renderer_init(char* title, int width, int height, void* key_callback, void* mouse_callback, void* mouse_button_callback, GLFWwindow** out_window);
+int renderer_init(char* title, int width, int height, GLFWwindow** out_window);
 void renderer_cleanup();
 void renderer_recompile_shader();
 int renderer_should_close();

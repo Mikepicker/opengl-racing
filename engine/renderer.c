@@ -76,7 +76,7 @@ static void init_depth_fbo() {
   glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-int renderer_init(char* title, int width, int height, void* key_callback, void* mouse_callback, void* mouse_button_callback, GLFWwindow** out_window) {
+int renderer_init(char* title, int width, int height, GLFWwindow** out_window) {
   glfwInit();
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
@@ -95,10 +95,6 @@ int renderer_init(char* title, int width, int height, void* key_callback, void* 
     return -1;
   }
   glfwMakeContextCurrent(window);
-  glfwSetKeyCallback(window, key_callback);
-  glfwSetCursorPosCallback(window, mouse_callback);
-  glfwSetMouseButtonCallback(window, mouse_button_callback);
-  //glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
   if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
     printf("Failed to initialize GLAD\n");

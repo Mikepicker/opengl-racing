@@ -11,7 +11,7 @@ int main()
 {
   // Init context
   GLFWwindow* window;
-  if (renderer_init("Microdrag", GAME_WIDTH, GAME_HEIGHT, input_key_callback, input_mouse_callback, input_mouse_button_callback, &window) < 0) {
+  if (renderer_init("Microdrag", GAME_WIDTH, GAME_HEIGHT, &window) < 0) {
     printf("Error initializing renderer!\n");
     return -1;
   }
@@ -41,9 +41,9 @@ int main()
   microdrag.num_lights = 1;
 
   // cars
-  vec3 car_pos = {0.0f, 0.1f, 0.0f};
+  vec3 car_pos = {0.0f, 0.05f, 0.0f};
   microdrag.cars[0] = *entities_new_car(car_pos, "assets/racing/raceCarRed.obj");
-  vec3 red_car_pos = {2.0f, 0.0f, 0.0f};
+  vec3 red_car_pos = {2.0f, 0.05f, 0.0f};
   microdrag.cars[1] = *entities_new_car(red_car_pos, "assets/racing/raceCarGreen.obj");
   microdrag.num_cars = 2;
 
