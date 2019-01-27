@@ -109,6 +109,7 @@ int renderer_init(char* title, int width, int height, void* key_callback, void* 
   renderer_debug_vao = 0;
   renderer_debug_enabled = 0;
   renderer_shadow_bias = 0.22f;
+  renderer_shadow_pcf_enabled = 0;
 
   // init depth fbo
   init_depth_fbo();
@@ -346,7 +347,7 @@ void renderer_render_objects(object *objects[], int objects_length, light *light
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
   mat4x4 light_proj, light_view, light_space;
-  float near_plane = 1.0f, far_plane = 7.5f;
+  float near_plane = 1.0f, far_plane = 5.5f;
   mat4x4_ortho(light_proj, -100.0f, 100.0f, -100.0f, 100.0f, near_plane, far_plane);
   vec3 up = { 0.0f, 0.0f, 1.0f };
   vec3 dir = { 0.0f, 0.0f, 0.0f };
@@ -393,6 +394,7 @@ void renderer_render_objects(object *objects[], int objects_length, light *light
   // shadow map to shader
   glUniform1i(glGetUniformLocation(renderer_main_shader, "shadowMap"), 0);
   glUniform1f(glGetUniformLocation(renderer_main_shader, "shadowBias"), renderer_shadow_bias);
+  glUniform1i(glGetUniformLocation(renderer_main_shader, "shadowPCFEnabled"), renderer_shadow_pcf_enabled);
 
   // compute mvp matrix
   mat4x4 v, p;

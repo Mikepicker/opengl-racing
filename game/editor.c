@@ -159,14 +159,16 @@ void editor_serialize(const char* filename) {
     return;
   }
 
+  printf("SERIALIZE\n");
   for (int i = 0; i < EDITOR_MAX_PLACED_OBJECTS; i++) {
     object* o = game_editor.placed_objects[i];
     if (o != NULL) {
       fprintf(f, "%d %d %d %d\n", game_editor.placed_indices[i], (int)o->position[0], (int)o->position[2], game_editor.placed_angles[i]);
+      printf("%d %d %d %d\n", game_editor.placed_indices[i], (int)o->position[0], (int)o->position[2], game_editor.placed_angles[i]);
     }
   }
 
-  printf("[editor_serialize] map saved!\n");
+  printf("[editor_serialize] map \"%s\" saved!\n", filename);
   fclose(f);
 }
 
@@ -191,15 +193,23 @@ void editor_deserialize(const char* filename) {
     int x, z;
     int angle;
     sscanf(line, "%d %d %d %d", &index, &x, &z, &angle);
+
     object* obj_clone = malloc(sizeof(object));
     memcpy(obj_clone, game_editor.objects[index], sizeof(object));
+
     obj_clone->position[0] = x;
     obj_clone->position[1] = 0;
     obj_clone->position[2] = z;
+
     vec3 y_axis = {0.0f, 1.0f, 0.0f};
     quat_identity(obj_clone->rotation);
     quat_rotate(obj_clone->rotation, to_radians(angle), y_axis);
+
     obj_clone->glowing = 0;
+
+    game_editor.placed_indices[c] = index;
+    game_editor.placed_angles[c] = angle;
+
     game_editor.placed_objects[c++] = obj_clone;
   }
 

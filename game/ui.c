@@ -26,6 +26,7 @@ void ui_init() {
 
  bg.r = 0.10f, bg.g = 0.18f, bg.b = 0.24f, bg.a = 1.0f;
  ui_debug = 1;
+ strncpy(ui_map_filename, "map", 4); 
 
  //ctx->style.window.background = nk_rgba(0,0,0,0);
  //ctx->style.window.fixed_background = nk_style_item_color(nk_rgba(0,0,0,0));
@@ -112,6 +113,11 @@ void ui_render() {
     nk_layout_row_static(ctx, 30, 120, 1);
     if (nk_button_label(ctx, "Toggle depth map")) {
       renderer_debug_enabled = renderer_debug_enabled == 0 ? 1 : 0;
+    }
+
+    nk_layout_row_static(ctx, 30, 120, 1);
+    if (nk_button_label(ctx, "Toggle pcf")) {
+      renderer_shadow_pcf_enabled = renderer_shadow_pcf_enabled == 0 ? 1 : 0;
     }
 
     nk_layout_row_begin(ctx, NK_STATIC, 30, 2);
