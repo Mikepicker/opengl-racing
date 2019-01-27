@@ -163,10 +163,11 @@ void input_update() {
     } else {
       int count;
       const float* axes = glfwGetJoystickAxes(GLFW_JOYSTICK_1, &count);
+      const unsigned char* buttons = glfwGetJoystickButtons(GLFW_JOYSTICK_1, &count);
 
-      if (axes[1] == -1.0f) {
+      if (buttons[3] == GLFW_PRESS) {
         c->accel = CAR_ACCEL;
-      } else if (axes[1] == 1.0f) {
+      } else if (buttons[2] == GLFW_PRESS) {
         c->accel = -CAR_ACCEL;
       } else {
         c->accel = 0.0f;
@@ -177,41 +178,42 @@ void input_update() {
       } else if (axes[0] == 1.0f) {
         rotate_car(c, 1.0f);
       } 
+    }
 
-      // car 2
-      car* c = &microdrag.cars[1];
-      if (!game_input.joystick_2_present) {
-        if (glfwGetKey(window, GLFW_KEY_Y) == GLFW_PRESS) {
-          c->accel = CAR_ACCEL;
-        } else if (glfwGetKey(window, GLFW_KEY_H) == GLFW_PRESS) {
-          c->accel = -CAR_ACCEL;
-        } else {
-          c->accel = 0.0f;
-        }
-
-        if (glfwGetKey(window, GLFW_KEY_G) == GLFW_PRESS) {
-          rotate_car(c, -1.0f);
-        } else if (glfwGetKey(window, GLFW_KEY_J) == GLFW_PRESS) {
-          rotate_car(c, 1.0f);
-        } 
+    // car 2
+    c = &microdrag.cars[1];
+    if (!game_input.joystick_2_present) {
+      if (glfwGetKey(window, GLFW_KEY_Y) == GLFW_PRESS) {
+        c->accel = CAR_ACCEL;
+      } else if (glfwGetKey(window, GLFW_KEY_H) == GLFW_PRESS) {
+        c->accel = -CAR_ACCEL;
       } else {
-        int count;
-        const float* axes = glfwGetJoystickAxes(GLFW_JOYSTICK_2, &count);
-
-        if (axes[1] == -1.0f) {
-          c->accel = CAR_ACCEL;
-        } else if (axes[1] == 1.0f) {
-          c->accel = -CAR_ACCEL;
-        } else {
-          c->accel = 0.0f;
-        }
-
-        if (axes[0] == -1.0f) {
-          rotate_car(c, -1.0f);
-        } else if (axes[0] == 1.0f) {
-          rotate_car(c, 1.0f);
-        } 
+        c->accel = 0.0f;
       }
+
+      if (glfwGetKey(window, GLFW_KEY_G) == GLFW_PRESS) {
+        rotate_car(c, -1.0f);
+      } else if (glfwGetKey(window, GLFW_KEY_J) == GLFW_PRESS) {
+        rotate_car(c, 1.0f);
+      } 
+    } else {
+      int count;
+      const float* axes = glfwGetJoystickAxes(GLFW_JOYSTICK_2, &count);
+      const unsigned char* buttons = glfwGetJoystickButtons(GLFW_JOYSTICK_2, &count);
+
+      if (buttons[3] == GLFW_PRESS) {
+        c->accel = CAR_ACCEL;
+      } else if (buttons[2] == GLFW_PRESS) {
+        c->accel = -CAR_ACCEL;
+      } else {
+        c->accel = 0.0f;
+      }
+
+      if (axes[0] == -1.0f) {
+        rotate_car(c, -1.0f);
+      } else if (axes[0] == 1.0f) {
+        rotate_car(c, 1.0f);
+      } 
     }
 
   }
