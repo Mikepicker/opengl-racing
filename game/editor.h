@@ -12,8 +12,10 @@ typedef struct {
   object* objects[EDITOR_OBJECTS_COUNT];
   object* placed_objects[EDITOR_MAX_PLACED_OBJECTS];
   object* render_list[EDITOR_MAX_PLACED_OBJECTS + 1];
+  unsigned int placed_indices[EDITOR_MAX_PLACED_OBJECTS];
+  int placed_angles[EDITOR_MAX_PLACED_OBJECTS];
   unsigned int current_index;
-  unsigned int current_angle;
+  int current_angle;
   unsigned int render_list_size;
   vec3 current_pos;
 } editor;
@@ -29,6 +31,8 @@ void editor_update();
 void editor_place_piece();
 void editor_remove_piece();
 object* editor_current_object();
+void editor_serialize();
+void editor_deserialize();
 void editor_free();
 
 #endif

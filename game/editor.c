@@ -128,6 +128,8 @@ void editor_place_piece() {
   obj_clone->glowing = 0;
 
   game_editor.placed_objects[i] = obj_clone;
+  game_editor.placed_indices[i] = game_editor.current_index;
+  game_editor.placed_angles[i] = game_editor.current_angle;
 
   editor_render_list_update();
 }
@@ -150,11 +152,73 @@ object* editor_current_object() {
   return obj;
 }
 
+void editor_serialize() {
+  FILE *f = fopen("map", "w");
+  if (f == NULL) {
+    printf("[editor_serialize] error opening file!\n");
+    return;
+  }
+
+  for (int i = 0; i < EDITOR_MAX_PLACED_OBJECTS; i++) {
+    object* o = game_editor.placed_objects[i];
+    if (o != NULL) {
+      fprintf(f, "%d %d %d %d\n", game_editor.placed_indices[i], (int)o->position[0], (int)o->position[2], game_editor.placed_angles[i]);
+    }
+  }
+
+  printf("[editor_serialize] map saved!\n");
+  fclose(f);
+}
+
+void editor_deserialize() {
+  FILE *f = fopen("map", "r");
+  char line[256];
+  if (f == NULL) {
+    printf("[editor_deserialize] error opening file!\n");
+    return;
+  }
+
+  for (int i = 0; i < EDITOR_MAX_PLACED_OBJECTS; i++) {
+    if (game_editor.placed_objects[i] != NULL) {
+      free(game_editor.placed_objects[i]);
+      game_editor.placed_objects[i] = NULL;
+    }
+  }
+
+  int c = 0;
+  while (fgets(line, sizeof(line), f)) {
+    unsigned int index;
+    int x, z;
+    int angle;
+    sscanf(line, "%d %d %d %d", &index, &x, &z, &angle);
+    object* obj_clone = malloc(sizeof(object));
+    memcpy(obj_clone, game_editor.objects[index], sizeof(object));
+    obj_clone->position[0] = x;
+    obj_clone->position[1] = 0;
+    obj_clone->position[2] = z;
+    vec3 y_axis = {0.0f, 1.0f, 0.0f};
+    quat_identity(obj_clone->rotation);
+    quat_rotate(obj_clone->rotation, to_radians(angle), y_axis);
+    obj_clone->glowing = 0;
+    game_editor.placed_objects[c++] = obj_clone;
+  }
+
+  fclose(f);
+  editor_render_list_update();
+
+  printf("[editor_deserialize] map loaded\n");
+}
+
 void editor_free() {
   for (int i = 0; i < EDITOR_OBJECTS_COUNT; i++) {
-    free(game_editor.objects[i]);
+    if (game_editor.objects[i] != NULL) {
+      object_free(game_editor.objects[i]);
+      free(game_editor.objects[i]);
+    }
   }
   for (int i = 0; i < EDITOR_MAX_PLACED_OBJECTS; i++) {
-    free(game_editor.placed_objects[i]);
+    if (game_editor.placed_objects[i] != NULL) {
+      free(game_editor.placed_objects[i]);
+    }
   }
 }

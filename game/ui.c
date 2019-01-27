@@ -72,8 +72,18 @@ void ui_render() {
     }
 
     nk_layout_row_static(ctx, 30, 120, 1);
-    if (nk_button_label(ctx, "Toggle debug")) {
+    if (nk_button_label(ctx, "Toggle depth map")) {
       renderer_debug_enabled = renderer_debug_enabled == 0 ? 1 : 0;
+    }
+
+    nk_layout_row_static(ctx, 30, 120, 1);
+    if (nk_button_label(ctx, "Save map")) {
+      editor_serialize();
+    }
+
+    nk_layout_row_static(ctx, 30, 120, 1);
+    if (nk_button_label(ctx, "Load map")) {
+      editor_deserialize();
     }
 
     nk_layout_row_begin(ctx, NK_STATIC, 30, 2);
