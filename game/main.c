@@ -16,6 +16,12 @@ int main()
     return -1;
   }
 
+  // Init audio
+  if (audio_init() < 0) {
+    printf("Error initializing audio\n");
+    return -1;
+  }
+
   // init game
   game_init(window);
 
@@ -40,6 +46,12 @@ int main()
   microdrag.lights[0] = l1;
   microdrag.num_lights = 1;
 
+  // test audio
+  audio_load_sound("assets/audio/test.wav");
+  ALuint s;
+  audio_add_source(&s);
+  audio_play_source(s);
+
   // cars
   vec3 car_pos = {0.0f, 0.05f, 0.0f};
   microdrag.cars[0] = *entities_new_car(car_pos, "assets/racing/raceCarRed.obj");
@@ -55,6 +67,9 @@ int main()
 
     // microdrag.lights[0].position[0] = 4 + sinf(current_frame);
     //microdrag.cars[0].obj->position[1] = 1.0f + sinf(2.0f * current_frame);
+
+    // audio
+    audio_source_playing(s);
 
     // input
     input_update();
@@ -88,6 +103,7 @@ int main()
   // cleanup
   ui_free();
   renderer_cleanup();
+  audio_free();
   editor_free();
   game_free();
 

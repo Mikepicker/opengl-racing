@@ -1,5 +1,5 @@
 #OBJS specifies which files to compile as part of the project
-OBJS = game/main.o game/game.o game/entities.o game/ui.o game/editor.o game/input.c engine/glad.o engine/shader.o engine/renderer.o engine/importer.o engine/dict.o engine/render_list.o engine/debug.o engine/physics.o engine/data/object.c engine/data/mesh.c
+OBJS = game/main.o game/game.o game/entities.o game/ui.o game/editor.o game/input.c engine/glad.o engine/shader.o engine/renderer.o engine/importer.o engine/audio.o engine/dict.o engine/render_list.o engine/debug.o engine/physics.o engine/data/object.c engine/data/mesh.c
 
 #CC specifies which compiler we're using
 CC = gcc -g -std=c99 `pkg-config --cflags glfw3`
@@ -12,7 +12,7 @@ CC = gcc -g -std=c99 `pkg-config --cflags glfw3`
 
 #OBJ_NAME specifies the name of our exectuable
 OBJ_NAME = game/microdrag
-LINKER_FLAGS = `pkg-config --static --libs glfw3`
+LINKER_FLAGS = `pkg-config --static --libs glfw3 openal freealut`
 
 #This is the target that compiles our executable
 

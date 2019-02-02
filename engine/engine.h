@@ -9,6 +9,9 @@
 #include <GLFW/glfw3.h>
 #include <stdbool.h>
 #include <math.h>
+#include <AL/al.h>
+#include <AL/alc.h>
+#include <AL/alut.h>
 
 /* importer */
 #include <limits.h>

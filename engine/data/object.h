@@ -19,6 +19,8 @@ typedef struct {
  int receive_shadows;
 
  aabb box;
+
+ ALuint audio_source;
 } object;
 
 void object_get_transform(const object* o, mat4x4 m);
