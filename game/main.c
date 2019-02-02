@@ -34,7 +34,7 @@ int main()
   // init editor
   editor_init();
 
-  /* lights */
+  // lights
   light l1;
   l1.position[0] = 0.0f;
   l1.position[1] = 4.0f;
@@ -46,11 +46,8 @@ int main()
   microdrag.lights[0] = l1;
   microdrag.num_lights = 1;
 
-  // test audio
-  audio_load_sound("assets/audio/test.wav");
-  ALuint s;
-  audio_add_source(&s);
-  audio_play_source(s);
+  // audio
+  audio_load_sound("assets/audio/test.wav", &microdrag.sound_car);
 
   // cars
   vec3 car_pos = {0.0f, 0.05f, 0.0f};
@@ -69,7 +66,7 @@ int main()
     //microdrag.cars[0].obj->position[1] = 1.0f + sinf(2.0f * current_frame);
 
     // audio
-    audio_source_playing(s);
+    audio_move_listener(microdrag.game_camera.pos);
 
     // input
     input_update();

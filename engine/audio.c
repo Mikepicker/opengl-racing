@@ -51,16 +51,20 @@ int audio_init() {
 
   alutInitWithoutContext(NULL, NULL);
 
+  audio_buffers_count = 0;
+
   return 1;
 }
 
-int audio_load_sound(const char* filename) {
-  audio_buffer = alutCreateBufferFromFile(filename);
+int audio_load_sound(const char* filename, ALuint* out_buffer) {
+  audio_buffers[audio_buffers_count] = alutCreateBufferFromFile(filename);
   //audio_buffer = alutCreateBufferHelloWorld();
   AUDIO_TEST_ERROR("[audio_load_sound] error: buffer generation");
+  *out_buffer = audio_buffers[audio_buffers_count];
+  audio_buffers_count++;
 }
 
-int audio_add_source(ALuint* source) {
+int audio_add_source(ALuint* source, ALuint buffer) {
   alGenSources(1, source);
   AUDIO_TEST_ERROR("[audio_add_source] error: source generation");
 
@@ -75,7 +79,7 @@ int audio_add_source(ALuint* source) {
   alSourcei(*source, AL_LOOPING, AL_FALSE);
   AUDIO_TEST_ERROR("[audio_add_source] error: source looping");
 
-  alSourcei(*source, AL_BUFFER, audio_buffer);
+  alSourcei(*source, AL_BUFFER, buffer);
   AUDIO_TEST_ERROR("[audio_add_source] error: source-buffer binding");
 }
 
@@ -91,10 +95,28 @@ int audio_source_playing(ALuint source) {
   return source_state == AL_PLAYING;
 }
 
+int audio_move_listener(vec3 pos) {
+  alListener3f(AL_POSITION, pos[0], pos[1], pos[2]);
+  AUDIO_TEST_ERROR("[audio_init] error: listener position");
+}
+
+int audio_move_source(ALuint source, vec3 pos) {
+  alSource3f(source, AL_POSITION, pos[0], pos[1], pos[2]);
+  AUDIO_TEST_ERROR("[audio_add_source] error: source position");
+}
+
+int audio_loop_source(ALuint source, ALboolean loop) {
+  alSourcei(source, AL_LOOPING, loop);
+  AUDIO_TEST_ERROR("[audio_add_source] error: source looping");
+}
+
 void audio_free() {
-  alDeleteBuffers(1, &audio_buffer);
+  for (int i = 0; i < AUDIO_MAX_BUFFERS; i++) {
+    alDeleteBuffers(1, &audio_buffers[i]);
+  }
   audio_device = alcGetContextsDevice(audio_context);
   alcMakeContextCurrent(NULL);
   alcDestroyContext(audio_context);
   alcCloseDevice(audio_device);
+  alutExit();
 }

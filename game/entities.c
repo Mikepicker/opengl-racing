@@ -9,6 +9,13 @@ car* entities_new_car(vec3 pos, char* filename) {
   vec3_copy(c->obj->position, pos);
   c->obj->box = physics_compute_aabb(c->obj);
   renderer_add_object(c->obj);
+
+  ALuint s;
+  audio_add_source(&s, microdrag.sound_car);
+  audio_loop_source(s, AL_TRUE);
+  audio_play_source(s);
+  c->obj->audio_source = s;
+
   return c;
 }
 
@@ -70,5 +77,10 @@ void entities_update() {
     // apply velocity
     vec4_scale(vel, vel, car->speed);
     vec3_add(car->obj->position, car->obj->position, vel);
+
+    // audio
+    audio_move_source(car->obj->audio_source, car->obj->position);
+    audio_source_playing(car->obj->audio_source);
+
   }
 }

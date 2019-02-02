@@ -20,6 +20,7 @@ typedef struct {
   int num_cars;
   light* lights;
   int num_lights;
+  ALuint sound_car;
 } game;
 
 game microdrag;

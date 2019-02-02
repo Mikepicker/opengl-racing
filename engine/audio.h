@@ -3,6 +3,8 @@
 
 #include "engine.h"
 
+#define AUDIO_MAX_BUFFERS 16
+
 ALCenum error;
 #define AUDIO_TEST_ERROR(_msg)		\
 	error = alGetError();		\
@@ -13,13 +15,17 @@ ALCenum error;
 
 ALCdevice* audio_device;
 ALCcontext* audio_context;
-ALuint audio_buffer;
+ALuint audio_buffers[AUDIO_MAX_BUFFERS];
+int audio_buffers_count;
 
 int audio_init();
-int audio_load_sound(const char* filename);
-int audio_add_source(ALuint* source);
+int audio_load_sound(const char* filename, ALuint* out_buffer);
+int audio_add_source(ALuint* source, ALuint buffer);
 int audio_play_source(ALuint source);
 int audio_source_playing(ALuint source);
+int audio_move_listener(vec3 pos);
+int audio_move_source(ALuint source, vec3 pos);
+int audio_loop_source(ALuint source, ALboolean loop);
 void audio_free();
 
 #endif
