@@ -1,6 +1,6 @@
 # OpenGL Racing Game Prototype
 
-[screen](screenshots/screen_1.png)
+![screen](screenshots/screen_1.png)
 
 Features:
 - Modern rendering pipeline (GLSL)
