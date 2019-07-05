@@ -4,7 +4,7 @@
 
 Features:
 - Modern rendering pipeline (GLSL)
-- Shadow mapping (with PCB)
+- Shadow mapping (with PCF)
 - Custom toon shader
 - Multiple lights
 - Simple rendering engine (OpenGL)
