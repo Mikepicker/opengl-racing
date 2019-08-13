@@ -455,6 +455,11 @@ static inline void mat4x4_look_at(mat4x4 m, vec3 eye, vec3 center, vec3 up)
 }
 
 typedef float quat[4];
+static inline void quat_copy(quat a, const quat b)
+{
+  for(int i=0; i<4; ++i)
+    a[i] = b[i];
+}
 static inline void quat_identity(quat q)
 {
 	q[0] = q[1] = q[2] = 0.f;

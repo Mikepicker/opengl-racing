@@ -11,6 +11,8 @@
 #define MAX_CARS 128
 #define MAX_LIGHTS 128
 
+enum game_state { MENU, RACE };
+
 typedef struct {
   GLFWwindow* window;
   camera game_camera;
@@ -22,12 +24,14 @@ typedef struct {
   light* lights;
   int num_lights;
   ALuint sound_car;
+  enum game_state state;
 } game;
 
 game microdrag;
 
 void game_init(GLFWwindow* window);
 void game_start();
+void game_update();
 void game_free();
 
 #endif
