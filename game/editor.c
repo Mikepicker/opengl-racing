@@ -30,12 +30,13 @@ void editor_init() {
     "assets/racing/roadStraight.obj",
     "assets/racing/roadCornerSmall.obj",
     "assets/racing/roadCornerLarge.obj",
-    "assets/racing/roadStart.obj"
+    "assets/racing/roadStraight.obj"
   };
 
   game_editor.enabled = 0;
   game_editor.current_index = 0;
   game_editor.current_angle = 0;
+  game_editor.start_index = -1;
   game_editor.render_list_size = 1;
   game_editor.current_pos[0] = 0.0f;
   game_editor.current_pos[1] = 0.001f; // y to 0.001 to avoid z-fighting
@@ -55,6 +56,12 @@ void editor_init() {
 
     physics_compute_aabb(game_editor.objects[i]);
     renderer_init_object(game_editor.objects[i]);
+
+    // start object
+    if (i == 3) {
+      vec3 cm = { 0, 0, 1.0f };
+      vec3_copy(game_editor.objects[i]->color_mask, cm);
+    }
   }
 
   for (int i = 0; i < EDITOR_MAX_PLACED_OBJECTS; i++) {
@@ -66,6 +73,11 @@ void editor_init() {
 
 void editor_next_piece() {
   game_editor.current_index = (game_editor.current_index + 1) % EDITOR_OBJECTS_COUNT;
+
+  if (game_editor.current_index == 3 && game_editor.start_index != -1) {
+    game_editor.current_index = 0;
+  }
+
   object* obj = game_editor.objects[game_editor.current_index];
   vec3_copy(obj->position, game_editor.current_pos);
   editor_render_list_update();
@@ -132,6 +144,11 @@ void editor_place_piece() {
   game_editor.placed_indices[i] = game_editor.current_index;
   game_editor.placed_angles[i] = game_editor.current_angle;
 
+  if (game_editor.current_index == 3) {
+    game_editor.start_index = i; 
+    editor_next_piece();
+  }
+
   editor_render_list_update();
 }
 
@@ -141,6 +158,8 @@ void editor_remove_piece() {
     if (game_editor.placed_objects[i] != NULL && physics_objects_collide(o, game_editor.placed_objects[i])) {
       free(game_editor.placed_objects[i]);
       game_editor.placed_objects[i] = NULL;
+
+      if (i == game_editor.start_index) { game_editor.start_index = -1; }
     }
   }
   editor_render_list_update();
@@ -151,6 +170,11 @@ object* editor_current_object() {
   vec3 y_axis = {0.0f, 1.0f, 0.0f};
   quat_rotate(obj->rotation, to_radians(game_editor.current_angle), y_axis);
   return obj;
+}
+
+object* editor_start_object() {
+  if (game_editor.start_index != -1) { return game_editor.placed_objects[game_editor.start_index]; }
+  return NULL;
 }
 
 void editor_serialize(const char* filename) {

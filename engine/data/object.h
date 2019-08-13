@@ -6,21 +6,22 @@
 #include "aabb.h"
 
 typedef struct {
- vec3 position;
- vec3 center;
- GLfloat scale;
- quat rotation;
+  vec3 position;
+  vec3 center;
+  GLfloat scale;
+  quat rotation;
 
- mesh* meshes;
- int num_meshes;
+  mesh* meshes;
+  int num_meshes;
 
- int glowing;
- vec3 glow_color;
- int receive_shadows;
+  vec3 color_mask;
+  int glowing;
+  vec3 glow_color;
+  int receive_shadows;
 
- aabb box;
+  aabb box;
 
- ALuint audio_source;
+  ALuint audio_source;
 } object;
 
 object* object_create(vec3 position, GLfloat scale, mesh* meshes, int num_meshes, int compute_center);

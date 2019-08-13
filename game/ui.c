@@ -120,6 +120,10 @@ void ui_render() {
       renderer_shadow_pcf_enabled = renderer_shadow_pcf_enabled == 0 ? 1 : 0;
     }
 
+    char camera_pos[128];
+    snprintf(camera_pos, 128, "camera: %f %f %f\n", cam->pos[0], cam->pos[1], cam->pos[2]);
+    nk_label(ctx, camera_pos, NK_TEXT_LEFT);
+
     nk_layout_row_begin(ctx, NK_STATIC, 30, 2);
     {
       nk_layout_row_push(ctx, 50);
@@ -131,11 +135,20 @@ void ui_render() {
     char shadow_bias[128];
     snprintf(shadow_bias, 128, "%f\n", renderer_shadow_bias);
     nk_label(ctx, shadow_bias, NK_TEXT_LEFT);
+    nk_layout_row_end(ctx);
 
-    char camera_pos[128];
-    snprintf(camera_pos, 128, "camera: %f %f %f\n", cam->pos[0], cam->pos[1], cam->pos[2]);
-    nk_label(ctx, camera_pos, NK_TEXT_LEFT);
+    nk_layout_row_begin(ctx, NK_STATIC, 30, 2);
+    {
+      nk_layout_row_push(ctx, 50);
+      nk_label(ctx, "Shadow Map Size:", NK_TEXT_LEFT);
+      nk_layout_row_push(ctx, 110);
+      nk_slider_float(ctx, 0, &renderer_shadow_far, 20.0f, 10.0f);
+    }
 
+    char shadow_far[128];
+    snprintf(shadow_far, 128, "%f\n", renderer_shadow_far);
+    nk_label(ctx, shadow_far, NK_TEXT_LEFT);
+    nk_layout_row_end(ctx);
   }
   nk_end(ctx);
 

@@ -16,6 +16,7 @@ object* object_create(vec3 position, GLfloat scale, mesh* meshes, int num_meshes
   else { vec3_copy(obj->position, zero_vec); }
   
   // shader
+  vec3_copy(obj->color_mask, zero_vec);
   obj->receive_shadows = 0;
   obj->glowing = 0;
   vec3_copy(obj->glow_color, zero_vec);
@@ -72,7 +73,7 @@ void object_get_center(const object* o, vec3* out_center) {
       if (v->z < min_z) { min_z = v->z; } 
       if (v->z > max_z) { max_z = v->z; }
     }
-  } 
+  }
   vec3 center = {(min_x + max_x) / 2, (min_y + max_y) / 2, (min_z + max_z) / 2};
   vec3_copy(*out_center, center);
 }

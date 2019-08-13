@@ -64,9 +64,6 @@ int main()
   mat.diffuse[0] = 1.0f;
   mat.diffuse[1] = 1.0f;
   mat.diffuse[2] = 1.0f;
-  mat.specular[0] = 1.0f;
-  mat.specular[1] = 1.0f;
-  mat.specular[2] = 1.0f;
   sphere->meshes[0].mat = mat;
   object_set_center(sphere);
   renderer_init_object(sphere);
@@ -79,7 +76,9 @@ int main()
 
     // microdrag.lights[0].position[0] = 4 + sinf(current_frame);
     //microdrag.cars[0].obj->position[1] = 1.0f + sinf(2.0f * current_frame);
-    // sphere->position[0] = 1.0f + sinf(2.0f * current_frame);
+    /* microdrag.lights[0].position[1] = 16 + 16 * sinf(0.5f * current_frame);
+    vec3_copy(sphere->position, microdrag.lights[0].position);
+    printf("TEST %f\n", microdrag.lights[0].position[1]); */
     vec3_copy(sphere->position, microdrag.lights[0].position);
 
     // audio

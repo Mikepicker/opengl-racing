@@ -102,6 +102,8 @@ int renderer_init(char* title, int width, int height, GLFWwindow** out_window) {
   }
 
   // init vars
+  renderer_shadow_near = 1.0f;
+  renderer_shadow_far = 10.0f;
   renderer_debug_vao = 0;
   renderer_debug_enabled = 0;
   renderer_shadow_bias = 0.22f;
@@ -276,6 +278,7 @@ static void render_objects(object *objects[], int objects_length, GLuint shader_
     glUniformMatrix4fv(glGetUniformLocation(shader_id, "M"), 1, GL_FALSE, (const GLfloat*) m);
     
     // render params
+    glUniform3fv(glGetUniformLocation(shader_id, "color_mask"), 1, o->color_mask);
     glUniform1i(glGetUniformLocation(shader_id, "glowing"), o->glowing);
     glUniform3fv(glGetUniformLocation(shader_id, "glow_color"), 1, o->glow_color);
     glUniform1i(glGetUniformLocation(shader_id, "receive_shadows"), o->receive_shadows);
@@ -347,8 +350,7 @@ void renderer_render_objects(object *objects[], int objects_length, light *light
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
   mat4x4 light_proj, light_view, light_space;
-  float near_plane = 1.0f, far_plane = 5.5f;
-  mat4x4_ortho(light_proj, -20.0f, 20.0f, -20.0f, 20.0f, near_plane, far_plane);
+  mat4x4_ortho(light_proj, -40.0f, 40.0f, -40.0f, 40.0f, renderer_shadow_near, renderer_shadow_far);
   vec3 up = { 0.0f, 0.0f, 1.0f };
   vec3 dir = { 0.0f, 0.0f, 0.0f };
   mat4x4_look_at(light_view, lights[0]->position, dir, up);
@@ -424,8 +426,8 @@ void renderer_render_objects(object *objects[], int objects_length, light *light
   /*------------------------------debug------------------------------*/
   /*-----------------------------------------------------------------*/
   glUseProgram(renderer_debug_shader);
-  glUniform1f(glGetUniformLocation(renderer_debug_shader, "near_plane"), near_plane);
-  glUniform1f(glGetUniformLocation(renderer_debug_shader, "far_plane"), far_plane);
+  glUniform1f(glGetUniformLocation(renderer_debug_shader, "near_plane"), renderer_shadow_near);
+  glUniform1f(glGetUniformLocation(renderer_debug_shader, "far_plane"), renderer_shadow_far);
   glUniform1i(glGetUniformLocation(renderer_debug_shader, "depthMap"), 0);
   glActiveTexture(GL_TEXTURE0);
   glBindTexture(GL_TEXTURE_2D, renderer_depth_map);

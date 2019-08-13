@@ -19,6 +19,7 @@ typedef struct {
   int current_angle;
   unsigned int render_list_size;
   vec3 current_pos;
+  int start_index;
 } editor;
 
 editor game_editor;
@@ -32,6 +33,7 @@ void editor_update();
 void editor_place_piece();
 void editor_remove_piece();
 object* editor_current_object();
+object* editor_start_object();
 void editor_serialize(const char* filename);
 void editor_deserialize(const char* filename);
 void editor_free();

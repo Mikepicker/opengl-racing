@@ -37,6 +37,7 @@ uniform sampler2D texture1;
 uniform float time;
 
 // render params
+uniform vec3 color_mask;
 uniform int glowing;
 uniform vec3 glow_color;
 uniform int receive_shadows;
@@ -105,6 +106,9 @@ void main() {
     result += (ambient + (1.0 - shadow) * (diffuse + specular)) * objectColor;
     //result = texture(shadowMap, FragPos.xy).rgb;
   }
+
+  // color mask
+  result += color_mask;
 
   // glowing effect
   if (glowing == 1) {
