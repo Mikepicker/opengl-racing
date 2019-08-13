@@ -2,6 +2,7 @@
 #define editor_h
 
 #include "../engine/steve.h"
+#include "data/car.h"
 
 #define EDITOR_OBJECTS_COUNT 4
 #define EDITOR_MAX_PLACED_OBJECTS 256
@@ -20,6 +21,7 @@ typedef struct {
   unsigned int render_list_size;
   vec3 current_pos;
   int start_index;
+  int placed_count;
 } editor;
 
 editor game_editor;
@@ -34,6 +36,7 @@ void editor_place_piece();
 void editor_remove_piece();
 object* editor_current_object();
 object* editor_start_object();
+void editor_color_car_pieces(const car* red_car, const car* green_car);
 void editor_serialize(const char* filename);
 void editor_deserialize(const char* filename);
 void editor_free();

@@ -2,6 +2,7 @@
 #define game_h
 
 #include "../engine/steve.h"
+#include "editor.h"
 #include "data/car.h"
 
 #define GAME_WIDTH 1280
@@ -26,6 +27,7 @@ typedef struct {
 game microdrag;
 
 void game_init(GLFWwindow* window);
+void game_start();
 void game_free();
 
 #endif

@@ -6,6 +6,8 @@ car* entities_new_car(vec3 pos, char* filename) {
   c->accel = 0.0f;
   c->speed = 0.0f;
   vec3_copy(c->obj->position, pos);
+  c->current_lap = 0;
+  c->last_piece_index = 0;
 
   physics_compute_aabb(c->obj);
   renderer_init_object(c->obj);
@@ -23,6 +25,9 @@ static ray compute_car_ray(car* c) {
   vec3_copy(r.dir, ray_dir);
   r.length = 10;
   return r;
+}
+
+void entities_car_advance() {
 }
 
 void entities_update() {
@@ -56,6 +61,12 @@ void entities_update() {
       if (track_piece != NULL && physics_objects_collide(car->obj, track_piece)) {
         mesh* m = physics_ray_hit_mesh(compute_car_ray(car), track_piece);
         if (m != NULL) {
+
+          // advance piece
+          if ((car->last_piece_index + 1) % game_editor.placed_count == j) {
+            car->last_piece_index = j;
+          }
+
           if (strcmp(m->mat.name, "grass") != 0) {
             on_grass = 0;
           }
@@ -63,7 +74,7 @@ void entities_update() {
         }
       }
     }
-
+    
     if (on_grass) {
       if (fabsf(car->speed) > CAR_MAX_SPEED_GRASS)
         car->speed = (car->speed / fabsf(car->speed)) * CAR_MAX_SPEED_GRASS;
@@ -77,5 +88,7 @@ void entities_update() {
     audio_move_source(car->obj->audio_source, car->obj->position);
     audio_source_playing(car->obj->audio_source);
 
+    // color track pieces
+    editor_color_car_pieces(&microdrag.cars[0], &microdrag.cars[1]);
   }
 }

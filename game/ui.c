@@ -101,6 +101,11 @@ void ui_render() {
     }
 
     nk_layout_row_static(ctx, 30, 120, 1);
+    if (nk_button_label(ctx, "Start game")) {
+      game_start();
+    }
+
+    nk_layout_row_static(ctx, 30, 120, 1);
     if (nk_button_label(ctx, "Compile shader")) {
       renderer_recompile_shader();
     }

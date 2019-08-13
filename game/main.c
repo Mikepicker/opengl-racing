@@ -80,6 +80,8 @@ int main()
     vec3_copy(sphere->position, microdrag.lights[0].position);
     printf("TEST %f\n", microdrag.lights[0].position[1]); */
     vec3_copy(sphere->position, microdrag.lights[0].position);
+    /* vec3_copy(microdrag.game_camera.pos, microdrag.cars[0].obj->position);
+    microdrag.game_camera.pos[1] = 0.5f; */
 
     // audio
     audio_move_listener(microdrag.game_camera.pos);

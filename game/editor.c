@@ -24,7 +24,6 @@ void editor_set_enabled(int on) {
   editor_render_list_update();
 }
 
-
 void editor_init() {
   const char* editor_objects_names[EDITOR_OBJECTS_COUNT] = {
     "assets/racing/roadStraight.obj",
@@ -36,6 +35,7 @@ void editor_init() {
   game_editor.enabled = 0;
   game_editor.current_index = 0;
   game_editor.current_angle = 0;
+  game_editor.placed_count = 0;
   game_editor.start_index = -1;
   game_editor.render_list_size = 1;
   game_editor.current_pos[0] = 0.0f;
@@ -149,6 +149,8 @@ void editor_place_piece() {
     editor_next_piece();
   }
 
+  game_editor.placed_count++;
+
   editor_render_list_update();
 }
 
@@ -160,6 +162,7 @@ void editor_remove_piece() {
       game_editor.placed_objects[i] = NULL;
 
       if (i == game_editor.start_index) { game_editor.start_index = -1; }
+      game_editor.placed_count--;
     }
   }
   editor_render_list_update();
@@ -175,6 +178,26 @@ object* editor_current_object() {
 object* editor_start_object() {
   if (game_editor.start_index != -1) { return game_editor.placed_objects[game_editor.start_index]; }
   return NULL;
+}
+
+void editor_color_car_pieces(const car* red_car, const car* green_car) {
+  vec3 zero_vec = { 0, 0, 0 };
+  vec3 red_mask = { 0.1f, 0, 0 };
+  vec3 green_mask = { 0, 0.1f, 0 };
+  for (int i = 0; i < EDITOR_MAX_PLACED_OBJECTS; i++) {
+    object* o = game_editor.placed_objects[i];
+    if (o != NULL && i != game_editor.start_index) {
+      if (i == red_car->last_piece_index && i == green_car->last_piece_index) {
+        vec3_add(o->color_mask, red_mask, green_mask);
+      } else if (i == red_car->last_piece_index) {
+        vec3_copy(o->color_mask, red_mask);
+      } else if (i == green_car->last_piece_index) {
+        vec3_copy(o->color_mask, green_mask);
+      } else {
+        vec3_copy(o->color_mask, zero_vec);
+      }
+    }
+  }
 }
 
 void editor_serialize(const char* filename) {
@@ -239,6 +262,11 @@ void editor_deserialize(const char* filename) {
     game_editor.placed_indices[c] = index;
     game_editor.placed_angles[c] = angle;
 
+    if (index == 3) {
+      game_editor.start_index = c;
+    }
+
+    game_editor.placed_count++;
     game_editor.placed_objects[c++] = obj_clone;
   }
 

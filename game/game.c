@@ -20,6 +20,21 @@ void game_init(GLFWwindow* window) {
   microdrag.lights = malloc(MAX_LIGHTS * sizeof(light));
 }
 
+void game_start() {
+  if (game_editor.start_index != -1) {
+    object* start = game_editor.placed_objects[game_editor.start_index];
+    vec3 start_pos;
+    vec3_copy(start_pos, start->position);
+    vec3_scale(start_pos, start->position, start->scale);
+
+    vec3_copy(microdrag.cars[0].obj->position, start_pos);
+    microdrag.cars[0].last_piece_index = game_editor.start_index;
+
+    vec3_copy(microdrag.cars[1].obj->position, start_pos);
+    microdrag.cars[1].last_piece_index = game_editor.start_index;
+  }
+}
+
 void game_free() {
   render_list_free(microdrag.game_render_list);
   free(microdrag.cars);

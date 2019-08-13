@@ -7,6 +7,7 @@
 #include "data/car.h"
 
 car* entities_new_car(vec3 pos, char* filename);
+void entities_car_advance();
 void entities_update();
 
 #endif

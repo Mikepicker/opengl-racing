@@ -13,6 +13,8 @@ typedef struct {
   vec3 dir;
   float accel;
   float speed;
+  int current_lap;
+  int last_piece_index;
 } car;
 
 #endif
