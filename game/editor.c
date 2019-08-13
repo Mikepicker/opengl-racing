@@ -53,8 +53,8 @@ void editor_init() {
 
     game_editor.objects[i]->receive_shadows = 1;
 
-    game_editor.objects[i]->box = physics_compute_aabb(game_editor.objects[i]);
-    renderer_add_object(game_editor.objects[i]);
+    physics_compute_aabb(game_editor.objects[i]);
+    renderer_init_object(game_editor.objects[i]);
   }
 
   for (int i = 0; i < EDITOR_MAX_PLACED_OBJECTS; i++) {

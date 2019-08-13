@@ -5,16 +5,11 @@ car* entities_new_car(vec3 pos, char* filename) {
   c->obj = importer_load_obj(filename);
   c->accel = 0.0f;
   c->speed = 0.0f;
-  c->obj->receive_shadows = 0;
   vec3_copy(c->obj->position, pos);
-  c->obj->box = physics_compute_aabb(c->obj);
-  renderer_add_object(c->obj);
 
-  ALuint s;
-  audio_add_source(&s, microdrag.sound_car);
-  audio_loop_source(s, AL_TRUE);
-  audio_play_source(s);
-  c->obj->audio_source = s;
+  physics_compute_aabb(c->obj);
+  renderer_init_object(c->obj);
+  audio_init_object(c->obj, microdrag.sound_car, 1);
 
   return c;
 }

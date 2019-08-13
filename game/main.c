@@ -56,6 +56,21 @@ int main()
   microdrag.cars[1] = *entities_new_car(red_car_pos, "assets/racing/raceCarGreen.obj");
   microdrag.num_cars = 2;
 
+  // test sphere
+  object* sphere = factory_create_sphere(1, 36, 18);
+  material mat;
+  strcpy(mat.name, "sphere_mat");
+  strcpy(mat.texture_path, "\0");
+  mat.diffuse[0] = 1.0f;
+  mat.diffuse[1] = 1.0f;
+  mat.diffuse[2] = 1.0f;
+  mat.specular[0] = 1.0f;
+  mat.specular[1] = 1.0f;
+  mat.specular[2] = 1.0f;
+  sphere->meshes[0].mat = mat;
+  object_set_center(sphere);
+  renderer_init_object(sphere);
+
   int macMoved = 0;
   while (!renderer_should_close()) {
     float current_frame = glfwGetTime();
@@ -64,6 +79,8 @@ int main()
 
     // microdrag.lights[0].position[0] = 4 + sinf(current_frame);
     //microdrag.cars[0].obj->position[1] = 1.0f + sinf(2.0f * current_frame);
+    // sphere->position[0] = 1.0f + sinf(2.0f * current_frame);
+    vec3_copy(sphere->position, microdrag.lights[0].position);
 
     // audio
     audio_move_listener(microdrag.game_camera.pos);
@@ -81,6 +98,7 @@ int main()
     render_list_clear(microdrag.game_render_list);
     render_list_add(microdrag.game_render_list, microdrag.cars[0].obj);
     render_list_add(microdrag.game_render_list, microdrag.cars[1].obj);
+    render_list_add(microdrag.game_render_list, sphere);
     render_list_add_batch(microdrag.game_render_list, game_editor.render_list, game_editor.render_list_size);
 
     // render editor

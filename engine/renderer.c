@@ -135,6 +135,10 @@ int renderer_should_close() {
 
 static void add_aabb(object* o) {
   aabb* aabb = &o->box;
+  if (!aabb) {
+    return;
+  }
+
   GLfloat vertices[] = {
     -0.5, -0.5, -0.5,
      0.5, -0.5, -0.5,
@@ -170,7 +174,7 @@ static void add_aabb(object* o) {
   glBindVertexArray(0);
 }
 
-void renderer_add_object(object* o) {
+void renderer_init_object(object* o) {
 
   for (int i = 0; i < o->num_meshes; i++) {
     mesh* mesh = &o->meshes[i];
@@ -344,7 +348,7 @@ void renderer_render_objects(object *objects[], int objects_length, light *light
 
   mat4x4 light_proj, light_view, light_space;
   float near_plane = 1.0f, far_plane = 5.5f;
-  mat4x4_ortho(light_proj, -100.0f, 100.0f, -100.0f, 100.0f, near_plane, far_plane);
+  mat4x4_ortho(light_proj, -20.0f, 20.0f, -20.0f, 20.0f, near_plane, far_plane);
   vec3 up = { 0.0f, 0.0f, 1.0f };
   vec3 dir = { 0.0f, 0.0f, 0.0f };
   mat4x4_look_at(light_view, lights[0]->position, dir, up);

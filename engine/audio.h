@@ -2,6 +2,7 @@
 #define audio_h
 
 #include "engine.h"
+#include "data/object.h"
 
 #define AUDIO_MAX_BUFFERS 16
 
@@ -26,6 +27,7 @@ int audio_source_playing(ALuint source);
 int audio_move_listener(vec3 pos);
 int audio_move_source(ALuint source, vec3 pos);
 int audio_loop_source(ALuint source, ALboolean loop);
+int audio_init_object(object* object, ALuint source, int loop);
 void audio_free();
 
 #endif

@@ -11,7 +11,7 @@ static vertex scale_vertex(float scale, vertex v) {
   return res;
 }
 
-aabb physics_compute_aabb(object* object) {
+void physics_compute_aabb(object* object) {
   aabb aabb;
 
   mesh* first_mesh = &object->meshes[0];
@@ -66,7 +66,7 @@ aabb physics_compute_aabb(object* object) {
     aabb.max_y += diff_h / 2;
   }
 
-  return aabb;
+  object->box = aabb;
 }
 
 int physics_objects_collide(object* a, object* b) {

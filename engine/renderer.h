@@ -8,8 +8,8 @@
 #include "data/camera.h"
 #include "data/ray.h"
 
-#define SHADOW_WIDTH 1024 * 4
-#define SHADOW_HEIGHT 1024 * 4
+#define SHADOW_WIDTH 1024 * 1
+#define SHADOW_HEIGHT 1024 * 1
 
 GLFWwindow* window;
 
@@ -30,7 +30,7 @@ int renderer_init(char* title, int width, int height, GLFWwindow** out_window);
 void renderer_cleanup();
 void renderer_recompile_shader();
 int renderer_should_close();
-void renderer_add_object(object* o);
+void renderer_init_object(object* o);
 void renderer_render_objects(object *objects[], int objects_length, light *lights[], int lights_length, camera *camera, void (*ui_render_callback)(void), int debug);
 
 #endif

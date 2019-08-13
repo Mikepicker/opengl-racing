@@ -110,6 +110,15 @@ int audio_loop_source(ALuint source, ALboolean loop) {
   AUDIO_TEST_ERROR("[audio_add_source] error: source looping");
 }
 
+int audio_init_object(object* object, ALuint source, int loop) {
+  ALuint s;
+  audio_add_source(&s, source);
+  if (loop) { audio_loop_source(s, AL_TRUE); }
+  else { audio_loop_source(s, AL_FALSE); }
+  audio_play_source(s);
+  object->audio_source = s;
+}
+
 void audio_free() {
   for (int i = 0; i < AUDIO_MAX_BUFFERS; i++) {
     alDeleteBuffers(1, &audio_buffers[i]);
