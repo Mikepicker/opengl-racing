@@ -32,6 +32,7 @@ uniform int shadowPCFEnabled;
 // texture
 uniform int hasTexture;
 uniform sampler2D texture1;
+uniform int texture_subdivision;
 
 // time
 uniform float time;
@@ -94,7 +95,7 @@ void main() {
     vec3 reflectDir = reflect(-lightDir, norm);  
     float spec = pow(max(dot(viewDir, reflectDir), 0.0), 64);
     spec = spec > 0.01 ? 0.6 : 0;
-    vec3 specular = specularStrength * spec * lightsColors[i];  
+    vec3 specular = specularStrength * spec * lightsColors[i] * material.specular;  
    
     // shadows
     float shadow = 0.0;
@@ -102,7 +103,7 @@ void main() {
       shadow = shadowCalculation(FragPosLightSpace, lightDir);
     }
 
-    vec3 objectColor = hasTexture > 0 ? texture(texture1, Uvs).rgb : vec3(1.0);
+    vec3 objectColor = hasTexture > 0 ? texture(texture1, Uvs * texture_subdivision).rgb : vec3(1.0);
     result += (ambient + (1.0 - shadow) * (diffuse + specular)) * objectColor;
     //result = texture(shadowMap, FragPos.xy).rgb;
   }

@@ -68,6 +68,24 @@ int main()
   object_set_center(sphere);
   renderer_init_object(sphere);
 
+  // plane
+  object* plane = factory_create_plane(80, 80);
+  plane->position[1] = -0.2;
+  plane->meshes[0].mat = mat;
+  material mat_plane;
+  strcpy(mat_plane.name, "plane_mat");
+  strcpy(mat_plane.texture_path, "assets/textures/Wood_Grain_DIFF.png");
+  mat_plane.texture_subdivision = 5;
+  mat_plane.diffuse[0] = 1;
+  mat_plane.diffuse[1] = 1;
+  mat_plane.diffuse[2] = 1;
+  mat_plane.specular[0] = 0;
+  mat_plane.specular[1] = 0;
+  mat_plane.specular[2] = 0;
+  plane->meshes[0].mat = mat_plane;
+  object_set_center(plane);
+  renderer_init_object(plane);
+
   int macMoved = 0;
   while (!renderer_should_close()) {
     float current_frame = glfwGetTime();
@@ -101,6 +119,7 @@ int main()
     render_list_add(microdrag.game_render_list, microdrag.cars[0].obj);
     render_list_add(microdrag.game_render_list, microdrag.cars[1].obj);
     render_list_add(microdrag.game_render_list, sphere);
+    render_list_add(microdrag.game_render_list, plane);
     render_list_add_batch(microdrag.game_render_list, game_editor.render_list, game_editor.render_list_size);
 
     // render editor

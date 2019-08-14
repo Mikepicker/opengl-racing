@@ -292,10 +292,11 @@ static void render_objects(object *objects[], int objects_length, GLuint shader_
 
       // bind texture
       if (strlen(mesh->mat.texture_path) > 0) {
-        glUniform1i(glGetUniformLocation(mesh->texture_id, "texture1"), 0);
-        glActiveTexture(GL_TEXTURE0);
+        glUniform1i(glGetUniformLocation(mesh->texture_id, "texture1"), 1);
+        glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_2D, mesh->texture_id);
         glUniform1i(glGetUniformLocation(shader_id, "hasTexture"), 1);
+        glUniform1i(glGetUniformLocation(shader_id, "texture_subdivision"), mesh->mat.texture_subdivision);
       } else {
         glUniform1i(glGetUniformLocation(shader_id, "hasTexture"), 0);
       }

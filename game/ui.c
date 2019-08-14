@@ -126,7 +126,7 @@ void ui_render() {
     }
 
     char camera_pos[128];
-    snprintf(camera_pos, 128, "camera: %f %f %f\n", cam->pos[0], cam->pos[1], cam->pos[2]);
+    snprintf(camera_pos, 128, "camera: %f %f %f | %f %f %f\n", cam->pos[0], cam->pos[1], cam->pos[2], cam->front[0], cam->front[1], cam->front[2]);
     nk_label(ctx, camera_pos, NK_TEXT_LEFT);
 
     nk_layout_row_begin(ctx, NK_STATIC, 30, 2);

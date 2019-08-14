@@ -29,19 +29,31 @@ void game_start() {
     vec3_copy(start_pos, start->position);
     vec3_scale(start_pos, start->position, start->scale);
 
-    vec3_copy(microdrag.cars[0].obj->position, start_pos);
-    microdrag.cars[0].last_piece_index = game_editor.start_index;
+    car* red_car = &microdrag.cars[0];
+    vec3_copy(red_car->obj->position, start_pos);
+    red_car->last_piece_index = game_editor.start_index;
 
-    vec3_copy(microdrag.cars[1].obj->position, start_pos);
-    microdrag.cars[1].last_piece_index = game_editor.start_index;
+    car* green_car = &microdrag.cars[1];
+    vec3 green_off = { -0.5f, 0.0f, 0.0 };
+    vec3_copy(green_car->obj->position, start_pos);
+    vec3_add(green_car->obj->position, green_off, green_car->obj->position);
+    green_car->last_piece_index = game_editor.start_index;
 
     microdrag.state = RACE;
+
+
+    // top-down camera
+    camera* cam = &microdrag.game_camera;
+    vec3 pos = { 0.0f, 50.0f, 0.0f };
+    vec3_copy(cam->pos, pos);
+    vec3 front = { -0.03f, -0.99, -0.04f };
+    vec3_copy(cam->front, front);
   }
 }
 
 void game_update() {
-  // camera
-  if (microdrag.state == RACE) {
+  // 1st person camera
+  /* if (microdrag.state == RACE) {
     camera* cam = &microdrag.game_camera;
     vec3_copy(cam->pos, microdrag.cars[0].obj->position);
     cam->pos[1] = 0.6f;
@@ -56,7 +68,7 @@ void game_update() {
     vec3 off = { dir[0], dir[1], dir[2] };
     vec3_scale(off, off, -2);
     vec3_add(cam->pos, off, cam->pos);
-  }
+  } */
 }
 
 void game_free() {

@@ -81,6 +81,34 @@ object* factory_create_sphere(float radius, int sector_count, int stack_count) {
   m->num_indices = icount;
 
   object* obj = object_create(NULL, 1.0f, m, 1, 1);
+  return obj;
+}
 
+object* factory_create_plane(float width, float height) {
+  vertex* vertices = (vertex*)malloc(4 * sizeof(vertex));
+  vertex v1 = { -width/2, 0,-height/2, 0, 0, 0, 1, 0 };
+  vertex v2 = { width/2, 0, -height/2, 0, 1, 0, 1, 0 };
+  vertex v3 = { width/2, 0, height/2, 1, 1, 0, 1, 0 };
+  vertex v4 = { -width/2, 0, height/2, 1, 0, 0, 1, 0 };
+  vertices[0] = v1;
+  vertices[1] = v2;
+  vertices[2] = v3;
+  vertices[3] = v4;
+
+  GLuint* indices = (GLuint*)malloc(4 * sizeof(GLuint));
+  indices[0] = 0;
+  indices[1] = 3;
+  indices[2] = 1;
+  indices[3] = 3;
+  indices[4] = 2;
+  indices[5] = 1;
+
+  mesh* m = (mesh*)malloc(sizeof(mesh));
+  m->vertices = vertices;
+  m->num_vertices = 4;
+  m->indices = indices;
+  m->num_indices = 6;
+
+  object* obj = object_create(NULL, 1.0f, m, 1, 1);
   return obj;
 }
