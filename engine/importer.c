@@ -9,6 +9,7 @@ static vec3* temp_normals;
 static GLuint* indices;
 
 static dict* vh;
+static dict* materials;
 
 static int vsize, vcount;
 static int vtsize, vtcount;
@@ -21,10 +22,9 @@ static vertex* vertices;
 static int meshes_size, meshes_count;
 static mesh* meshes;
 
-static dict* import_mtl(const char* filename) {
+static void import_mtl(const char* filename) {
   FILE* file = fopen(filename, "r");
   char line[256];
-  dict* materials = dict_new(INIT_SIZE);
 
   material* current_mat = NULL;
   int first = 1;
@@ -62,8 +62,6 @@ static dict* import_mtl(const char* filename) {
   }
 
   fclose(file);
-
-  return materials;
 }
 
 static void push_index(const char* vkey) {
@@ -159,7 +157,7 @@ object* importer_load_obj(const char* filename) {
   init_structures();
   
   // materials dictionary
-  dict* materials;
+  materials = dict_new(INIT_SIZE);
 
   int first_mesh = 1;
   while (fgets(line, sizeof(line), file)) {
@@ -228,7 +226,7 @@ object* importer_load_obj(const char* filename) {
       char mtl_path[128];
       strncpy(mtl_path, ASSETS_PATH, 128);
       strncat(mtl_path, mtl_name, 128);
-      materials = import_mtl(mtl_path);
+      import_mtl(mtl_path);
     }
 
     // use mtl
