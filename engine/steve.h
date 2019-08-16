@@ -8,3 +8,4 @@
 #include "audio.h"
 #include "render_list.h"
 #include "factory.h"
+#include "skybox.h"

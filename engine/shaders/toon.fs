@@ -29,6 +29,9 @@ uniform sampler2D shadowMap;
 uniform float shadowBias;
 uniform int shadowPCFEnabled;
 
+// skybox
+uniform samplerCube skybox;
+
 // texture
 uniform int hasTexture;
 uniform sampler2D texture1;
@@ -95,7 +98,10 @@ void main() {
     vec3 reflectDir = reflect(-lightDir, norm);  
     float spec = pow(max(dot(viewDir, reflectDir), 0.0), 64);
     spec = spec > 0.01 ? 0.6 : 0;
-    vec3 specular = specularStrength * spec * lightsColors[i] * material.specular;  
+
+    // skybox
+    vec3 r = reflect(-viewDir, normalize(norm));
+    vec3 specular = specularStrength * spec * lightsColors[i] * material.specular + texture(skybox, r).rgb * material.specular;  
    
     // shadows
     float shadow = 0.0;

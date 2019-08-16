@@ -129,6 +129,7 @@ void renderer_recompile_shader() {
   shader_compile("../engine/shaders/toon.vs", "../engine/shaders/toon.fs", &renderer_main_shader);
   shader_compile("../engine/shaders/shadow.vs", "../engine/shaders/shadow.fs", &renderer_shadow_shader);
   shader_compile("../engine/shaders/debug.vs", "../engine/shaders/debug.fs", &renderer_debug_shader);
+  shader_compile("../engine/shaders/skybox.vs", "../engine/shaders/skybox.fs", &renderer_skybox_shader);
 }
 
 int renderer_should_close() {
@@ -336,7 +337,7 @@ static void render_debug_quad() {
   glBindVertexArray(0);
 }
 
-void renderer_render_objects(object *objects[], int objects_length, light *lights[], int lights_length, camera *camera, void (*ui_render_callback)(void), int debug)
+void renderer_render_objects(object* objects[], int objects_length, light* lights[], int lights_length, camera* camera, void (*ui_render_callback)(void), skybox* sky, int debug)
 {
   GLint time;
   float ratio;
@@ -374,9 +375,9 @@ void renderer_render_objects(object *objects[], int objects_length, light *light
   /*------------------------------scene------------------------------*/
   /*-----------------------------------------------------------------*/
   glUseProgram(renderer_main_shader);
-  glClearColor(183.0f / 255.0f, 220.0f / 255.0f, 244.0f / 255.0f, 1.0f);
   ratio = width / (float)height;
   glViewport(0, 0, width, height);
+  glClearColor(183.0f / 255.0f, 220.0f / 255.0f, 244.0f / 255.0f, 1.0f);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
   // camera position
@@ -398,6 +399,11 @@ void renderer_render_objects(object *objects[], int objects_length, light *light
   glUniform1i(glGetUniformLocation(renderer_main_shader, "shadowMap"), 0);
   glUniform1f(glGetUniformLocation(renderer_main_shader, "shadowBias"), renderer_shadow_bias);
   glUniform1i(glGetUniformLocation(renderer_main_shader, "shadowPCFEnabled"), renderer_shadow_pcf_enabled);
+
+  // skybox to shader
+  glUniform1i(glGetUniformLocation(renderer_main_shader, "skybox"), 2);
+  glActiveTexture(GL_TEXTURE2);
+  glBindTexture(GL_TEXTURE_CUBE_MAP, sky->texture_id);
 
   // compute mvp matrix
   mat4x4 v, p;
@@ -423,6 +429,28 @@ void renderer_render_objects(object *objects[], int objects_length, light *light
   // process objects
   render_objects(objects, objects_length, renderer_main_shader, debug);
 
+  /*-----------------------------------------------------------------*/
+  /*-----------------------------skybox------------------------------*/
+  /*-----------------------------------------------------------------*/
+  if (sky) {
+    glDepthFunc(GL_LEQUAL);  // change depth function so depth test passes when values are equal to depth buffer's content
+    glUseProgram(renderer_skybox_shader);
+    glUniform1i(glGetUniformLocation(sky->texture_id, "skybox"), 0);
+    v[3][0] = 0;
+    v[3][1] = 0;
+    v[3][2] = 0;
+    v[3][3] = 0;
+    glUniformMatrix4fv(glGetUniformLocation(renderer_skybox_shader, "view"), 1, GL_FALSE, (const GLfloat*) v);
+    glUniformMatrix4fv(glGetUniformLocation(renderer_skybox_shader, "projection"), 1, GL_FALSE, (const GLfloat*) p);
+
+    // skybox cube
+    glBindVertexArray(sky->vao);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, sky->texture_id);
+    glDrawArrays(GL_TRIANGLES, 0, 36);
+    glBindVertexArray(0);
+    glDepthFunc(GL_LESS); // set depth function back to default
+  }
   /*-----------------------------------------------------------------*/
   /*------------------------------debug------------------------------*/
   /*-----------------------------------------------------------------*/

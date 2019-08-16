@@ -70,8 +70,9 @@ int main()
 
   // plane
   object* plane = factory_create_plane(80, 80);
-  plane->position[1] = -0.2;
+  plane->position[1] = -0.001;
   plane->meshes[0].mat = mat;
+  plane->receive_shadows = 1;
   material mat_plane;
   strcpy(mat_plane.name, "plane_mat");
   strcpy(mat_plane.texture_path, "assets/textures/Wood_Grain_DIFF.png");
@@ -85,6 +86,17 @@ int main()
   plane->meshes[0].mat = mat_plane;
   object_set_center(plane);
   renderer_init_object(plane);
+
+  // init skybox
+  skybox sky;
+  const char* faces[6];
+  faces[0] = "assets/skybox/devils-tooth_ft.tga";
+  faces[1] = "assets/skybox/devils-tooth_bk.tga";
+  faces[2] = "assets/skybox/devils-tooth_up.tga";
+  faces[3] = "assets/skybox/devils-tooth_dn.tga";
+  faces[4] = "assets/skybox/devils-tooth_rt.tga";
+  faces[5] = "assets/skybox/devils-tooth_lf.tga";
+  skybox_init(&sky, faces);
 
   int macMoved = 0;
   while (!renderer_should_close()) {
@@ -123,7 +135,7 @@ int main()
     render_list_add_batch(microdrag.game_render_list, game_editor.render_list, game_editor.render_list_size);
 
     // render editor
-    renderer_render_objects(microdrag.game_render_list->objects, microdrag.game_render_list->size, &microdrag.lights, microdrag.num_lights, &microdrag.game_camera, ui_render, ui_debug);
+    renderer_render_objects(microdrag.game_render_list->objects, microdrag.game_render_list->size, &microdrag.lights, microdrag.num_lights, &microdrag.game_camera, ui_render, &sky, ui_debug);
 
 #ifdef __APPLE__ // TODO: remove this workaround with glfw 3.3
       if (macMoved == 0)
@@ -142,6 +154,7 @@ int main()
   audio_free();
   editor_free();
   game_free();
+  // skybox_free(&sky);
 
   return 0;
 }
