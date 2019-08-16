@@ -90,12 +90,12 @@ int main()
   // init skybox
   skybox sky;
   const char* faces[6];
-  faces[0] = "assets/skybox/devils-tooth_ft.tga";
-  faces[1] = "assets/skybox/devils-tooth_bk.tga";
-  faces[2] = "assets/skybox/devils-tooth_up.tga";
-  faces[3] = "assets/skybox/devils-tooth_dn.tga";
-  faces[4] = "assets/skybox/devils-tooth_rt.tga";
-  faces[5] = "assets/skybox/devils-tooth_lf.tga";
+  faces[0] = "assets/skybox/skybox_rt.bmp";
+  faces[1] = "assets/skybox/skybox_lf.bmp";
+  faces[2] = "assets/skybox/skybox_up.bmp";
+  faces[3] = "assets/skybox/skybox_dn.bmp";
+  faces[4] = "assets/skybox/skybox_ft.bmp";
+  faces[5] = "assets/skybox/skybox_bk.bmp";
   skybox_init(&sky, faces);
 
   int macMoved = 0;
