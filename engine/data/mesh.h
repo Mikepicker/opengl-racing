@@ -18,8 +18,11 @@ typedef struct {
   material mat;
 
   GLuint texture_id;
+  GLuint normal_map_id;
+  GLuint specular_map_id;
 } mesh;
 
+void mesh_compute_tangent(mesh* m);
 void mesh_free(mesh* m);
 
 #endif

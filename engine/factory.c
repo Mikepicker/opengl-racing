@@ -86,10 +86,10 @@ object* factory_create_sphere(float radius, int sector_count, int stack_count) {
 
 object* factory_create_plane(float width, float height) {
   vertex* vertices = (vertex*)malloc(4 * sizeof(vertex));
-  vertex v1 = { -width/2, 0,-height/2, 0, 0, 0, 1, 0 };
-  vertex v2 = { width/2, 0, -height/2, 0, 1, 0, 1, 0 };
-  vertex v3 = { width/2, 0, height/2, 1, 1, 0, 1, 0 };
-  vertex v4 = { -width/2, 0, height/2, 1, 0, 0, 1, 0 };
+  vertex v1 = { -width/2, 0, -height/2, 0, 0, 0, 1, 0 };
+  vertex v2 = {  width/2, 0, -height/2, 0, 1, 0, 1, 0 };
+  vertex v3 = {  width/2, 0,  height/2, 1, 1, 0, 1, 0 };
+  vertex v4 = { -width/2, 0,  height/2, 1, 0, 0, 1, 0 };
   vertices[0] = v1;
   vertices[1] = v2;
   vertices[2] = v3;

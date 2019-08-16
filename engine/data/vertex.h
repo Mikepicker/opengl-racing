@@ -12,6 +12,9 @@ typedef struct {
   GLfloat nx;
   GLfloat ny;
   GLfloat nz;
+  GLfloat tx;
+  GLfloat ty;
+  GLfloat tz;
 } vertex;
 
 #endif

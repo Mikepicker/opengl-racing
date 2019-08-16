@@ -61,9 +61,14 @@ int main()
   material mat;
   strcpy(mat.name, "sphere_mat");
   strcpy(mat.texture_path, "\0");
+  strcpy(mat.normal_map_path, "\0");
+  strcpy(mat.specular_map_path, "\0");
   mat.diffuse[0] = 1.0f;
   mat.diffuse[1] = 1.0f;
   mat.diffuse[2] = 1.0f;
+  mat.specular[0] = 1.0f;
+  mat.specular[1] = 1.0f;
+  mat.specular[2] = 1.0f;
   sphere->meshes[0].mat = mat;
   object_set_center(sphere);
   renderer_init_object(sphere);
@@ -76,15 +81,18 @@ int main()
   material mat_plane;
   strcpy(mat_plane.name, "plane_mat");
   strcpy(mat_plane.texture_path, "assets/textures/Wood_Grain_DIFF.png");
+  strcpy(mat_plane.normal_map_path, "assets/textures/Wood_Grain_NRM.png");
+  strcpy(mat_plane.specular_map_path, "assets/textures/Wood_Grain_SPEC.png");
   mat_plane.texture_subdivision = 5;
   mat_plane.diffuse[0] = 1;
   mat_plane.diffuse[1] = 1;
   mat_plane.diffuse[2] = 1;
-  mat_plane.specular[0] = 0;
-  mat_plane.specular[1] = 0;
-  mat_plane.specular[2] = 0;
+  mat_plane.specular[0] = 1;
+  mat_plane.specular[1] = 1;
+  mat_plane.specular[2] = 1;
   plane->meshes[0].mat = mat_plane;
   object_set_center(plane);
+  mesh_compute_tangent(&plane->meshes[0]);
   renderer_init_object(plane);
 
   // init skybox
@@ -106,9 +114,7 @@ int main()
 
     // microdrag.lights[0].position[0] = 4 + sinf(current_frame);
     //microdrag.cars[0].obj->position[1] = 1.0f + sinf(2.0f * current_frame);
-    /* microdrag.lights[0].position[1] = 16 + 16 * sinf(0.5f * current_frame);
-    vec3_copy(sphere->position, microdrag.lights[0].position);
-    printf("TEST %f\n", microdrag.lights[0].position[1]); */
+    // microdrag.lights[0].position[0] =  24 * sinf(0.5f * current_frame);
     vec3_copy(sphere->position, microdrag.lights[0].position);
 
     // game
@@ -130,7 +136,7 @@ int main()
     render_list_clear(microdrag.game_render_list);
     render_list_add(microdrag.game_render_list, microdrag.cars[0].obj);
     render_list_add(microdrag.game_render_list, microdrag.cars[1].obj);
-    render_list_add(microdrag.game_render_list, sphere);
+    // render_list_add(microdrag.game_render_list, sphere);
     render_list_add(microdrag.game_render_list, plane);
     render_list_add_batch(microdrag.game_render_list, game_editor.render_list, game_editor.render_list_size);
 

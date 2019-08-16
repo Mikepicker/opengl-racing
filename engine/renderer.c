@@ -194,22 +194,28 @@ void renderer_init_object(object* o) {
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, mesh->num_indices * sizeof(GLuint), mesh->indices, GL_STATIC_DRAW);
 
     // position attribute
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid *)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(GLfloat), (GLvoid *)0);
     glEnableVertexAttribArray(0);
 
     // texture coord attribute
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid *)(3 * sizeof(GLfloat)));
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 11 * sizeof(GLfloat), (GLvoid *)(3 * sizeof(GLfloat)));
     glEnableVertexAttribArray(1);
 
     // normals attribute
-    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid *)(5 * sizeof(GLfloat)));
+    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(GLfloat), (GLvoid *)(5 * sizeof(GLfloat)));
     glEnableVertexAttribArray(2);
+
+    // tangents attribute
+    glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(GLfloat), (GLvoid *)(8 * sizeof(GLfloat)));
+    glEnableVertexAttribArray(3);
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
 
     // texture
     mesh->texture_id = load_image(mesh->mat.texture_path);
+    mesh->normal_map_id = load_image(mesh->mat.normal_map_path);
+    mesh->specular_map_id = load_image(mesh->mat.specular_map_path);
 
     add_aabb(o);
   }
@@ -293,13 +299,33 @@ static void render_objects(object *objects[], int objects_length, GLuint shader_
 
       // bind texture
       if (strlen(mesh->mat.texture_path) > 0) {
-        glUniform1i(glGetUniformLocation(mesh->texture_id, "texture1"), 1);
+        glUniform1i(glGetUniformLocation(shader_id, "texture1"), 1);
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_2D, mesh->texture_id);
         glUniform1i(glGetUniformLocation(shader_id, "hasTexture"), 1);
         glUniform1i(glGetUniformLocation(shader_id, "texture_subdivision"), mesh->mat.texture_subdivision);
       } else {
         glUniform1i(glGetUniformLocation(shader_id, "hasTexture"), 0);
+      }
+
+      // bind normal map
+      if (strlen(mesh->mat.normal_map_path) > 0) {
+        glUniform1i(glGetUniformLocation(shader_id, "normalMap"), 2);
+        glActiveTexture(GL_TEXTURE2);
+        glBindTexture(GL_TEXTURE_2D, mesh->normal_map_id);
+        glUniform1i(glGetUniformLocation(shader_id, "hasNormalMap"), 1);
+      } else {
+        glUniform1i(glGetUniformLocation(shader_id, "hasNormalMap"), 0);
+      }
+
+      // bind specular map
+      if (strlen(mesh->mat.specular_map_path) > 0) {
+        glUniform1i(glGetUniformLocation(shader_id, "specularMap"), 3);
+        glActiveTexture(GL_TEXTURE3);
+        glBindTexture(GL_TEXTURE_2D, mesh->specular_map_id);
+        glUniform1i(glGetUniformLocation(shader_id, "hasSpecularMap"), 1);
+      } else {
+        glUniform1i(glGetUniformLocation(shader_id, "hasSpecularMap"), 0);
       }
 
       // render the mesh
@@ -401,9 +427,11 @@ void renderer_render_objects(object* objects[], int objects_length, light* light
   glUniform1i(glGetUniformLocation(renderer_main_shader, "shadowPCFEnabled"), renderer_shadow_pcf_enabled);
 
   // skybox to shader
-  glUniform1i(glGetUniformLocation(renderer_main_shader, "skybox"), 2);
-  glActiveTexture(GL_TEXTURE2);
-  glBindTexture(GL_TEXTURE_CUBE_MAP, sky->texture_id);
+  if (sky) {
+    glUniform1i(glGetUniformLocation(renderer_main_shader, "skybox"), 4);
+    glActiveTexture(GL_TEXTURE4);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, sky->texture_id);
+  }
 
   // compute mvp matrix
   mat4x4 v, p;
