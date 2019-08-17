@@ -73,6 +73,12 @@ void game_update() {
 
 void game_free() {
   render_list_free(microdrag.game_render_list);
+  renderer_free_object(microdrag.cars[0].obj);
+  renderer_free_object(microdrag.cars[1].obj);
+  audio_free_object(microdrag.cars[0].obj);
+  audio_free_object(microdrag.cars[1].obj);
+  object_free(microdrag.cars[0].obj);
+  object_free(microdrag.cars[1].obj);
   free(microdrag.cars);
   free(microdrag.lights);
 }

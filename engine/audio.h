@@ -28,6 +28,7 @@ int audio_move_listener(vec3 pos);
 int audio_move_source(ALuint source, vec3 pos);
 int audio_loop_source(ALuint source, ALboolean loop);
 int audio_init_object(object* object, ALuint source, int loop);
+int audio_free_object(object* object);
 void audio_free();
 
 #endif

@@ -107,6 +107,9 @@ aabb object_aabb_to_object_space(const object* o, aabb box) {
 }
 
 void object_free(object* o) {
-  mesh_free(o->meshes);
+  if (o->num_meshes > 0) {
+    free(o->meshes[0].vertices);
+  }
+  free(o->meshes);
   alDeleteSources(1, &o->audio_source);
 }

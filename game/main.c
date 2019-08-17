@@ -11,7 +11,7 @@ int main()
 {
   // Init context
   GLFWwindow* window;
-  if (renderer_init("Microdrag", GAME_WIDTH, GAME_HEIGHT, &window) < 0) {
+  if (renderer_init("Microdrag", GAME_WIDTH, GAME_HEIGHT, 1, &window) < 0) {
     printf("Error initializing renderer!\n");
     return -1;
   }
@@ -101,7 +101,7 @@ int main()
 
     // microdrag.lights[0].position[0] = 4 + sinf(current_frame);
     //microdrag.cars[0].obj->position[1] = 1.0f + sinf(2.0f * current_frame);
-    // microdrag.lights[0].position[0] =  24 * sinf(0.5f * current_frame);
+    microdrag.lights[0].position[0] =  24 * sinf(0.5f * current_frame);
     vec3_copy(sphere->position, microdrag.lights[0].position);
 
     // game
@@ -142,12 +142,12 @@ int main()
   }
 
   // cleanup
-  ui_free();
-  renderer_cleanup();
-  audio_free();
   editor_free();
+  ui_free();
+  audio_free();
   game_free();
-  // skybox_free(&sky);
+  skybox_free(&sky);
+  renderer_cleanup();
 
   return 0;
 }

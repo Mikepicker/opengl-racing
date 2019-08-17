@@ -76,7 +76,7 @@ static void init_depth_fbo() {
   glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-int renderer_init(char* title, int width, int height, GLFWwindow** out_window) {
+int renderer_init(char* title, int width, int height, int fullscreen, GLFWwindow** out_window) {
   glfwInit();
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
@@ -87,7 +87,7 @@ int renderer_init(char* title, int width, int height, GLFWwindow** out_window) {
   glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 #endif
 
-  window = glfwCreateWindow(width, height, title, NULL, NULL);
+  window = glfwCreateWindow(width, height, title, glfwGetPrimaryMonitor(), NULL);
   *out_window = window;
   if (!window) {
     printf("Failed to create GLFW window\n");
@@ -179,7 +179,6 @@ static void add_aabb(object* o) {
 }
 
 void renderer_init_object(object* o) {
-
   for (int i = 0; i < o->num_meshes; i++) {
     mesh* mesh = &o->meshes[i];
     glGenVertexArrays(1, &(mesh->vao)); // Vertex Array Object
@@ -219,6 +218,14 @@ void renderer_init_object(object* o) {
     mesh->specular_map_id = load_image(mesh->mat.specular_map_path);
 
     add_aabb(o);
+  }
+}
+
+void renderer_free_object(object* o) {
+  for (int i = 0; i < o->num_meshes; i++) {
+    glDeleteVertexArrays(1, &(o->meshes[i].vao));
+    glDeleteBuffers(1, &(o->meshes[i].vbo));
+    glDeleteBuffers(1, &(o->meshes[i].ebo));
   }
 }
 

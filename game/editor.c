@@ -279,6 +279,7 @@ void editor_deserialize(const char* filename) {
 void editor_free() {
   for (int i = 0; i < EDITOR_OBJECTS_COUNT; i++) {
     if (game_editor.objects[i] != NULL) {
+      renderer_free_object(game_editor.objects[i]);
       object_free(game_editor.objects[i]);
       free(game_editor.objects[i]);
     }

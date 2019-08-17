@@ -27,9 +27,6 @@ static ray compute_car_ray(car* c) {
   return r;
 }
 
-void entities_car_advance() {
-}
-
 void entities_update() {
   for (int i = 0; i < microdrag.num_cars; i++) {
     car* car = &microdrag.cars[i];

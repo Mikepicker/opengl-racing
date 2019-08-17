@@ -115,8 +115,12 @@ int audio_init_object(object* object, ALuint source, int loop) {
   audio_add_source(&s, source);
   if (loop) { audio_loop_source(s, AL_TRUE); }
   else { audio_loop_source(s, AL_FALSE); }
-  audio_play_source(s);
+  // audio_play_source(s);
   object->audio_source = s;
+}
+
+int audio_free_object(object* object) {
+  alDeleteSources(1, &object->audio_source);
 }
 
 void audio_free() {
