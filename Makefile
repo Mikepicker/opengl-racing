@@ -1,5 +1,5 @@
 #OBJS specifies which files to compile as part of the project
-OBJS = game/main.o game/game.o game/entities.o game/ui.o game/editor.o game/input.o engine/glad.o engine/shader.o engine/renderer.o engine/importer.o engine/audio.o engine/dict.o engine/render_list.o engine/factory.o engine/debug.o engine/physics.o engine/skybox.o engine/data/object.o engine/data/mesh.o
+OBJS = game/main.o game/game.o game/entities.o game/ui.o game/editor.o game/input.o engine/glad.o engine/shader.o engine/renderer.o engine/importer.o engine/audio.o engine/dict.o engine/render_list.o engine/factory.o engine/debug.o engine/physics.o engine/skybox.o engine/data/object.o engine/data/mesh.o engine/data/material.o
 
 #CC specifies which compiler we're using
 CC = gcc -g -std=c99 `pkg-config --cflags glfw3`

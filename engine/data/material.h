@@ -13,4 +13,6 @@ typedef struct {
   int texture_subdivision;
 } material;
 
+void material_init(material* mat);
+
 #endif

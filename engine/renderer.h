@@ -25,6 +25,7 @@ GLuint renderer_debug_vao;
 GLuint renderer_debug_vbo;
 
 int renderer_debug_enabled;
+int renderer_render_aabb;
 float renderer_shadow_bias;
 int renderer_shadow_pcf_enabled;
 float renderer_shadow_near;
@@ -35,6 +36,6 @@ void renderer_cleanup();
 void renderer_recompile_shader();
 int renderer_should_close();
 void renderer_init_object(object* o);
-void renderer_render_objects(object* objects[], int objects_length, light* lights[], int lights_length, camera* camera, void (*ui_render_callback)(void), skybox* sky, int debug);
+void renderer_render_objects(object* objects[], int objects_length, light* lights[], int lights_length, camera* camera, void (*ui_render_callback)(void), skybox* sky);
 
 #endif

@@ -102,12 +102,13 @@ int renderer_init(char* title, int width, int height, GLFWwindow** out_window) {
   }
 
   // init vars
+  renderer_render_aabb = 0;
   renderer_shadow_near = 1.0f;
   renderer_shadow_far = 10.0f;
   renderer_debug_vao = 0;
   renderer_debug_enabled = 0;
   renderer_shadow_bias = 0.22f;
-  renderer_shadow_pcf_enabled = 0;
+  renderer_shadow_pcf_enabled = 1;
 
   // init depth fbo
   init_depth_fbo();
@@ -255,7 +256,7 @@ static void render_aabb(object* o) {
   glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
-static void render_objects(object *objects[], int objects_length, GLuint shader_id, int debug) {
+static void render_objects(object *objects[], int objects_length, GLuint shader_id) {
   for (int i = 0; i < objects_length; i++) {
     object* o = objects[i];
     mat4x4 m;
@@ -333,7 +334,7 @@ static void render_objects(object *objects[], int objects_length, GLuint shader_
       glDrawElements(GL_TRIANGLES, mesh->num_indices, GL_UNSIGNED_INT , 0);
     }
 
-    if (debug)
+    if (renderer_render_aabb)
       render_aabb(o);
   }
 }
@@ -363,7 +364,7 @@ static void render_debug_quad() {
   glBindVertexArray(0);
 }
 
-void renderer_render_objects(object* objects[], int objects_length, light* lights[], int lights_length, camera* camera, void (*ui_render_callback)(void), skybox* sky, int debug)
+void renderer_render_objects(object* objects[], int objects_length, light* lights[], int lights_length, camera* camera, void (*ui_render_callback)(void), skybox* sky)
 {
   GLint time;
   float ratio;
@@ -393,7 +394,7 @@ void renderer_render_objects(object* objects[], int objects_length, light* light
   glBindFramebuffer(GL_FRAMEBUFFER, renderer_depth_fbo);
   glClear(GL_DEPTH_BUFFER_BIT);
   //glCullFace(GL_FRONT);
-  render_objects(objects, objects_length, renderer_shadow_shader, 0);
+  render_objects(objects, objects_length, renderer_shadow_shader);
   //glCullFace(GL_BACK);
   glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
@@ -455,7 +456,7 @@ void renderer_render_objects(object* objects[], int objects_length, light* light
   glBindTexture(GL_TEXTURE_2D, renderer_depth_map);
 
   // process objects
-  render_objects(objects, objects_length, renderer_main_shader, debug);
+  render_objects(objects, objects_length, renderer_main_shader);
 
   /*-----------------------------------------------------------------*/
   /*-----------------------------skybox------------------------------*/

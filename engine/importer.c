@@ -37,10 +37,7 @@ static void import_mtl(const char* filename) {
         first = 0;
       }
       current_mat = (material*)malloc(sizeof(material));
-      // current_mat->texture_subdivision = 1;
-      strcpy(current_mat->texture_path, "\0");
-      strcpy(current_mat->normal_map_path, "\0");
-      strcpy(current_mat->specular_map_path, "\0");
+      material_init(current_mat);
       sscanf(line, "newmtl %s", current_mat->name);
     }
     // texture path

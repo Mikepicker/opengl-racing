@@ -25,7 +25,6 @@ void ui_init() {
    nk_glfw3_font_stash_end();}
 
  bg.r = 0.10f, bg.g = 0.18f, bg.b = 0.24f, bg.a = 1.0f;
- ui_debug = 1;
  strncpy(ui_map_filename, "map", 4); 
 
  //ctx->style.window.background = nk_rgba(0,0,0,0);
@@ -88,7 +87,7 @@ void ui_render() {
   {
     nk_layout_row_static(ctx, 30, 120, 1);
     if (nk_button_label(ctx, "Toggle AABB"))
-      ui_debug = ui_debug == 0 ? 1 : 0;
+      renderer_render_aabb = renderer_render_aabb == 0 ? 1 : 0;
 
     nk_layout_row_static(ctx, 30, 120, 1);
     if (nk_button_label(ctx, "Reset camera")) {

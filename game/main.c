@@ -59,16 +59,8 @@ int main()
   // test sphere
   object* sphere = factory_create_sphere(1, 36, 18);
   material mat;
+  material_init(&mat);
   strcpy(mat.name, "sphere_mat");
-  strcpy(mat.texture_path, "\0");
-  strcpy(mat.normal_map_path, "\0");
-  strcpy(mat.specular_map_path, "\0");
-  mat.diffuse[0] = 1.0f;
-  mat.diffuse[1] = 1.0f;
-  mat.diffuse[2] = 1.0f;
-  mat.specular[0] = 1.0f;
-  mat.specular[1] = 1.0f;
-  mat.specular[2] = 1.0f;
   sphere->meshes[0].mat = mat;
   object_set_center(sphere);
   renderer_init_object(sphere);
@@ -79,17 +71,12 @@ int main()
   plane->meshes[0].mat = mat;
   plane->receive_shadows = 1;
   material mat_plane;
+  material_init(&mat_plane);
   strcpy(mat_plane.name, "plane_mat");
   strcpy(mat_plane.texture_path, "assets/textures/Wood_Grain_DIFF.png");
   strcpy(mat_plane.normal_map_path, "assets/textures/Wood_Grain_NRM.png");
   strcpy(mat_plane.specular_map_path, "assets/textures/Wood_Grain_SPEC.png");
   mat_plane.texture_subdivision = 5;
-  mat_plane.diffuse[0] = 1;
-  mat_plane.diffuse[1] = 1;
-  mat_plane.diffuse[2] = 1;
-  mat_plane.specular[0] = 1;
-  mat_plane.specular[1] = 1;
-  mat_plane.specular[2] = 1;
   plane->meshes[0].mat = mat_plane;
   object_set_center(plane);
   mesh_compute_tangent(&plane->meshes[0]);
@@ -141,7 +128,7 @@ int main()
     render_list_add_batch(microdrag.game_render_list, game_editor.render_list, game_editor.render_list_size);
 
     // render editor
-    renderer_render_objects(microdrag.game_render_list->objects, microdrag.game_render_list->size, &microdrag.lights, microdrag.num_lights, &microdrag.game_camera, ui_render, &sky, ui_debug);
+    renderer_render_objects(microdrag.game_render_list->objects, microdrag.game_render_list->size, &microdrag.lights, microdrag.num_lights, &microdrag.game_camera, ui_render, &sky);
 
 #ifdef __APPLE__ // TODO: remove this workaround with glfw 3.3
       if (macMoved == 0)
