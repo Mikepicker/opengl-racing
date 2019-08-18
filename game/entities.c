@@ -60,10 +60,10 @@ void car_update(car* car) {
     }
 
     // steering wheel angle integration from keyboard input
-    car->steering_wheel_angle +=  ( 10.0f*car->steering_command - 5.0f * car->steering_wheel_angle ) * microdrag.delta_time;
+    car->steering_wheel_angle += 5.0f* ( 10.0f*car->steering_command - 10.0f * car->steering_wheel_angle ) * microdrag.delta_time;
 
     // car orientation in the plane (yaw)
-    car->yaw += ( tanf(car->steering_wheel_angle)/CAR_FRAME_LONGITUDINAL_LENGTH * 1000.0f *car->speed) * microdrag.delta_time;
+    car->yaw += ( tanf(2.0f*car->steering_wheel_angle)/CAR_FRAME_LONGITUDINAL_LENGTH * 500.0f *car->speed) * microdrag.delta_time;
 
     // car attitude from suspension displacement
     car->pitch=atanf((car->suspension_fl.x + car->suspension_fr.x - car->suspension_rl.x - car->suspension_rr.x)/2.0);
@@ -79,7 +79,7 @@ void weight_transfer_on_suspensions(car *car) {
     car->weight_transfer_rear = (CAR_CG_TO_REAR_AXLE_DISTANCE/CAR_FRAME_LONGITUDINAL_LENGTH)*CAR_MASS*0.1 + (CAR_CG_HEIGHT/CAR_FRAME_LONGITUDINAL_LENGTH)*CAR_MASS*car->accel;
 
     // rotational motion
-    float lateral_acceleration = car->speed * ( tanf(car->steering_wheel_angle)/CAR_FRAME_LONGITUDINAL_LENGTH * 1000.0f *car->speed);
+    float lateral_acceleration = 2.0f*car->speed * ( tanf(2.0f*car->steering_wheel_angle)/CAR_FRAME_LONGITUDINAL_LENGTH * 500.0f *car->speed);
     car->weight_transfer_left =  (CAR_CG_HEIGHT/CAR_FRAME_LONGITUDINAL_LENGTH)*CAR_MASS*lateral_acceleration;
     car->weight_transfer_right = - (CAR_CG_HEIGHT/CAR_FRAME_LONGITUDINAL_LENGTH)*CAR_MASS*lateral_acceleration;
 }
@@ -96,11 +96,8 @@ void entities_update() {
     vec4 vel;
     mat4x4 m;
 
-    quat_from_rpy(car->obj->rotation,0,car->yaw,0);
-    mat4x4_from_quat(m, car->obj->rotation);
     quat_from_rpy(car->obj->rotation,car->pitch,car->yaw,car->roll);
-    mat4x4_mul_vec4(vel, m, front);
-    vec4_norm(vel, vel);
+    
     // weight transfer on suspesions
     weight_transfer_on_suspensions(car);
 
@@ -141,7 +138,12 @@ void entities_update() {
     }
 
     // apply velocity
+    vel[0] = -sinf(car->yaw)*cosf(car->steering_wheel_angle);
+    vel[1] = 0.0f;
+    vel[2] = -cosf(car->yaw)*cosf(car->steering_wheel_angle);
+    vel[3] = 0.0f;
     vec4_scale(vel, vel, car->speed);
+    vel[4] = 1.0f;
     vec3_add(car->obj->position, car->obj->position, vel);
 
     // audio
