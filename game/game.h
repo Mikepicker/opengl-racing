@@ -5,8 +5,8 @@
 #include "editor.h"
 #include "data/car.h"
 
-#define GAME_WIDTH 1920
-#define GAME_HEIGHT 1080
+#define GAME_WIDTH 1080
+#define GAME_HEIGHT 720
 
 #define MAX_CARS 128
 #define MAX_LIGHTS 128
