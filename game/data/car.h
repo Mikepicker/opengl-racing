@@ -20,6 +20,7 @@ typedef struct {
   float accel;
   float speed;
   float steering_wheel_angle;
+  float steering_command;
   float roll;
   float pitch;
   float yaw;

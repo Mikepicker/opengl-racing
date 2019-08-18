@@ -536,6 +536,23 @@ v' = v + q.w * t + cross(q.xyz, t)
 	vec3_add(r, v, t);
 	vec3_add(r, r, u);
 }
+
+static inline void quat_from_rpy(quat q, float roll, float pitch, float yaw)
+{
+    // Abbreviations for the various angular functions
+    float cy = cosf(yaw * 0.5);
+    float sy = sinf(yaw * 0.5);
+    float cp = cosf(pitch * 0.5);
+    float sp = sinf(pitch * 0.5);
+    float cr = cosf(roll * 0.5);
+    float sr = sinf(roll * 0.5);
+
+    q[3] = cy * cp * cr + sy * sp * sr;
+    q[0] = cy * cp * sr - sy * sp * cr;
+    q[1] = sy * cp * sr + cy * sp * cr;
+    q[2] = sy * cp * cr - cy * sp * sr;
+}
+
 static inline void mat4x4_from_quat(mat4x4 M, const quat q)
 {
 	float a = q[3];

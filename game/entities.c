@@ -1,3 +1,4 @@
+#include <math.h>
 #include "entities.h"
 
 car* entities_new_car(vec3 pos, char* filename) {
@@ -42,25 +43,26 @@ void car_update(car* car) {
     }
 
     // steering wheel angle integration from keyboard input
-    car->steering_wheel_angle += ( car->obj->rotation ) * microdrag.delta_time;
+    car->steering_wheel_angle += 0.1f * ( car->steering_command - * 0.005f * car->steering_wheel_angle ) * microdrag.delta_time;
 
     // car orientation in the plane (yaw)
-    car->yaw += ( tan(car->steering_wheel_angle)/CAR_FRAME_LONGITUDINAL_LENGTH ) * microdrag.delta_time;
+    car->yaw += ( tanf(car->steering_wheel_angle)/CAR_FRAME_LONGITUDINAL_LENGTH ) * microdrag.delta_time;
 
     // car attitude from suspension displacement
-    car->pitch=asin((car->suspension_fl.x + car->suspension_fr.x - car->suspension_rl.x - car->suspension_rr.x)/2.0);
-    car->roll=asin((car->suspension_fr.x + car->suspension_rr.x - car->suspension_fl.x - car->suspension_rl.x)/2.0);
+    car->pitch=asinf((car->suspension_fl.x + car->suspension_fr.x - car->suspension_rl.x - car->suspension_rr.x)/2.0);
+    car->roll=asinf((car->suspension_fr.x + car->suspension_rr.x - car->suspension_fl.x - car->suspension_rl.x)/2.0);
 
 }
 
 // weight transfer: formulas online from Car Physics for Games by Marco Monster
 void weight_transfer_on_suspensions(car *car) {
-    car->weight_transfer_front = (CAR_CG_TO_FRONT_AXLE_DISTANCE/CAR_FRAME_LONGITUDINAL_LENGTH)*CAR_MASS*0.1 - (CAR_CG_HEIGHT/CAR_FRAME_LONGITUDINAL_LENGTH)*CAR_MASS*car->accel;
 
+    // forward motion
+    car->weight_transfer_front = (CAR_CG_TO_FRONT_AXLE_DISTANCE/CAR_FRAME_LONGITUDINAL_LENGTH)*CAR_MASS*0.1 - (CAR_CG_HEIGHT/CAR_FRAME_LONGITUDINAL_LENGTH)*CAR_MASS*car->accel;
     car->weight_transfer_rear = (CAR_CG_TO_REAR_AXLE_DISTANCE/CAR_FRAME_LONGITUDINAL_LENGTH)*CAR_MASS*0.1 + (CAR_CG_HEIGHT/CAR_FRAME_LONGITUDINAL_LENGTH)*CAR_MASS*car->accel;
 
-    float lateral_acceleration = car->speed * tan(car->steering_wheel_angle)/CAR_FRAME_LONGITUDINAL_LENGTH;
-
+    // rotational motion
+    float lateral_acceleration = car->speed * tanf(car->steering_wheel_angle)/CAR_FRAME_LONGITUDINAL_LENGTH;
     car->weight_transfer_left = - (CAR_CG_HEIGHT/CAR_FRAME_LONGITUDINAL_LENGTH)*CAR_MASS*lateral_acceleration;
     car->weight_transfer_right = - (CAR_CG_HEIGHT/CAR_FRAME_LONGITUDINAL_LENGTH)*CAR_MASS*lateral_acceleration;
 }
@@ -76,6 +78,8 @@ void entities_update() {
     vec4 front = { 0.0f, 0.0f, -1.0f, 1.0f };
     vec4 vel;
     mat4x4 m;
+
+    quat_from_rpy(car->obj->rotation,cat->roll,cat->pitch,cat->yaw);
     mat4x4_from_quat(m, car->obj->rotation);
     mat4x4_mul_vec4(vel, m, front);
     vec4_norm(vel, vel);
@@ -84,10 +88,10 @@ void entities_update() {
     weight_transfer_on_suspensions(car* car);
 
     //suspensions
-    suspension_update(car->suspension_fl,car->weight_transfer_front+car->weight_transfer_left);
-    suspension_update(car->suspension_fr,car->weight_transfer_front+car->weight_transfer_right);
-    suspension_update(car->suspension_rl,car->weight_transfer_rear+car->weight_transfer_left);
-    suspension_update(car->suspension_rr,car->weight_transfer_rear+car->weight_transfer_right);
+    suspension_update(car->suspension_fl,car->weight_transfer_front + car->weight_transfer_left);
+    suspension_update(car->suspension_fr,car->weight_transfer_front + car->weight_transfer_right);
+    suspension_update(car->suspension_rl,car->weight_transfer_rear + car->weight_transfer_left);
+    suspension_update(car->suspension_rr,car->weight_transfer_rear + car->weight_transfer_right);
 
     // forward speed saturation   
     if (fabsf(car->speed) > CAR_MAX_SPEED) car->speed = (car->speed / fabsf(car->speed)) * CAR_MAX_SPEED;
