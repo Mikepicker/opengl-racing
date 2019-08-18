@@ -6,6 +6,23 @@ car* entities_new_car(vec3 pos, char* filename) {
   c->obj = importer_load_obj(filename);
   c->accel = 0.0f;
   c->speed = 0.0f;
+  c->steering_wheel_angle = 0;
+  c->steering_command = 0;
+  c->roll = 0;
+  c->pitch = 0;
+  c->yaw = 0;
+  c->weight_transfer_front = 0;
+  c->weight_transfer_rear = 0;
+  c->weight_transfer_left = 0;
+  c->weight_transfer_right = 0;
+  c->suspension_fl.x = 0;
+  c->suspension_fl.v = 0;
+  c->suspension_fr.x = 0;
+  c->suspension_fr.v = 0;
+  c->suspension_rl.x = 0;
+  c->suspension_rl.v = 0;
+  c->suspension_rr.x = 0;
+  c->suspension_rr.v = 0;
   vec3_copy(c->obj->position, pos);
   c->current_lap = 0;
   c->last_piece_index = 0;
@@ -43,7 +60,7 @@ void car_update(car* car) {
     }
 
     // steering wheel angle integration from keyboard input
-    car->steering_wheel_angle += 0.1f * ( car->steering_command - 0.005f * car->steering_wheel_angle ) * microdrag.delta_time;
+    car->steering_wheel_angle += 10.0f * ( car->steering_command - 0.005f * car->steering_wheel_angle ) * microdrag.delta_time;
 
     // car orientation in the plane (yaw)
     car->yaw += ( tanf(car->steering_wheel_angle)/CAR_FRAME_LONGITUDINAL_LENGTH ) * microdrag.delta_time;
@@ -83,7 +100,6 @@ void entities_update() {
     mat4x4_from_quat(m, car->obj->rotation);
     mat4x4_mul_vec4(vel, m, front);
     vec4_norm(vel, vel);
-
     // weight transfer on suspesions
     weight_transfer_on_suspensions(car);
 
@@ -106,12 +122,10 @@ void entities_update() {
       if (track_piece != NULL && physics_objects_collide(car->obj, track_piece)) {
         mesh* m = physics_ray_hit_mesh(compute_car_ray(car), track_piece);
         if (m != NULL) {
-
           // advance piece
           if ((car->last_piece_index + 1) % game_editor.placed_count == j) {
             car->last_piece_index = j;
           }
-
           if (strcmp(m->mat.name, "grass") != 0) {
             on_grass = 0;
           }

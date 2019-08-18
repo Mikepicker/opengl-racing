@@ -127,13 +127,9 @@ static void rotate_car(car* c, float dir) {
   float rot_factor = 1.0f;
 
   if (dir == -1.0f) {
-    quat_rotate(rot, to_radians(CAR_TURN_RATE) * rot_factor, y_axis);
-    quat_mul(res, c->obj->rotation, rot);
-    vec4_copy(c->obj->rotation, res);
+    c->steering_command = to_radians(CAR_TURN_RATE) * rot_factor;
   } else if (dir == 1.0f) {
-    quat_rotate(rot, to_radians(-CAR_TURN_RATE) * rot_factor, y_axis);
-    quat_mul(res, c->obj->rotation, rot);
-    vec4_copy(c->obj->rotation, res);
+    c->steering_command = -to_radians(CAR_TURN_RATE) * rot_factor;
   } 
 }
 
