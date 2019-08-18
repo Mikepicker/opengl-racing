@@ -55,8 +55,8 @@ void suspension_update(suspension* s, float force) {
 void car_update(car* car) {
     // forward speed: keyboard input and nonlinear damping
     car->speed += ( car->accel - fabsf((car->speed)*(car->speed)) * 0.001f ) * microdrag.delta_time;
-    if (car->accel == 0) { // this might not be necessary at all
-      car->speed -= (car->speed * 0.005f) * microdrag.delta_time;
+    if (car->accel == 0) {
+      car->speed -= (car->speed * 0.01f) * microdrag.delta_time;
     }
 
     // steering wheel angle integration from keyboard input
@@ -79,8 +79,8 @@ void weight_transfer_on_suspensions(car *car) {
     car->weight_transfer_rear = (CAR_CG_TO_REAR_AXLE_DISTANCE/CAR_FRAME_LONGITUDINAL_LENGTH)*CAR_MASS*0.1 + (CAR_CG_HEIGHT/CAR_FRAME_LONGITUDINAL_LENGTH)*CAR_MASS*car->accel;
 
     // rotational motion
-    float lateral_acceleration = car->speed * tanf(car->steering_wheel_angle)/CAR_FRAME_LONGITUDINAL_LENGTH;
-    car->weight_transfer_left = - (CAR_CG_HEIGHT/CAR_FRAME_LONGITUDINAL_LENGTH)*CAR_MASS*lateral_acceleration;
+    float lateral_acceleration = car->speed * ( tanf(car->steering_wheel_angle)/CAR_FRAME_LONGITUDINAL_LENGTH * 1000.0f *car->speed);
+    car->weight_transfer_left =  (CAR_CG_HEIGHT/CAR_FRAME_LONGITUDINAL_LENGTH)*CAR_MASS*lateral_acceleration;
     car->weight_transfer_right = - (CAR_CG_HEIGHT/CAR_FRAME_LONGITUDINAL_LENGTH)*CAR_MASS*lateral_acceleration;
 }
  
@@ -143,8 +143,6 @@ void entities_update() {
     // apply velocity
     vec4_scale(vel, vel, car->speed);
     vec3_add(car->obj->position, car->obj->position, vel);
-
-debug_print_vec3(vel);
 
     // audio
     audio_move_source(car->obj->audio_source, car->obj->position);
