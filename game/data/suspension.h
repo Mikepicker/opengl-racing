@@ -3,8 +3,8 @@
 
 #include "../../engine/steve.h"
 
-#define SUSPENSION_STIFFNESS 50
-#define SUSPENSION_DAMPING 15
+#define SUSPENSION_STIFFNESS 70
+#define SUSPENSION_DAMPING 2
 
 typedef struct {
   float x;

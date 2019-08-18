@@ -47,8 +47,8 @@ static ray compute_car_ray(car* c) {
 
 void suspension_update(suspension* s, float force) {
     // input
-    s->x += s->v * microdrag.delta_time;
-    s->v += (-SUSPENSION_DAMPING*s->v-SUSPENSION_STIFFNESS*s->x+force) * microdrag.delta_time;
+    s->x +=  s->v * microdrag.delta_time * 1.5f;
+    s->v += (-SUSPENSION_DAMPING*s->v-SUSPENSION_STIFFNESS*s->x+force) * microdrag.delta_time * 1.5f;
 }
 
 // we use the rear-wheel driving kinematic model
@@ -60,11 +60,10 @@ void car_update(car* car) {
     }
 
     // steering wheel angle integration from keyboard input
-    car->steering_wheel_angle += 10.0f * ( 10.0f*car->steering_command - 1.0f * car->steering_wheel_angle ) * microdrag.delta_time;
+    car->steering_wheel_angle +=  ( 10.0f*car->steering_command - 5.0f * car->steering_wheel_angle ) * microdrag.delta_time;
 
     // car orientation in the plane (yaw)
-    car->yaw += ( tanf(car->steering_wheel_angle)/CAR_FRAME_LONGITUDINAL_LENGTH ) * microdrag.delta_time;
-    printf ("car yaw %f \n", car->yaw);
+    car->yaw += ( tanf(car->steering_wheel_angle)/CAR_FRAME_LONGITUDINAL_LENGTH * 1000.0f *car->speed) * microdrag.delta_time;
 
     // car attitude from suspension displacement
     car->pitch=atanf((car->suspension_fl.x + car->suspension_fr.x - car->suspension_rl.x - car->suspension_rr.x)/2.0);
@@ -97,8 +96,9 @@ void entities_update() {
     vec4 vel;
     mat4x4 m;
 
-    quat_from_rpy(car->obj->rotation,car->pitch,car->yaw,car->roll);
+    quat_from_rpy(car->obj->rotation,0,car->yaw,0);
     mat4x4_from_quat(m, car->obj->rotation);
+    quat_from_rpy(car->obj->rotation,car->pitch,car->yaw,car->roll);
     mat4x4_mul_vec4(vel, m, front);
     vec4_norm(vel, vel);
     // weight transfer on suspesions
@@ -143,6 +143,8 @@ void entities_update() {
     // apply velocity
     vec4_scale(vel, vel, car->speed);
     vec3_add(car->obj->position, car->obj->position, vel);
+
+debug_print_vec3(vel);
 
     // audio
     audio_move_source(car->obj->audio_source, car->obj->position);

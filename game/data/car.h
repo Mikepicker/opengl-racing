@@ -12,7 +12,7 @@
 #define CAR_CG_TO_REAR_AXLE_DISTANCE 0.4
 #define CAR_CG_TO_FRONT_AXLE_DISTANCE 0.6
 #define CAR_CG_HEIGHT 0.4
-#define CAR_MASS 10.0
+#define CAR_MASS 100.0
 
 typedef struct {
   object* obj;
