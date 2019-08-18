@@ -27,6 +27,44 @@ static ray compute_car_ray(car* c) {
   return r;
 }
 
+void suspension_update(suspension* s, float force) {
+    // input
+    s.x += s.v * microdrag.delta_time;
+    s.v += (-SUSPENSION_DAMPING*s.v-SUSPENSION_STIFFNESS*s.x+force) * microdrag.delta_time;
+}
+
+// we use the rear-wheel driving kinematic model
+void car_update(car* car) {
+    // forward speed: keyboard input and nonlinear damping
+    car->speed += ( car->accel - fabsf((car->speed)*(car->speed)) * 0.001f ) * microdrag.delta_time;
+    if (car->accel == 0) { // this might not be necessary at all
+      car->speed -= (car->speed * 0.005f) * microdrag.delta_time;
+    }
+
+    // steering wheel angle integration from keyboard input
+    car->steering_wheel_angle += ( car->obj->rotation ) * microdrag.delta_time;
+
+    // car orientation in the plane (yaw)
+    car->yaw += ( tan(car->steering_wheel_angle)/CAR_FRAME_LONGITUDINAL_LENGTH ) * microdrag.delta_time;
+
+    // car attitude from suspension displacement
+    car->pitch=asin((car->suspension_fl.x + car->suspension_fr.x - car->suspension_rl.x - car->suspension_rr.x)/2.0);
+    car->roll=asin((car->suspension_fr.x + car->suspension_rr.x - car->suspension_fl.x - car->suspension_rl.x)/2.0);
+
+}
+
+// weight transfer: formulas online from Car Physics for Games by Marco Monster
+void weight_transfer_on_suspensions(car *car) {
+    car->weight_transfer_front = (CAR_CG_TO_FRONT_AXLE_DISTANCE/CAR_FRAME_LONGITUDINAL_LENGTH)*CAR_MASS*0.1 - (CAR_CG_HEIGHT/CAR_FRAME_LONGITUDINAL_LENGTH)*CAR_MASS*car->accel;
+
+    car->weight_transfer_rear = (CAR_CG_TO_REAR_AXLE_DISTANCE/CAR_FRAME_LONGITUDINAL_LENGTH)*CAR_MASS*0.1 + (CAR_CG_HEIGHT/CAR_FRAME_LONGITUDINAL_LENGTH)*CAR_MASS*car->accel;
+
+    float lateral_acceleration = car->speed * tan(car->steering_wheel_angle)/CAR_FRAME_LONGITUDINAL_LENGTH;
+
+    car->weight_transfer_left = - (CAR_CG_HEIGHT/CAR_FRAME_LONGITUDINAL_LENGTH)*CAR_MASS*lateral_acceleration;
+    car->weight_transfer_right = - (CAR_CG_HEIGHT/CAR_FRAME_LONGITUDINAL_LENGTH)*CAR_MASS*lateral_acceleration;
+}
+ 
 void entities_update() {
   for (int i = 0; i < microdrag.num_cars; i++) {
     car* car = &microdrag.cars[i];
@@ -42,14 +80,20 @@ void entities_update() {
     mat4x4_mul_vec4(vel, m, front);
     vec4_norm(vel, vel);
 
-    // speed
-    car->speed += car->accel * microdrag.delta_time;
-    if (fabsf(car->speed) > CAR_MAX_SPEED) car->speed = (car->speed / fabsf(car->speed)) * CAR_MAX_SPEED;
+    // weight transfer on suspesions
+    weight_transfer_on_suspensions(car* car);
 
-    // damping
-    if (car->accel == 0) {
-      car->speed -= car->speed * 0.01f;
-    }
+    //suspensions
+    suspension_update(car->suspension_fl,car->weight_transfer_front+car->weight_transfer_left);
+    suspension_update(car->suspension_fr,car->weight_transfer_front+car->weight_transfer_right);
+    suspension_update(car->suspension_rl,car->weight_transfer_rear+car->weight_transfer_left);
+    suspension_update(car->suspension_rr,car->weight_transfer_rear+car->weight_transfer_right);
+
+    // forward speed saturation   
+    if (fabsf(car->speed) > CAR_MAX_SPEED) car->speed = (car->speed / fabsf(car->speed)) * CAR_MAX_SPEED;
+    
+    // car kinematic model
+    update_car(car);
 
     // collide with track
     int on_grass = 1;
