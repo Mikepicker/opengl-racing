@@ -41,7 +41,6 @@ void game_start() {
 
     microdrag.state = RACE;
 
-
     // top-down camera
     camera* cam = &microdrag.game_camera;
     vec3 pos = { 0.0f, 50.0f, 0.0f };

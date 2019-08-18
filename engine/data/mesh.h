@@ -23,6 +23,5 @@ typedef struct {
 } mesh;
 
 void mesh_compute_tangent(mesh* m);
-void mesh_free(mesh* m);
 
 #endif

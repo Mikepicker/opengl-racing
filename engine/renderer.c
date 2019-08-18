@@ -87,7 +87,7 @@ int renderer_init(char* title, int width, int height, int fullscreen, GLFWwindow
   glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 #endif
 
-  window = glfwCreateWindow(width, height, title, glfwGetPrimaryMonitor(), NULL);
+  window = glfwCreateWindow(width, height, title, fullscreen > 0 ? glfwGetPrimaryMonitor() : NULL, NULL);
   *out_window = window;
   if (!window) {
     printf("Failed to create GLFW window\n");
