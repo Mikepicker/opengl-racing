@@ -49,8 +49,8 @@ void car_update(car* car) {
     car->yaw += ( tanf(car->steering_wheel_angle)/CAR_FRAME_LONGITUDINAL_LENGTH ) * microdrag.delta_time;
 
     // car attitude from suspension displacement
-    car->pitch=asinf((car->suspension_fl.x + car->suspension_fr.x - car->suspension_rl.x - car->suspension_rr.x)/2.0);
-    car->roll=asinf((car->suspension_fr.x + car->suspension_rr.x - car->suspension_fl.x - car->suspension_rl.x)/2.0);
+    car->pitch=atanf((car->suspension_fl.x + car->suspension_fr.x - car->suspension_rl.x - car->suspension_rr.x)/2.0);
+    car->roll=atanf((car->suspension_fr.x + car->suspension_rr.x - car->suspension_fl.x - car->suspension_rl.x)/2.0);
 
 }
 
