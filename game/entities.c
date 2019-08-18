@@ -30,8 +30,8 @@ static ray compute_car_ray(car* c) {
 
 void suspension_update(suspension* s, float force) {
     // input
-    s.x += s.v * microdrag.delta_time;
-    s.v += (-SUSPENSION_DAMPING*s.v-SUSPENSION_STIFFNESS*s.x+force) * microdrag.delta_time;
+    s->x += s->v * microdrag.delta_time;
+    s->v += (-SUSPENSION_DAMPING*s->v-SUSPENSION_STIFFNESS*s->x+force) * microdrag.delta_time;
 }
 
 // we use the rear-wheel driving kinematic model
@@ -43,7 +43,7 @@ void car_update(car* car) {
     }
 
     // steering wheel angle integration from keyboard input
-    car->steering_wheel_angle += 0.1f * ( car->steering_command - * 0.005f * car->steering_wheel_angle ) * microdrag.delta_time;
+    car->steering_wheel_angle += 0.1f * ( car->steering_command - 0.005f * car->steering_wheel_angle ) * microdrag.delta_time;
 
     // car orientation in the plane (yaw)
     car->yaw += ( tanf(car->steering_wheel_angle)/CAR_FRAME_LONGITUDINAL_LENGTH ) * microdrag.delta_time;
@@ -79,25 +79,25 @@ void entities_update() {
     vec4 vel;
     mat4x4 m;
 
-    quat_from_rpy(car->obj->rotation,cat->roll,cat->pitch,cat->yaw);
+    quat_from_rpy(car->obj->rotation,car->roll,car->pitch,car->yaw);
     mat4x4_from_quat(m, car->obj->rotation);
     mat4x4_mul_vec4(vel, m, front);
     vec4_norm(vel, vel);
 
     // weight transfer on suspesions
-    weight_transfer_on_suspensions(car* car);
+    weight_transfer_on_suspensions(car);
 
     //suspensions
-    suspension_update(car->suspension_fl,car->weight_transfer_front + car->weight_transfer_left);
-    suspension_update(car->suspension_fr,car->weight_transfer_front + car->weight_transfer_right);
-    suspension_update(car->suspension_rl,car->weight_transfer_rear + car->weight_transfer_left);
-    suspension_update(car->suspension_rr,car->weight_transfer_rear + car->weight_transfer_right);
+    suspension_update(&(car->suspension_fl),car->weight_transfer_front + car->weight_transfer_left);
+    suspension_update(&(car->suspension_fr),car->weight_transfer_front + car->weight_transfer_right);
+    suspension_update(&(car->suspension_rl),car->weight_transfer_rear + car->weight_transfer_left);
+    suspension_update(&(car->suspension_rr),car->weight_transfer_rear + car->weight_transfer_right);
 
     // forward speed saturation   
     if (fabsf(car->speed) > CAR_MAX_SPEED) car->speed = (car->speed / fabsf(car->speed)) * CAR_MAX_SPEED;
     
     // car kinematic model
-    update_car(car);
+    car_update(car);
 
     // collide with track
     int on_grass = 1;
