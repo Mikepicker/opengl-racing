@@ -60,10 +60,11 @@ void car_update(car* car) {
     }
 
     // steering wheel angle integration from keyboard input
-    car->steering_wheel_angle += 10.0f * ( car->steering_command - 0.005f * car->steering_wheel_angle ) * microdrag.delta_time;
+    car->steering_wheel_angle += 10.0f * ( 10.0f*car->steering_command - 1.0f * car->steering_wheel_angle ) * microdrag.delta_time;
 
     // car orientation in the plane (yaw)
     car->yaw += ( tanf(car->steering_wheel_angle)/CAR_FRAME_LONGITUDINAL_LENGTH ) * microdrag.delta_time;
+    printf ("car yaw %f \n", car->yaw);
 
     // car attitude from suspension displacement
     car->pitch=atanf((car->suspension_fl.x + car->suspension_fr.x - car->suspension_rl.x - car->suspension_rr.x)/2.0);
@@ -96,7 +97,7 @@ void entities_update() {
     vec4 vel;
     mat4x4 m;
 
-    quat_from_rpy(car->obj->rotation,car->roll,car->pitch,car->yaw);
+    quat_from_rpy(car->obj->rotation,car->pitch,car->yaw,car->roll);
     mat4x4_from_quat(m, car->obj->rotation);
     mat4x4_mul_vec4(vel, m, front);
     vec4_norm(vel, vel);
