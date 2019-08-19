@@ -126,6 +126,7 @@ static void rotate_car(car* c, float dir) {
   //float rot_factor = fabsf(c->speed / CAR_MAX_SPEED);
   float rot_factor = 1.0f;
 
+  c->steering_command = 0.0f;
   if (dir == -1.0f) {
     c->steering_command = to_radians(CAR_TURN_RATE) * rot_factor;
   } else if (dir == 1.0f) {
@@ -181,7 +182,9 @@ void input_update() {
         rotate_car(c, -1.0f);
       } else if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS) {
         rotate_car(c, 1.0f);
-      } 
+      } else {
+        rotate_car(c, 0.0f);
+      }
     } else {
       int count;
       const float* axes = glfwGetJoystickAxes(GLFW_JOYSTICK_1, &count);
@@ -200,6 +203,8 @@ void input_update() {
           rotate_car(c, -1.0f);
         } else if (axes[0] == 1.0f) {
           rotate_car(c, 1.0f);
+        } else {
+        rotate_car(c, 0.0f);
         } 
       } else {
         printf("[input_update] error joystick 1\n");
@@ -221,6 +226,8 @@ void input_update() {
         rotate_car(c, -1.0f);
       } else if (glfwGetKey(window, GLFW_KEY_J) == GLFW_PRESS) {
         rotate_car(c, 1.0f);
+      } else {
+        rotate_car(c, 0.0f);
       } 
     } else {
       int count;
@@ -240,6 +247,8 @@ void input_update() {
           rotate_car(c, -1.0f);
         } else if (axes[0] == 1.0f) {
           rotate_car(c, 1.0f);
+        } else {
+          rotate_car(c, 0.0f);
         } 
       } else {
         printf("[input_update] error joystick 2\n");
